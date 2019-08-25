@@ -1,6 +1,10 @@
 <template>
   <div class="WorkOrder">
-    <TopLineBlock :pathName="pathName" :navTxt='navTxt' :warnVisible='warnVisible' :detailVisible='detailVisible' :reportVisible='reportVisible' @closeWarnVisible='closePrint' @closeDetailVisible='closeDetail' @closeReportVisible='closeReport'/>
+    <TopLineBlock :pathName="pathName" :navTxt='navTxt' :warnVisible='warnVisible' :detailVisible='detailVisible' :reportVisible='reportVisible' :historyVisible="historyVisible" :curPlantNumber="curPlantNumber" @closeWarnVisible='closePrint' @closeDetailVisible='closeDetail' @closeReportVisible='closeReport' @closeHistoryVisible="closeHistory"/>
+    <!-- <p>{{detailVisible}}{{reportVisible}}{{historyVisible}}</p> -->
+    <el-input v-if="!warnVisible && !detailVisible && !reportVisible" v-model="filterProductionName" placeholder="请输入产品名称" clearable>
+      <el-button slot="append" icon="el-icon-search" @click="search"></el-button>
+    </el-input>
     <section v-if="!warnVisible && !detailVisible && !reportVisible">
       <el-table @row-dblclick="goDetial"
         :data="orderList"
@@ -19,7 +23,7 @@
         <el-table-column
           property="FCheckDateTxt"
           label="日期"
-          width="120">
+          width="140">
         </el-table-column>
         <el-table-column
           property="fbillno"
@@ -40,7 +44,7 @@
         <el-table-column
           property="FPlanFinishDateTxt"
           label="交期"
-          width="120">
+          width="140">
           <!-- <template slot-scope="scope">
             <el-button
               size="mini"
@@ -81,11 +85,14 @@
     <section  v-if="warnVisible">
       <WarnPrint @closePrint="closePrint" :curFShortNumber="curFShortNumber" :timestamp="timestamp"/>
     </section>
-    <section  v-if="detailVisible && !reportVisible">
+    <section  v-if="detailVisible && !reportVisible && !historyVisible">
       <Ljgz @closeDetail="closeDetail" @addReport="addReport" :curFShortNumber="curFShortNumber" :timestamp="timestamp"/>
     </section>
     <section  v-if="reportVisible">
-      <Report @closeDetail="closeReport" :curReportInfo="curReportInfo" :timestamp="timestamp"/>
+      <Report @closeReport="closeReport" @showHistory="showHistory" :curReportInfo="curReportInfo" :timestamp="timestamp"/>
+    </section>
+    <section  v-if="historyVisible">
+      <History @closeHistory="closeHistory" :curReportInfo="curReportInfo" :historyId="historyId" :timestamp="timestamp"/>
     </section>
   </div>
 </template>
@@ -97,6 +104,7 @@ import TopLineBlock from '../components/TopLine'
 import WarnPrint from '../components/WarnPrint.vue'
 import Ljgz from '../components/Ljgz.vue'
 import Report from '../components/Report.vue'
+import History from '../components/History.vue'
 
 export default {
   name: 'WorkOrder',
@@ -105,14 +113,18 @@ export default {
       warnVisible: false,
       detailVisible: false,
       reportVisible: false,
+      historyVisible: false,
       timestamp: '', // 当前时间戳
       pathName: 'Home',
       listLoading: true,
+      filterProductionName: '5.14.WLK-003',
       curPage: 1,
       pageSize: 15,
       sum: 0,
+      historyId: null,
       orderList: [],
       curFShortNumber: '',
+      curPlantNumber: '',
       curReportInfo: null
     }
   },
@@ -125,16 +137,25 @@ export default {
       return this.curModuleInfo.department + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + '汇报人: ' + this.userInfo.fname
     }
   },
+  watch: {
+    navTxt: function () {
+      alert('kkk')
+    }
+  },
   components: {
     TopLineBlock,
     WarnPrint,
     Ljgz,
-    Report
+    Report,
+    History
   },
   created () {
     this.getWorkOrderList()
   },
   methods: {
+    search () {
+      this.getWorkOrderList()
+    },
     changeDate (idx, row) {
       this.dialogDateVisible = true
       this.finterid = row.finterid
@@ -151,6 +172,7 @@ export default {
       this.timestamp = (new Date()).getTime()
       this.detailVisible = true
       this.curFShortNumber = row.FShortNumber
+      this.curPlantNumber = row.fqty
     },
     addReport (row, gxName) {
       this.timestamp = (new Date()).getTime()
@@ -163,9 +185,18 @@ export default {
     },
     closeDetail () {
       this.detailVisible = false
+      this.curPlantNumber = ''
     },
     closeReport () {
       this.reportVisible = false
+    },
+    closeHistory () {
+      this.reportVisible = true
+      this.historyVisible = false
+    },
+    showHistory (ID) {
+      this.historyVisible = true
+      this.historyId = ID
     },
     notice (idx, row) {
       this.$confirm('确认下达?', '提示', {
@@ -196,8 +227,12 @@ export default {
       })
     },
     getWorkOrderList () {
+      let DATA = {number: this.pageSize, page_num: this.curPage}
+      if (this.filterProductionName) {
+        DATA.fnumber = this.filterProductionName
+      }
       this.listLoading = true
-      this.Http.get('orderList', {number: this.pageSize, page_num: this.curPage}
+      this.Http.get('orderList', DATA
       ).then(res => {
         switch (res.data.code) {
           case 1:

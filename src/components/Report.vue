@@ -2,60 +2,86 @@
   <div class="Report">
     <div class="TopBarBlock">
       <el-row style="height:1rem;line-height:1rem;">
-        <el-col :span="7">零件号: {{curReportInfo.fnumber}}</el-col>
-        <el-col :span="7">零件名称: {{curReportInfo.fname}}</el-col>
-        <el-col :span="7">当前工序: {{curReportInfo.gxName}}</el-col>
-        <el-col :span="3" class="TextAlignR" v-if="ifCanAdd"><el-button size="medium" type="success" icon="el-icon-plus" @click="addRecord">新增</el-button></el-col>
+        <el-col :span="4" class="TextAlignL">零件号: {{curReportInfo.fnumber}}</el-col>
+        <el-col :span="6" class="TextAlignL">零件名称: {{curReportInfo.fname}}</el-col>
+        <el-col :span="3" class="TextAlignL">当前工序: {{curReportInfo.gxName}}</el-col>
+        <el-col :span="3" class="TextAlignL">成品计划数: {{plantNumber}}</el-col>
+        <el-col :span="8" class="TextAlignR" v-if="ifCanAdd">
+          <el-button size="small" type="primary" @click="tuzhi">图纸</el-button>
+          <el-button size="small" type="info" @click="getHBHistory">历史汇报</el-button>
+          <el-button size="small" type="warning" @click="huizong">汇报</el-button>
+          <el-button size="small" type="success" @click="addRecord">新增</el-button>
+        </el-col>
+      </el-row>
+      <el-row style="height:1rem;line-height:1rem;">
+        <el-col :span="4" class="TextAlignL">完工产量: {{topLineInfo.fnumber}}</el-col>
+        <el-col :span="4" class="TextAlignL">报废数: {{topLineInfo.badnumber}}</el-col>
+        <el-col :span="4" class="TextAlignL">库存数: {{topLineInfo.kcnumber}}</el-col>
+        <el-col :span="4" class="TextAlignL">是否返工: {{topLineInfo.isback}}</el-col>
+        <el-col :span="4" class="TextAlignL">备注: {{topLineInfo.fnote}}</el-col>
+        <el-col :span="4" class="TextAlignL">是否首检: {{topLineInfo.ischeck}}</el-col>
       </el-row>
     </div>
     <el-table
       :data="reportList"
       v-loading="listLoading"
+      @selection-change="handleSelectionChange"
       style="width: 100%">
       <el-table-column
+        fixed
+        type="selection"
+        width="55">
+      </el-table-column>
+      <!-- <el-table-column
         type="index"
         width="50">
-      </el-table-column>
+      </el-table-column> -->
       <el-table-column
         property="username"
         label="操作工"
-        width="80"
+        width="100"
         show-overflow-tooltip>
       </el-table-column>
       <el-table-column
         property="starttimeTxt"
         label="开机时间"
-        width="100"
+        width="110"
         show-overflow-tooltip>
       </el-table-column>
       <el-table-column
         property="endtimeTxt"
         label="停机时间"
-        width="100"
+        width="110"
         show-overflow-tooltip>
       </el-table-column>
-      <el-table-column
+      <!-- <el-table-column
         property="fnumber"
         label="完工产量"
-        width="100"
+        width="110"
         show-overflow-tooltip>
       </el-table-column>
       <el-table-column
         property="badnumber"
         label="报废数"
-        width="80"
+        width="100"
         show-overflow-tooltip>
       </el-table-column>
+      <el-table-column
+        property="kcnumber"
+        label="库存数"
+        width="100"
+        show-overflow-tooltip>
+      </el-table-column> -->
       <el-table-column
         property="worktime"
         label="工作时间"
-        width="100"
+        width="110"
         show-overflow-tooltip>
       </el-table-column>
-      <el-table-column
+      <!-- <el-table-column
         property="isback"
         label="是否返工"
-        width="100"
+        width="110"
         show-overflow-tooltip>
       </el-table-column>
       <el-table-column
@@ -66,19 +92,19 @@
       <el-table-column
         property="ischeck"
         label="是否首检"
-        width="100"
+        width="110"
         show-overflow-tooltip>
-      </el-table-column>
+      </el-table-column> -->
       <el-table-column
         property="waittime"
         label="等待时间"
-        width="100"
+        width="110"
         show-overflow-tooltip>
       </el-table-column>
       <el-table-column
         property="tuntime"
         label="调机时间"
-        width="100"
+        width="110"
         show-overflow-tooltip>
       </el-table-column>
       <el-table-column
@@ -92,12 +118,12 @@
         width="110">
         <template slot-scope="scope">
           <el-button
-            size="mini"
+            size="medium"
             type="text"
             style="color: #409EFF;"
             @click="edit(scope.$index, scope.row)">编辑</el-button>
           <el-button
-            size="mini"
+            size="medium"
             type="text"
             style="color: #F56C6C;"
             @click="dele(scope.$index, scope.row)">删除</el-button>
@@ -112,9 +138,9 @@
       :total="sum">
     </el-pagination>
     <!-- 新增 -->
-    <el-dialog :title="ifEdit ? '编辑' : '新增'" :visible.sync="dialogAddFormVisible" :close-on-click-modal="false" width="500px">
+    <el-dialog :title="ifEdit ? '编辑' : (ifHZ ? '汇报' : '新增')" :visible.sync="dialogAddFormVisible" :close-on-click-modal="false" width="500px">
       <el-form class="TextAlignL" :model="form" :rules="rules" ref="form" label-width="100px">
-        <el-form-item label="操作工" prop="username">
+        <el-form-item label="操作工" prop="username" v-if="!ifHZ">
           <el-select v-model="form.username" placeholder="请选择操作工">
             <el-option v-for="(people, idx) in peopleList" :key="idx" :label="people.fname" :value="people.fname"></el-option>
           </el-select>
@@ -141,11 +167,14 @@
             }">
           </el-time-picker>
         </el-form-item>
-        <el-form-item label="完工产量" prop="fnumber">
+        <el-form-item label="完工产量" prop="fnumber" v-if="!ifEdit">
           <el-input v-model="form.fnumber"></el-input>
         </el-form-item>
-        <el-form-item label="报废数">
+        <el-form-item label="报废数" prop="badnumber" v-if="!ifEdit">
           <el-input v-model="form.badnumber" prop="badnumber"></el-input>
+        </el-form-item>
+        <el-form-item label="库存数" prop="kcnumber" v-if="!ifEdit">
+          <el-input v-model="form.kcnumber" prop="kcnumber"></el-input>
         </el-form-item>
         <el-form-item label="工作时间">
           <el-input v-model="form.worktime" prop="worktime"></el-input>
@@ -180,6 +209,60 @@
         <el-button type="primary" :loading="btLoading" @click="save('form')">保 存</el-button>
       </div>
     </el-dialog>
+    <!-- 汇报历史 -->
+    <el-dialog title="汇报历史" :visible.sync="dialogHBHistoryVisible" :close-on-click-modal="false">
+      <!-- <el-dialog
+        width="90%"
+        title="汇报详情"
+        :close-on-click-modal="false"
+        :visible.sync="dialogHBDetailVisible"
+        append-to-body>
+      </el-dialog> -->
+      <el-table @row-dblclick="historyDetail"
+      :data="hbHistory"
+      v-loading="listLoading"
+      style="width: 100%">
+      <el-table-column
+        fixed
+        type="selection"
+        width="55">
+      </el-table-column>
+      <el-table-column
+        property="createtime"
+        label="汇报日期"
+        width="140"
+        show-overflow-tooltip>
+      </el-table-column>
+      <el-table-column
+        property="danhao"
+        label="单号"
+        show-overflow-tooltip>
+      </el-table-column>
+      <!-- <el-table-column
+        fixed="right"
+        label="操作"
+        width="80">
+        <template slot-scope="scope">
+          <el-button
+            size="medium"
+            type="text"
+            style="color: #409EFF;"
+            @click="edit(scope.$index, scope.row)">编辑</el-button>
+        </template>
+      </el-table-column> -->
+    </el-table>
+      <el-pagination v-if="hbHistory.length > 0" style="margin: .2rem 0;"
+        @current-change="getHBHistory"
+        :current-page.sync="curPageHB"
+        :page-size="pageSizeHB"
+        layout="total, prev, pager, next, jumper"
+        :total="sumHB">
+      </el-pagination>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogHBHistoryVisible = false">关 闭</el-button>
+        <!-- <el-button type="primary" @click="dialogHBDetailVisible = true">打开内层 Dialog</el-button> -->
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -194,19 +277,41 @@ export default {
       listLoading: false,
       btLoading: false,
       dialogAddFormVisible: false,
+      dialogHBHistoryVisible: false,
+      dialogHBDetailVisible: false,
       ifCanAdd: true,
+      plantNumber: '',
       curPage: 1,
-      pageSize: 15,
+      pageSize: 10,
       sum: 0,
+      hbHistory: [],
+      curPageHB: 1,
+      pageSizeHB: 10,
+      sumHB: 0,
       ifEdit: false,
+      ifHZ: false,
+      zhubiaoid: null,
       reportList: [],
+      huibaoIdList: [],
       peopleList: [],
+      topLineInfo: {
+        badnumber: '',
+        fnumber: '',
+        isback: '',
+        ischeck: '',
+        jhnumber: '',
+        jhsnumber: '',
+        kcnumber: '',
+        synumber: '',
+        fnote: ''
+      },
       form: {
         username: '',
         starttime: '',
         endtime: '',
         fnumber: '',
         badnumber: '',
+        kcnumber: '',
         worktime: '',
         isback: '',
         fnote: '',
@@ -218,53 +323,82 @@ export default {
       rules: {
         username: [
           { required: true, message: '请选择操作工', trigger: 'change' }
-        ],
-        starttime: [
-          { required: true, message: '请选择操开机时间', trigger: 'change' }
-        ],
-        endtime: [
-          { required: true, message: '请选择停机时间', trigger: 'change' }
-        ],
-        fnumber: [
-          { required: true, message: '请输入完工产量', trigger: 'change' }
-        ],
-        badnumber: [
-          { required: true, message: '请输入报废数', trigger: 'change' }
-        ],
-        worktime: [
-          { required: true, message: '请输入工作时间', trigger: 'change' }
-        ],
-        isback: [
-          { required: true, message: '请选择是否返工', trigger: 'change' }
-        ],
-        ischeck: [
-          { required: true, message: '请选择是否首检', trigger: 'change' }
-        ],
-        waittime: [
-          { required: true, message: '请输入等待时间', trigger: 'change' }
-        ],
-        tuntime: [
-          { required: true, message: '请输入调机时间', trigger: 'change' }
         ]
+        // starttime: [
+        //   { required: true, message: '请选择操开机时间', trigger: 'change' }
+        // ],
+        // endtime: [
+        //   { required: true, message: '请选择停机时间', trigger: 'change' }
+        // ],
+        // fnumber: [
+        //   { required: true, message: '请输入完工产量', trigger: 'change' }
+        // ],
+        // badnumber: [
+        //   { required: true, message: '请输入报废数', trigger: 'change' }
+        // ],
+        // worktime: [
+        //   { required: true, message: '请输入工作时间', trigger: 'change' }
+        // ],
+        // isback: [
+        //   { required: true, message: '请选择是否返工', trigger: 'change' }
+        // ],
+        // ischeck: [
+        //   { required: true, message: '请选择是否首检', trigger: 'change' }
+        // ],
+        // waittime: [
+        //   { required: true, message: '请输入等待时间', trigger: 'change' }
+        // ],
+        // tuntime: [
+        //   { required: true, message: '请输入调机时间', trigger: 'change' }
+        // ]
       }
     }
   },
   computed: {
     ...mapState({
       curModuleInfo: state => state.curModuleInfo
-    })
+    }),
+    forder: function () {
+      let forder = null
+      let Info = this.curReportInfo
+      console.log('Info', Info)
+      switch (Info.gxName) {
+        case '切管':
+          forder = Info.fqg
+          break
+        case '激光':
+          forder = Info.fjg
+          break
+        case '折弯':
+          forder = Info.fzw
+          break
+        case '焊接':
+          forder = Info.fhj
+          break
+        case '抛丸':
+          forder = Info.fpw
+          break
+        case '喷涂':
+          forder = Info.fpt
+          break
+        case '包装':
+          forder = Info.fbz
+          break
+      }
+      return forder
+    }
   },
   watch: {
-    dialogAddFormVisible: function (val) {
-      if (val && !this.ifEdit) {
-        this.$refs['form'].resetFields()
-      }
-    },
-    ifEdit: function (val) {
-      if (!this.ifEdit) {
-        this.$refs['form'].resetFields()
-      }
-    }
+    // dialogAddFormVisible: function (val) {
+    //   if (val && !this.ifEdit) {
+    //     this.$refs['form'].resetFields()
+    //   }
+    // },
+    // ifEdit: function (val) {
+    //   if (!this.ifEdit) {
+    //     this.$refs['form'].resetFields()
+    //   }
+    // }
   },
   created () {
     // console.log(this.curReportInfo)
@@ -275,8 +409,15 @@ export default {
     handleCurrentChange () {
       this.getHBList()
     },
+    handleSelectionChange (val) {
+      this.huibaoIdList = []
+      val.map(item => {
+        this.huibaoIdList.push({id: item.id})
+      })
+    },
     edit (idx, row) {
       this.ifEdit = true
+      this.ifHZ = false
       this.dialogAddFormVisible = true
       this.form = row
     },
@@ -311,7 +452,15 @@ export default {
         console.log(error)
       })
     },
-    addRecord () {
+    huizong () {
+      if (this.huibaoIdList.length === 0) {
+        this.$message({
+          message: '请先勾选需要汇总的记录!',
+          type: 'warning'
+        })
+        return false
+      }
+      this.ifHZ = true
       this.ifEdit = false
       this.dialogAddFormVisible = true
       // 初始化数据
@@ -321,6 +470,28 @@ export default {
         endtime: '',
         fnumber: '',
         badnumber: '',
+        kcnumber: '',
+        worktime: '',
+        isback: '',
+        fnote: '',
+        ischeck: '',
+        waittime: '',
+        tuntime: '',
+        freason: ''
+      }
+    },
+    addRecord () {
+      this.ifHZ = false
+      this.ifEdit = false
+      this.dialogAddFormVisible = true
+      // 初始化数据
+      this.form = {
+        username: '',
+        starttime: '',
+        endtime: '',
+        fnumber: '',
+        badnumber: '',
+        kcnumber: '',
         worktime: '',
         isback: '',
         fnote: '',
@@ -336,7 +507,45 @@ export default {
           if (this.ifEdit) {
             this.sureEdit()
           } else {
-            this.sureAdd()
+            // 库存数和完工产量都没有填的情况下,必填停机原因
+            if (!this.form.kcnumber && !this.form.fnumber && !this.form.freason) {
+              this.$message({
+                message: '由于"库存数"和"完工产量"没有数据输入，故请输入停机原因!',
+                type: 'warning'
+              })
+            } else if (this.form.kcnumber && this.form.fnumber) {
+              if (this.form.kcnumber + this.form.fnumber > this.topLineInfo.synumber) { // this.plantNumber
+                this.$message({
+                  message: '"库存数"和"完工产量"之和超过了剩余数!',
+                  type: 'warning'
+                })
+              } else {
+                if (this.ifHZ) {
+                  this.addHz()
+                } else {
+                  this.sureAdd()
+                }
+              }
+            } else if (this.form.kcnumber || this.form.fnumber) {
+              if (this.form.kcnumber > this.topLineInfo.synumber || this.form.fnumber > this.topLineInfo.synumber) {
+                this.$message({
+                  message: '"库存数"和"完工产量"之和超过了剩余数!',
+                  type: 'warning'
+                })
+              } else {
+                if (this.ifHZ) {
+                  this.addHz()
+                } else {
+                  this.sureAdd()
+                }
+              }
+            } else {
+              if (this.ifHZ) {
+                this.addHz()
+              } else {
+                this.sureAdd()
+              }
+            }
           }
         } else {
           this.$message({
@@ -360,6 +569,7 @@ export default {
               message: '修改成功!',
               type: 'success'
             })
+            this.getHBList()
             this.dialogAddFormVisible = false
             this.btLoading = false
             break
@@ -376,9 +586,14 @@ export default {
     },
     sureAdd () {
       this.btLoading = true
+      this.form.zhubiaoid = this.zhubiaoid
       this.form.fidz = this.curReportInfo.fidz
       this.form.fidc = this.curReportInfo.fidc
       this.form.gongxu = this.curReportInfo.gxName
+      this.form.jhnumber = this.topLineInfo.synumber
+      this.form.fnumber = this.form.fnumber ? this.form.fnumber : 0
+      this.form.badnumber = this.form.badnumber ? this.form.badnumber : 0
+      this.form.kcnumber = this.form.kcnumber ? this.form.kcnumber : 0
       this.Http.post('addhuibao', this.form
       ).then(res => {
         switch (res.data.code) {
@@ -400,11 +615,92 @@ export default {
         }
       }).catch((error) => {
         console.log(error)
+        this.btLoading = false
       })
+    },
+    addHz () {
+      this.btLoading = true
+      this.form.zhubiaoid = this.zhubiaoid
+      this.form.fidz = this.curReportInfo.fidz
+      this.form.fidc = this.curReportInfo.fidc
+      this.form.gongxu = this.curReportInfo.gxName
+      this.form.jhnumber = this.topLineInfo.synumber
+      this.form.department = this.curModuleInfo.departid
+      this.form.huibaoid = this.huibaoIdList
+      this.form.fnumber = this.form.fnumber ? this.form.fnumber : 0
+      this.form.badnumber = this.form.badnumber ? this.form.badnumber : 0
+      this.form.kcnumber = this.form.kcnumber ? this.form.kcnumber : 0
+      console.log(this.form)
+      this.Http.post('pilianghuibao', {huibaolist: this.form}
+      ).then(res => {
+        switch (res.data.code) {
+          case '1':
+            this.$message({
+              message: '汇总成功!',
+              type: 'success'
+            })
+            this.getHBList()
+            this.dialogAddFormVisible = false
+            this.btLoading = false
+            break
+          default:
+            this.btLoading = false
+            this.$message({
+              message: res.data.message + '!',
+              type: 'error'
+            })
+        }
+      }).catch((error) => {
+        console.log(error)
+        this.btLoading = false
+      })
+    },
+    tuzhi () {
+      this.Http.get('sertuzhi', {fidz: this.curReportInfo.fidz, fidc: this.curReportInfo.fidc}
+      ).then(res => {
+        switch (res.data.code) {
+          case '1':
+            window.open(res.data.maplist, '_blank')
+            // window.open('http://ep23767307.qicp.vip:31379/LK-P-RZR900S-7-10-B1-18364-1.PDF', '_blank')
+            break
+          default:
+            this.$message({
+              message: res.data.messge + '!',
+              type: 'error'
+            })
+        }
+      }).catch((error) => {
+        console.log(error)
+      })
+    },
+    getHBHistory () {
+      this.Http.get('oldhuibao', {number: this.pageSizeHB, page_num: this.curPageHB, fidz: this.curReportInfo.fidz, fidc: this.curReportInfo.fidc, gongxu: this.curReportInfo.gxName, forder: this.forder}
+      ).then(res => {
+        switch (res.data.code) {
+          case '1':
+            this.hbHistory = res.data.list
+            this.sumHB = res.data.oldhuibaocount
+            this.dialogHBHistoryVisible = true
+            // this.listLoading = false
+            break
+          default:
+            // this.listLoading = false
+            this.$message({
+              message: res.data.message + '!',
+              type: 'error'
+            })
+        }
+      }).catch((error) => {
+        console.log(error)
+      })
+    },
+    historyDetail (row) {
+      this.$emit('closeReport')
+      this.$emit('showHistory', row.id)
     },
     getHBList () {
       this.listLoading = true
-      this.Http.get('huibaolist', {number: this.pageSize, page_num: this.curPage, fidz: this.curReportInfo.fidz, fidc: this.curReportInfo.fidc, gongxu: this.curReportInfo.gxName}
+      this.Http.get('huibaolist', {number: this.pageSize, page_num: this.curPage, fidz: this.curReportInfo.fidz, fidc: this.curReportInfo.fidc, gongxu: this.curReportInfo.gxName, department: this.curModuleInfo.departid, forder: this.forder, jhsnumber: this.curReportInfo.jhsnumber}
       ).then(res => {
         switch (res.data.code) {
           case 0:
@@ -416,9 +712,23 @@ export default {
             this.listLoading = false
             break
           case 1:
+            console.log('res', res)
+            this.plantNumber = res.data.jhnumber
+            this.zhubiaoid = res.data.zhubiaoid
+            this.topLineInfo = {
+              badnumber: res.data.badnumber,
+              fnumber: res.data.fnumber,
+              isback: res.data.isback,
+              ischeck: res.data.ischeck,
+              jhnumber: res.data.jhnumber,
+              jhsnumber: res.data.jhsnumber,
+              kcnumber: res.data.kcnumber,
+              synumber: res.data.synumber,
+              fnote: res.data.fnote
+            }
             this.reportList = res.data.list.map(item => {
-              item.starttimeTxt = (item.starttime).replace('-', '点') + '分'
-              item.endtimeTxt = (item.endtime).replace('-', '点') + '分'
+              item.starttimeTxt = item.starttime ? (item.starttime).replace('-', '点') + '分' : ''
+              item.endtimeTxt = item.endtime ? (item.endtime).replace('-', '点') + '分' : ''
               return item
             })
             this.sum = res.data.orderCount
@@ -451,7 +761,7 @@ export default {
 .TopBarBlock{
   width: calc(100% - .4rem);
   margin: 0 auto;
-  font-size: .25rem;
+  font-size: .2rem;
   height: 1rem;
 }
 </style>
