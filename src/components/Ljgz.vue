@@ -209,7 +209,7 @@
 <script>
 export default {
   name: 'Ljgz',
-  props: ['curFShortNumber', 'timestamp'],
+  props: ['curFShortNumber', 'curPlantNumber', 'timestamp'],
   data () {
     return {
       curPage: 1,
@@ -237,7 +237,7 @@ export default {
     },
     getLjgzList () {
       this.listLoading = true
-      this.Http.get('serljgz', {number: this.pageSize, page_num: this.curPage, fshortnumber: this.curFShortNumber}
+      this.Http.get('serljgz', {number: this.pageSize, page_num: this.curPage, fshortnumber: this.curFShortNumber, fqty: this.curPlantNumber}
       ).then(res => {
         switch (res.data.code) {
           case 1:

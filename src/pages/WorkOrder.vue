@@ -86,13 +86,13 @@
       <WarnPrint @closePrint="closePrint" :curFShortNumber="curFShortNumber" :timestamp="timestamp"/>
     </section>
     <section  v-if="detailVisible && !reportVisible && !historyVisible">
-      <Ljgz @closeDetail="closeDetail" @addReport="addReport" :curFShortNumber="curFShortNumber" :timestamp="timestamp"/>
+      <Ljgz @closeDetail="closeDetail" @addReport="addReport" :curPlantNumber="curPlantNumber" :curFShortNumber="curFShortNumber" :timestamp="timestamp"/>
     </section>
     <section  v-if="reportVisible">
-      <Report @closeReport="closeReport" @showHistory="showHistory" :curReportInfo="curReportInfo" :timestamp="timestamp"/>
+      <Report @backTopLineInfo="backTopLineInfo" @closeReport="closeReport" @showHistory="showHistory" :curReportInfo="curReportInfo" :timestamp="timestamp"/>
     </section>
     <section  v-if="historyVisible">
-      <History @closeHistory="closeHistory" :curReportInfo="curReportInfo" :historyId="historyId" :timestamp="timestamp"/>
+      <History @closeHistory="closeHistory" :topLineInfo="topLineInfo" :curReportInfo="curReportInfo" :historyId="historyId" :timestamp="timestamp"/>
     </section>
   </div>
 </template>
@@ -117,7 +117,7 @@ export default {
       timestamp: '', // 当前时间戳
       pathName: 'Home',
       listLoading: true,
-      filterProductionName: '5.14.WLK-003',
+      filterProductionName: '5.14.WLK-003', // 5.14.WLK-003
       curPage: 1,
       pageSize: 15,
       sum: 0,
@@ -125,7 +125,8 @@ export default {
       orderList: [],
       curFShortNumber: '',
       curPlantNumber: '',
-      curReportInfo: null
+      curReportInfo: null,
+      topLineInfo: null
     }
   },
   computed: {
@@ -197,6 +198,9 @@ export default {
     showHistory (ID) {
       this.historyVisible = true
       this.historyId = ID
+    },
+    backTopLineInfo (Info) {
+      this.topLineInfo = Info
     },
     notice (idx, row) {
       this.$confirm('确认下达?', '提示', {

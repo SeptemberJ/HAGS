@@ -3,17 +3,19 @@
     <div class="TopBarBlock">
       <el-row style="height:1rem;line-height:1rem;">
         <el-col :span="4" class="TextAlignL">零件号: {{curReportInfo.fnumber}}</el-col>
-        <el-col :span="6" class="TextAlignL">零件名称: {{curReportInfo.fname}}</el-col>
-        <el-col :span="3" class="TextAlignL">当前工序: {{curReportInfo.gxName}}</el-col>
-        <!-- <el-col :span="3" class="TextAlignL">成品计划数: {{plantNumber}}</el-col> -->
+        <el-col :span="4" class="TextAlignL">零件名称: {{curReportInfo.fname}}</el-col>
+        <el-col :span="4" class="TextAlignL">当前工序: {{curReportInfo.gxName}}</el-col>
+        <el-col :span="4" class="TextAlignL">零件计划数: {{topLineInfoHistory.jhsnumber}}</el-col>
+        <el-col :span="4" class="TextAlignL">接收数: {{topLineInfoHistory.jhnumber}}</el-col>
+        <el-col :span="4" class="TextAlignL">剩余接收数: {{topLineInfoHistory.synumber}}</el-col>
       </el-row>
       <el-row style="height:1rem;line-height:1rem;">
-        <el-col :span="4" class="TextAlignL">完工产量: {{topLineInfo.fnumber}}</el-col>
-        <el-col :span="4" class="TextAlignL">报废数: {{topLineInfo.badnumber}}</el-col>
-        <el-col :span="4" class="TextAlignL">库存数: {{topLineInfo.kcnumber}}</el-col>
-        <el-col :span="4" class="TextAlignL">是否返工: {{topLineInfo.isback}}</el-col>
-        <el-col :span="4" class="TextAlignL">备注: {{topLineInfo.fnote}}</el-col>
-        <el-col :span="4" class="TextAlignL">是否首检: {{topLineInfo.ischeck}}</el-col>
+        <el-col :span="4" class="TextAlignL">完工产量: {{topLineInfoHistory.fnumber}}</el-col>
+        <el-col :span="4" class="TextAlignL">报废数: {{topLineInfoHistory.badnumber}}</el-col>
+        <el-col :span="4" class="TextAlignL">库存数: {{topLineInfoHistory.kcnumber}}</el-col>
+        <el-col :span="4" class="TextAlignL">是否返工: {{topLineInfoHistory.isback}}</el-col>
+        <el-col :span="4" class="TextAlignL">备注: {{topLineInfoHistory.fnote}}</el-col>
+        <el-col :span="4" class="TextAlignL">是否首检: {{topLineInfoHistory.ischeck}}</el-col>
       </el-row>
     </div>
     <el-table
@@ -126,7 +128,7 @@
           <el-input v-model="form.kcnumber" prop="kcnumber"></el-input>
         </el-form-item>
         <el-form-item label="工作时间">
-          <el-input v-model="form.worktime" prop="worktime"></el-input>
+          <el-input v-model="form.worktime" prop="worktime" disabled></el-input>
         </el-form-item>
         <el-form-item label="是否返工" prop="isback">
           <el-select v-model="form.isback" placeholder="请选择是否返工">
@@ -166,7 +168,7 @@
 // import { setTimeout } from 'timers';
 export default {
   name: 'Report',
-  props: ['historyId', 'curReportInfo', 'timestamp'],
+  props: ['historyId', 'curReportInfo', 'topLineInfo', 'timestamp'],
   data () {
     return {
       listLoading: false,
@@ -189,17 +191,6 @@ export default {
       reportList: [],
       huibaoIdList: [],
       peopleList: [],
-      topLineInfo: {
-        badnumber: '',
-        fnumber: '',
-        isback: '',
-        ischeck: '',
-        jhnumber: '',
-        jhsnumber: '',
-        kcnumber: '',
-        synumber: '',
-        fnote: ''
-      },
       form: {
         username: '',
         starttime: '',
@@ -250,9 +241,28 @@ export default {
     }
   },
   created () {
-    console.log(this.curReportInfo)
+    this.topLineInfoHistory = this.topLineInfo
     this.getHBList()
-    // this.getPeopleList()
+  },
+  watch: {
+    'form.starttime': function (newVal, oldVal) {
+      if (newVal && this.form.endtime) {
+        let afterSplitS = newVal.split('-')
+        let afterSplitE = this.form.endtime.split('-')
+        let minS = Number(afterSplitS[0]) * 60 + Number(afterSplitS[1])
+        let minE = Number(afterSplitE[0]) * 60 + Number(afterSplitE[1])
+        this.form.worktime = parseInt((minE - minS) / 60) + ' 时' + ((minE - minS) % 60) + ' 分'
+      }
+    },
+    'form.endtime': function (newVal, oldVal) {
+      if (this.form.starttime && newVal) {
+        let afterSplitS = this.form.starttime.split('-')
+        let afterSplitE = newVal.split('-')
+        let minS = Number(afterSplitS[0]) * 60 + Number(afterSplitS[1])
+        let minE = Number(afterSplitE[0]) * 60 + Number(afterSplitE[1])
+        this.form.worktime = parseInt((minE - minS) / 60) + '时' + ((minE - minS) % 60) + '分'
+      }
+    }
   },
   methods: {
     handleCurrentChange () {
@@ -311,17 +321,13 @@ export default {
       ).then(res => {
         switch (res.data.code) {
           case 1:
-            this.topLineInfo = {
-              badnumber: res.data.huibaolist.badnumber,
-              fnumber: res.data.huibaolist.fnumber,
-              isback: res.data.huibaolist.isback,
-              ischeck: res.data.huibaolist.ischeck,
-              jhnumber: res.data.huibaolist.jhnumber,
-              jhsnumber: res.data.huibaolist.jhsnumber,
-              kcnumber: res.data.huibaolist.kcnumber,
-              synumber: res.data.huibaolist.synumber,
-              fnote: res.data.huibaolist.fnote
-            }
+            this.topLineInfoHistory.badnumber = res.data.huibaolist.badnumber
+            this.topLineInfoHistory.fnumber = res.data.huibaolist.fnumber
+            this.topLineInfoHistory.isback = res.data.huibaolist.isback
+            this.topLineInfoHistory.ischeck = res.data.huibaolist.ischeck
+            this.topLineInfoHistory.kcnumber = res.data.huibaolist.kcnumber
+            this.topLineInfoHistory.fnote = res.data.huibaolist.fnote
+
             this.reportList = res.data.entrylist.map(item => {
               item.starttimeTxt = item.starttime ? (item.starttime).replace('-', '点') + '分' : ''
               item.endtimeTxt = item.endtime ? (item.endtime).replace('-', '点') + '分' : ''
