@@ -1,12 +1,31 @@
 <template>
   <div id="app">
+    <TopLineBlock v-if="curPage != 'Login'"/>
     <router-view/>
+    <!-- <div style="display: block;"><router-view/></div> -->
   </div>
 </template>
 
 <script>
+import { mapState } from 'vuex'
+import TopLineBlock from './components/TopLine'
+import { Adaptation } from './util/utils.js'
 export default {
-  name: 'App'
+  name: 'App',
+  computed: {
+    ...mapState({
+      curPage: state => state.curPage
+    })
+  },
+  components: {
+    TopLineBlock
+  },
+  created () {
+    Adaptation()
+    window.onresize = () => {
+      Adaptation()
+    }
+  }
 }
 </script>
 

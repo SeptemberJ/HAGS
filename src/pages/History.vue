@@ -164,32 +164,30 @@
 </template>
 
 <script>
-// import { mapState } from 'vuex'
-// import { setTimeout } from 'timers';
+import { mapState } from 'vuex'
 export default {
   name: 'Report',
-  props: ['historyId', 'curReportInfo', 'topLineInfo', 'timestamp'],
   data () {
     return {
       listLoading: false,
       btLoading: false,
       dialogAddFormVisible: false,
-      dialogHBHistoryVisible: false,
-      dialogHBDetailVisible: false,
-      ifCanAdd: true,
-      plantNumber: '',
+      // dialogHBHistoryVisible: false,
+      // dialogHBDetailVisible: false,
+      // ifCanAdd: true,
+      // plantNumber: '',
       curPage: 1,
       pageSize: 10,
       sum: 0,
-      hbHistory: [],
-      curPageHB: 1,
-      pageSizeHB: 10,
-      sumHB: 0,
+      // hbHistory: [],
+      // curPageHB: 1,
+      // pageSizeHB: 10,
+      // sumHB: 0,
       ifEdit: false,
       ifHZ: false,
-      zhubiaoid: null,
+      // zhubiaoid: null,
       reportList: [],
-      huibaoIdList: [],
+      // huibaoIdList: [],
       peopleList: [],
       form: {
         username: '',
@@ -238,6 +236,15 @@ export default {
         //   { required: true, message: '请输入调机时间', trigger: 'change' }
         // ]
       }
+    }
+  },
+  computed: {
+    ...mapState({
+      curReportInfo: state => state.curReportInfo,
+      topLineInfo: state => state.curReportInfo
+    }),
+    historyId: function () {
+      return this.$route.params.id
     }
   },
   created () {
@@ -313,6 +320,10 @@ export default {
         }
       }).catch((error) => {
         console.log(error)
+        this.$message({
+          message: '服务器繁忙!',
+          type: 'error'
+        })
       })
     },
     getHBList () {
@@ -345,6 +356,10 @@ export default {
         }
       }).catch((error) => {
         console.log(error)
+        this.$message({
+          message: '服务器繁忙!',
+          type: 'error'
+        })
       })
     }
   }

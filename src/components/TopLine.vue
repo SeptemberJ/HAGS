@@ -3,48 +3,89 @@
     <div class="BackBlock">
       <span class="CursorPointer" @click="back"><i class="el-icon-arrow-left" title="返回"></i></span>
     </div>
-    <div class="MainBlock"><span>{{navTxt}} {{curPlantNumber ? '\xa0\xa0\xa0\xa0\xa0\xa0\xa0成品计划数：' + curPlantNumber : ''}}</span></div>
+    <div class="MainBlock" v-if="curPage == 'Home'"><span>MES-SYSTEM</span></div>
+    <div class="MainBlock" v-if="curPage == 'WorkOrder'"><span>{{curModuleInfo.department + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + '汇报人: ' + userInfo.fname}}</span></div>
+    <div class="MainBlock" v-if="curPage != 'Home' && curPage != 'WorkOrder'"><span>{{curModuleInfo.department + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + '汇报人: ' + userInfo.fname + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0成品计划数：' + workOrderFqty}}</span></div>
     <div class="RightAccount">您好,{{userInfo.fname}}<span class="CursorPointer" style="margin-left: 10px;" @click="logOut"><i class="fa fa-sign-out" title="退出"></i></span></div>
+    <!-- <div class="BackBlock">
+      <span class="CursorPointer" @click="back"><i class="el-icon-arrow-left" title="返回"></i></span>
+    </div>
+    <div class="MainBlock"><span>{{navTxt}} {{curPlantNumber ? '\xa0\xa0\xa0\xa0\xa0\xa0\xa0成品计划数：' + curPlantNumber : ''}}</span></div>
+    <div class="RightAccount">您好,{{userInfo.fname}}<span class="CursorPointer" style="margin-left: 10px;" @click="logOut"><i class="fa fa-sign-out" title="退出"></i></span></div> -->
   </div>
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { mapState, mapActions } from 'vuex'
 import {clearCookie} from '../util/utils'
 export default {
   name: 'TopLineBlock',
-  props: ['navTxt', 'pathName', 'warnVisible', 'detailVisible', 'reportVisible', 'historyVisible', 'curPlantNumber'],
+  // props: ['navTxt', 'pathName', 'warnVisible', 'detailVisible', 'reportVisible', 'historyVisible', 'curPlantNumber'],
   data () {
     return {
+      ljgzFromType: 0 // 0 WorkerOrder 1 HBDetail
     }
   },
   computed: {
     ...mapState({
       curModuleInfo: state => state.curModuleInfo,
-      userInfo: state => state.userInfo
+      userInfo: state => state.userInfo,
+      curPage: state => state.curPage,
+      workOrderFqty: state => state.workOrderFqty
     })
   },
+  created () {
+    // alert(this.workOrderFqty)
+  },
   watch: {
-    navTxt: function () {
-      alert('hahah')
+    curPage: function (newVal, oldVal) {
+      if (oldVal === 'WorkOrder' && newVal === 'Ljgz') {
+        this.ljgzFromType = 0
+      }
+      if (oldVal === 'HBDetail' && newVal === 'Ljgz') {
+        this.ljgzFromType = 1
+      }
+      console.log('newVal', newVal)
+      console.log('oldVal', oldVal)
     }
   },
   methods: {
+    ...mapActions([
+      'updateCurPage'
+    ]),
     back () {
-      if (this.warnVisible) {
-        this.$emit('closeWarnVisible')
+      console.log(this.$route)
+      if (this.$route.name === 'Home') {
+        this.updateCurPage('Login')
+        this.$router.push({name: 'Login'})
       }
-      if (this.detailVisible && !this.reportVisible && !this.historyVisible) {
-        this.$emit('closeDetailVisible')
+      if (this.$route.name === 'WorkOrder') {
+        this.updateCurPage('Home')
+        this.$router.push({name: 'Home'})
       }
-      if (this.detailVisible && this.reportVisible && !this.historyVisible) {
-        this.$emit('closeReportVisible')
+      if (this.$route.name === 'HBDetail') {
+        this.updateCurPage('WorkOrder')
+        this.$router.push({name: 'WorkOrder'})
       }
-      if (this.historyVisible) {
-        this.$emit('closeHistoryVisible')
+      if (this.$route.name === 'WarnPrint') {
+        this.updateCurPage('WorkOrder')
+        this.$router.push({name: 'WorkOrder'})
       }
-      if (!this.warnVisible && !this.detailVisible && !this.reportVisible) {
-        this.$router.push({name: this.pathName})
+      if (this.$route.name === 'Ljgz' && this.ljgzFromType === 0) {
+        this.updateCurPage('WorkOrder')
+        this.$router.push({name: 'WorkOrder'})
+      }
+      if (this.$route.name === 'Ljgz' && this.ljgzFromType === 1) {
+        this.updateCurPage('HBDetail')
+        this.$router.push({name: 'HBDetail'})
+      }
+      if (this.$route.name === 'Report') {
+        this.updateCurPage('Ljgz')
+        this.$router.push({name: 'Ljgz'})
+      }
+      if (this.$route.name === 'History') {
+        this.updateCurPage('Report')
+        this.$router.push({name: 'Report'})
       }
     },
     logOut () {
@@ -54,6 +95,7 @@ export default {
         type: 'warning'
       }).then(() => {
         localStorage.clear('vuex-along')
+        this.updateCurPage('Login')
         this.$router.push({name: 'Login'})
         clearCookie('gs_28a807940bba58c2c')
       }).catch((error) => {
@@ -67,6 +109,7 @@ export default {
 <style lang="less" scoped>
 .TopLineBlock{
   height: 1rem;
+  display: block;
   line-height: 1rem;
   text-align: center;
   color: white;

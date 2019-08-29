@@ -1,6 +1,7 @@
 <template>
   <div class="Home">
-    <TopLineBlock :pathName="pathName" :navTxt='navTxt'/>
+    <!-- <TopLineBlock :pathName="pathName" :navTxt='navTxt'/> -->
+    <!-- <TopLineBlock :pathName="pathName" :navTxt='navTxt'/> -->
     <el-row>
       <el-col class="ModuleItem" :span="6" v-for="(item, idx) in moduleList" :key="idx">
         <div class="ItemInner" @click="toWorkerOrder(item)">{{item.department}}</div>
@@ -35,7 +36,8 @@ export default {
   },
   methods: {
     ...mapActions([
-      'updateCurModule'
+      'updateCurModule',
+      'updateCurPage'
     ]),
     LogOut () {
       localStorage.clear('vuex-along')
@@ -44,6 +46,7 @@ export default {
     },
     toWorkerOrder (item) {
       this.updateCurModule(item)
+      this.updateCurPage('WorkOrder')
       this.$router.push({name: 'WorkOrder'})
     },
     getModuleList () {
@@ -61,6 +64,7 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="less" scoped>
 .Home{
+  width: 100%;
   overflow: hidden;
   .TopLineBlock{
     height: 1rem;

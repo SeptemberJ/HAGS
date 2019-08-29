@@ -3,13 +3,13 @@
     <el-row>
       <el-form :inline="true" class="demo-form-inline">
         <el-form-item label="零件名称">
-          <el-input v-model="formSearch.ljname" placeholder="请输入零件名称" size="mini" clearable></el-input>
+          <el-input v-model="formSearch.ljname" placeholder="请输入零件名称" size="small" clearable></el-input>
         </el-form-item>
         <el-form-item label="材料名称">
-          <el-input v-model="formSearch.clname" placeholder="请输入材料名称" size="mini" clearable></el-input>
+          <el-input v-model="formSearch.clname" placeholder="请输入材料名称" size="small" clearable></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" icon="el-icon-search" size="mini" @click="search">搜索</el-button>
+          <el-button type="primary" icon="el-icon-search" size="small" @click="search">搜索</el-button>
         </el-form-item>
       </el-form>
     </el-row>
@@ -220,9 +220,9 @@
 </template>
 
 <script>
+import { mapState, mapActions } from 'vuex'
 export default {
   name: 'Ljgz',
-  props: ['curFShortNumber', 'curPlantNumber', 'timestamp'],
   data () {
     return {
       formSearch: {
@@ -239,9 +239,22 @@ export default {
   created () {
     this.getLjgzList()
   },
+  computed: {
+    ...mapState({
+      workOrderFshortnumber: state => state.workOrderFshortnumber,
+      workOrderFqty: state => state.workOrderFqty
+    })
+  },
   methods: {
+    ...mapActions([
+      'updateCurReportInfo',
+      'updateCurPage'
+    ]),
     addReport (idx, row, gxName) {
-      this.$emit('addReport', row, gxName)
+      row.gxName = gxName
+      this.updateCurReportInfo(row)
+      this.updateCurPage('Report')
+      this.$router.push({name: 'Report'})
     },
     canNotAddReport () {
       this.$message({
@@ -260,8 +273,8 @@ export default {
       let Data = {
         number: this.pageSize,
         page_num: this.curPage,
-        fshortnumber: this.curFShortNumber,
-        fqty: this.curPlantNumber
+        fshortnumber: this.workOrderFshortnumber,
+        fqty: this.workOrderFqty
       }
       if (this.formSearch.ljname && this.formSearch.ljname.trim() !== '') {
         Data.ljname = this.formSearch.ljname
@@ -280,13 +293,6 @@ export default {
               item.F2Txt = item.F2 === 1 ? '✓' : ''
               item.F3Txt = item.F3 === 1 ? '✓' : ''
               item.F4Txt = item.F4 === 1 ? '✓' : ''
-              // item.fqg = item.fqg ? item.fqg : '---'
-              // item.fjg = item.fjg ? item.fjg : '---'
-              // item.fzw = item.fzw ? item.fzw : '---'
-              // item.fhj = item.fhj ? item.fhj : '---'
-              // item.fpw = item.fpw ? item.fpw : '---'
-              // item.fpt = item.fpt ? item.fpt : '---'
-              // item.fbz = item.fbz ? item.fbz : '---'
               return item
             })
             this.sum = res.data.orderCount
@@ -301,6 +307,11 @@ export default {
         }
       }).catch((error) => {
         console.log(error)
+        this.listLoading = false
+        this.$message({
+          message: '服务器繁忙!',
+          type: 'error'
+        })
       })
     }
   }
@@ -308,4 +319,7 @@ export default {
 </script>
 
 <style lang="less" scoped>
+.Ljgz{
+  margin-top:.3rem;
+}
 </style>

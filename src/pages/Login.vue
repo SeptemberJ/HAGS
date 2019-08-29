@@ -41,15 +41,7 @@ export default {
   data () {
     return {
       btLoading: false,
-      userList: [
-        {
-          value: '0',
-          label: '黄金糕'
-        }, {
-          value: '2',
-          label: '双皮奶'
-        }
-      ],
+      userList: [],
       loginForm: {
         accountName: '',
         accountPsd: ''
@@ -65,11 +57,13 @@ export default {
     }
   },
   created () {
+    this.updateCurPage('Login')
     this.getUserList()
   },
   methods: {
     ...mapActions([
-      'unitUserInfo'
+      'unitUserInfo',
+      'updateCurPage'
     ]),
     enterEvent () {
       let keyCode = event.keyCode ? event.keyCode : event.which ? event.which : event.charCode
@@ -92,6 +86,7 @@ export default {
                   type: 'success'
                 })
                 this.btLoading = false
+                this.updateCurPage('Home')
                 this.$router.push({name: 'Home'})
                 // 刷新信息
                 this.unitUserInfo(res.data.memberInfo)
@@ -191,7 +186,6 @@ export default {
       transform: translate(-50%, -50%);
     }
     .bt{
-      // width: 50%;
       margin-top: 20px;
       background: #4A5F7A;
       border: 1px solid #4A5F7A;

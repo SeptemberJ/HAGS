@@ -10,7 +10,7 @@ import router from './router'
 import Http from './util/request'
 import '../static/css/style.css'
 import 'lib-flexible'
-import '../static/js/common.js'
+// import '../static/js/common.js'
 
 Vue.prototype.Http = Http
 

@@ -58,47 +58,12 @@
         width="110"
         show-overflow-tooltip>
       </el-table-column>
-      <!-- <el-table-column
-        property="fnumber"
-        label="完工产量"
-        width="110"
-        show-overflow-tooltip>
-      </el-table-column>
-      <el-table-column
-        property="badnumber"
-        label="报废数"
-        width="100"
-        show-overflow-tooltip>
-      </el-table-column>
-      <el-table-column
-        property="kcnumber"
-        label="库存数"
-        width="100"
-        show-overflow-tooltip>
-      </el-table-column> -->
       <el-table-column
         property="worktime"
         label="工作时间"
         width="110"
         show-overflow-tooltip>
       </el-table-column>
-      <!-- <el-table-column
-        property="isback"
-        label="是否返工"
-        width="110"
-        show-overflow-tooltip>
-      </el-table-column>
-      <el-table-column
-        property="fnote"
-        label="备注"
-        show-overflow-tooltip>
-      </el-table-column>
-      <el-table-column
-        property="ischeck"
-        label="是否首检"
-        width="110"
-        show-overflow-tooltip>
-      </el-table-column> -->
       <el-table-column
         property="waittime"
         label="等待时间"
@@ -250,10 +215,9 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { mapState, mapActions } from 'vuex'
 export default {
   name: 'Report',
-  props: ['curReportInfo', 'timestamp'],
   data () {
     return {
       listLoading: false,
@@ -341,7 +305,8 @@ export default {
   },
   computed: {
     ...mapState({
-      curModuleInfo: state => state.curModuleInfo
+      curModuleInfo: state => state.curModuleInfo,
+      curReportInfo: state => state.curReportInfo
     }),
     forder: function () {
       let forder = null
@@ -458,6 +423,10 @@ export default {
     this.getPeopleList()
   },
   methods: {
+    ...mapActions([
+      'updateTopLineInfo',
+      'updateCurPage'
+    ]),
     handleCurrentChange () {
       this.getHBList()
     },
@@ -503,6 +472,10 @@ export default {
         }
       }).catch((error) => {
         console.log(error)
+        this.$message({
+          message: '服务器繁忙!',
+          type: 'error'
+        })
       })
     },
     huizong () {
@@ -628,6 +601,10 @@ export default {
       }).catch((error) => {
         this.btLoading = false
         console.log(error)
+        this.$message({
+          message: '服务器繁忙!',
+          type: 'error'
+        })
       })
     },
     sureAdd () {
@@ -662,6 +639,10 @@ export default {
       }).catch((error) => {
         console.log(error)
         this.btLoading = false
+        this.$message({
+          message: '服务器繁忙!',
+          type: 'error'
+        })
       })
     },
     addHz () {
@@ -706,6 +687,10 @@ export default {
       }).catch((error) => {
         console.log(error)
         this.btLoading = false
+        this.$message({
+          message: '服务器繁忙!',
+          type: 'error'
+        })
       })
     },
     addHzNoTime () {
@@ -743,6 +728,10 @@ export default {
       }).catch((error) => {
         console.log(error)
         this.btLoading = false
+        this.$message({
+          message: '服务器繁忙!',
+          type: 'error'
+        })
       })
     },
     tuzhi () {
@@ -751,7 +740,6 @@ export default {
         switch (res.data.code) {
           case '1':
             window.open(res.data.maplist, '_blank')
-            // window.open('http://ep23767307.qicp.vip:31379/LK-P-RZR900S-7-10-B1-18364-1.PDF', '_blank')
             break
           default:
             this.$message({
@@ -761,6 +749,10 @@ export default {
         }
       }).catch((error) => {
         console.log(error)
+        this.$message({
+          message: '服务器繁忙!',
+          type: 'error'
+        })
       })
     },
     getHBHistory () {
@@ -771,10 +763,8 @@ export default {
             this.hbHistory = res.data.list
             this.sumHB = res.data.oldhuibaocount
             this.dialogHBHistoryVisible = true
-            // this.listLoading = false
             break
           default:
-            // this.listLoading = false
             this.$message({
               message: res.data.message + '!',
               type: 'error'
@@ -789,9 +779,9 @@ export default {
       })
     },
     historyDetail (row) {
-      this.$emit('closeReport')
-      this.$emit('showHistory', row.id)
-      this.$emit('backTopLineInfo', this.topLineInfo)
+      this.updateTopLineInfo(this.topLineInfo)
+      this.updateCurPage('History')
+      this.$router.push({name: 'History'})
     },
     getHBList () {
       this.listLoading = true
@@ -807,7 +797,6 @@ export default {
             this.listLoading = false
             break
           case 1:
-            // this.plantNumber = res.data.jhnumber
             this.zhubiaoid = res.data.zhubiaoid
             this.isshow = res.data.isshow
             this.topLineInfo = {
@@ -838,6 +827,11 @@ export default {
         }
       }).catch((error) => {
         console.log(error)
+        this.listLoading = false
+        this.$message({
+          message: '服务器繁忙!',
+          type: 'error'
+        })
       })
     },
     getPeopleList () {
@@ -846,6 +840,10 @@ export default {
         this.peopleList = res.data.list
       }).catch((error) => {
         console.log(error)
+        this.$message({
+          message: '服务器繁忙!',
+          type: 'error'
+        })
       })
     }
   }

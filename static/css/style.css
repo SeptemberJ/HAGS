@@ -35,6 +35,9 @@ body{
 .TextAlignR{
   text-align: right;
 }
+#addPerson .el-dialog__body{
+  padding-top: 0 !important;
+}
 /* .TopLineBlock{
   height: 1rem;
   line-height: 1rem;
