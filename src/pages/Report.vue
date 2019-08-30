@@ -9,20 +9,20 @@
         <el-col :span="3" class="TextAlignL">接收数: {{topLineInfo.jhnumber}}</el-col>
         <el-col :span="3" class="TextAlignL">剩余接收数: {{topLineInfo.synumber}}</el-col>
       </el-row>
-      <el-row style="height:1rem;line-height:1rem;">
+      <el-row style="height:.5rem;line-height:.5rem;">
         <el-col :span="6" class="TextAlignL">完工产量: {{topLineInfo.fnumber}}</el-col>
         <el-col :span="6" class="TextAlignL">报废数: {{topLineInfo.badnumber}}</el-col>
         <el-col :span="3" class="TextAlignL">库存数: {{topLineInfo.kcnumber}}</el-col>
         <el-col :span="3" class="TextAlignL">是否返工: {{topLineInfo.isback}}</el-col>
         <el-col :span="3" class="TextAlignL">备注: {{topLineInfo.fnote}}</el-col>
-        <el-col :span="3" class="TextAlignL">是否首检: {{topLineInfo.ischeck}}</el-col>
+        <!-- <el-col :span="3" class="TextAlignL">是否首检: {{topLineInfo.ischeck}}</el-col> -->
       </el-row>
       <el-row>
         <el-col :span="24" class="TextAlignR" v-if="ifCanAdd">
-          <el-button size="small" type="primary" @click="tuzhi">图纸</el-button>
-          <el-button size="small" type="info" @click="getHBHistory">历史汇报</el-button>
           <el-button size="small" type="warning" @click="huizong">汇报</el-button>
-          <el-button size="small" type="success" @click="addRecord">新增</el-button>
+          <!-- <el-button size="small" type="primary" @click="tuzhi">图纸</el-button>
+          <el-button size="small" type="info" @click="getHBHistory">历史汇报</el-button>
+          <el-button size="small" type="success" @click="addRecord">新增</el-button> -->
         </el-col>
       </el-row>
     </div>
@@ -36,10 +36,10 @@
         type="selection"
         width="55">
       </el-table-column>
-      <!-- <el-table-column
+      <el-table-column
         type="index"
         width="50">
-      </el-table-column> -->
+      </el-table-column>
       <el-table-column
         property="username"
         label="操作工"
@@ -49,31 +49,21 @@
       <el-table-column
         property="starttimeTxt"
         label="开机时间"
-        width="110"
         show-overflow-tooltip>
       </el-table-column>
       <el-table-column
         property="endtimeTxt"
         label="停机时间"
-        width="110"
         show-overflow-tooltip>
       </el-table-column>
       <el-table-column
         property="worktime"
         label="工作时间"
-        width="110"
         show-overflow-tooltip>
       </el-table-column>
       <el-table-column
         property="waittime"
         label="等待时间"
-        width="110"
-        show-overflow-tooltip>
-      </el-table-column>
-      <el-table-column
-        property="tuntime"
-        label="调机时间"
-        width="110"
         show-overflow-tooltip>
       </el-table-column>
       <el-table-column
@@ -84,7 +74,7 @@
       <el-table-column
         fixed="right"
         label="操作"
-        width="110">
+        width="120">
         <template slot-scope="scope">
           <el-button
             size="medium"
@@ -106,16 +96,16 @@
       layout="total, prev, pager, next, jumper"
       :total="sum">
     </el-pagination>
-    <!-- 新增 -->
+    <!-- 新增 编辑 -->
     <el-dialog :title="ifEdit ? '编辑' : (ifHZ ? '汇报' : '新增')" :visible.sync="dialogAddFormVisible" :close-on-click-modal="false" width="500px">
       <el-form class="TextAlignL" :model="form" :rules="rules" ref="form" label-width="100px">
         <el-form-item label="操作工" prop="username" v-if="!ifHZ">
-          <el-select v-model="form.username" placeholder="请选择操作工">
+          <el-select v-model="form.username" placeholder="请选择操作工" :disabled="ifEdit">
             <el-option v-for="(people, idx) in peopleList" :key="idx" :label="people.fname" :value="people.fname"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="开机时间" prop="starttime" v-if="(ifHZ && ifHasTwoTime && isshow != 1) || ifEdit">
-          <el-time-picker
+          <el-time-picker :disabled="ifEdit"
             v-model="form.starttime"
             format="HH 点 mm 分"
             value-format="HH-mm"
@@ -126,7 +116,7 @@
           </el-time-picker>
         </el-form-item>
         <el-form-item label="停机时间" prop="endtime" v-if="(ifHZ && ifHasTwoTime && isshow != 1) || ifEdit">
-          <el-time-picker
+          <el-time-picker :disabled="ifEdit"
             v-model="form.endtime"
             format="HH 点 mm 分"
             value-format="HH-mm"
@@ -145,32 +135,37 @@
         <el-form-item label="库存数" prop="kcnumber" v-if="ifHZ">
           <el-input v-model="form.kcnumber" prop="kcnumber"></el-input>
         </el-form-item>
-        <el-form-item label="工作时间" v-if="!ifAdd">
+        <!-- <el-form-item label="工作时间" v-if="!ifAdd">
           <el-input v-model="form.worktime" prop="worktime" disabled></el-input>
-        </el-form-item>
+        </el-form-item> -->
         <el-form-item label="是否返工" prop="isback" v-if="!ifAdd">
-          <el-select v-model="form.isback" placeholder="请选择是否返工">
+          <el-select v-model="form.isback" placeholder="请选择是否返工" :disabled="ifEdit">
             <el-option label="Y" value="Y"></el-option>
             <el-option label="N" value="N"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="备注" prop="fnote" v-if="!ifAdd">
-          <el-input type="textarea" v-model="form.fnote" placeholder="请输入备注..."></el-input>
+          <el-input type="textarea" v-model="form.fnote" :disabled="ifEdit" placeholder="请输入备注..."></el-input>
         </el-form-item>
-        <el-form-item label="是否首检" prop="ischeck" v-if="!ifAdd">
+        <!-- <el-form-item label="是否首检" prop="ischeck" v-if="!ifAdd">
           <el-select v-model="form.ischeck" placeholder="请选择是否返工">
             <el-option label="Y" value="Y"></el-option>
             <el-option label="N" value="N"></el-option>
           </el-select>
-        </el-form-item>
+        </el-form-item> -->
         <el-form-item label="等待时间" prop="waittime" v-if="!ifAdd">
           <el-input v-model="form.waittime"></el-input>
         </el-form-item>
-        <el-form-item label="调机时间" prop="tuntime" v-if="!ifAdd">
+        <!-- <el-form-item label="调机时间" prop="tuntime" v-if="!ifAdd">
           <el-input v-model="form.tuntime"></el-input>
-        </el-form-item>
+        </el-form-item> -->
         <el-form-item label="停机原因" prop="freason" v-if="!ifAdd">
-          <el-input type="textarea" v-model="form.freason" placeholder="请输入停机原因..."></el-input>
+          <el-select v-model="form.freason" placeholder="请选择停机原因">
+            <el-option label="首检" value="首检"></el-option>
+            <el-option label="停机" value="停机"></el-option>
+            <el-option label="其他" value="其他"></el-option>
+          </el-select>
+          <!-- <el-input type="textarea" v-model="form.freason" placeholder="请输入停机原因..."></el-input> -->
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -179,7 +174,7 @@
       </div>
     </el-dialog>
     <!-- 汇报历史 -->
-    <el-dialog title="汇报历史" :visible.sync="dialogHBHistoryVisible" :close-on-click-modal="false">
+    <!-- <el-dialog title="汇报历史" :visible.sync="dialogHBHistoryVisible" :close-on-click-modal="false">
       <el-table @row-dblclick="historyDetail"
         :data="hbHistory"
         v-loading="listLoading"
@@ -210,7 +205,7 @@
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogHBHistoryVisible = false">关 闭</el-button>
       </div>
-    </el-dialog>
+    </el-dialog> -->
   </div>
 </template>
 
@@ -247,7 +242,7 @@ export default {
         badnumber: '',
         fnumber: '',
         isback: '',
-        ischeck: '',
+        // ischeck: '',
         jhnumber: '',
         jhsnumber: '',
         kcnumber: '',
@@ -262,11 +257,11 @@ export default {
         badnumber: '',
         kcnumber: '',
         worktime: '',
-        isback: '',
+        // isback: '',
         fnote: '',
         ischeck: '',
         waittime: '',
-        tuntime: '',
+        // tuntime: '',
         freason: ''
       },
       rules: {
@@ -306,7 +301,8 @@ export default {
   computed: {
     ...mapState({
       curModuleInfo: state => state.curModuleInfo,
-      curReportInfo: state => state.curReportInfo
+      curReportInfo: state => state.curReportInfo,
+      curWorkId: state => state.curWorkId
     }),
     forder: function () {
       let forder = null
@@ -478,7 +474,15 @@ export default {
         })
       })
     },
-    huizong () {
+    async huizong () {
+      let ifCanHB = await this.ifCanHB()
+      if (ifCanHB === '0') {
+        this.$message({
+          message: '已汇报，不可以多次汇报!',
+          type: 'warning'
+        })
+        return false
+      }
       if (this.huibaoIdList.length === 0) {
         this.$message({
           message: '请先勾选需要汇总的记录!',
@@ -506,6 +510,20 @@ export default {
         tuntime: '',
         freason: ''
       }
+    },
+    ifCanHB () {
+      return new Promise((resolve, reject) => {
+        this.Http.get('checkhuibao', {zhubiaoid: this.zhubiaoid}
+        ).then(res => {
+          resolve(res.data.code)
+        }).catch((error) => {
+          console.log(error)
+          this.$message({
+            message: '服务器繁忙!',
+            type: 'error'
+          })
+        })
+      })
     },
     addRecord () {
       this.ifAdd = true
@@ -785,7 +803,7 @@ export default {
     },
     getHBList () {
       this.listLoading = true
-      this.Http.get('huibaolist', {number: this.pageSize, page_num: this.curPage, fidz: this.curReportInfo.fidz, fidc: this.curReportInfo.fidc, gongxu: this.curReportInfo.gxName, department: this.curModuleInfo.departid, forder: this.forder, jhsnumber: this.curReportInfo.jhsnumber}
+      this.Http.get('huibaolist2', {number: this.pageSize, page_num: this.curPage, fidz: this.curReportInfo.fidz, fidc: this.curReportInfo.fidc, gongxu: this.curReportInfo.gxName, department: this.curModuleInfo.departid, forder: this.forder, jhsnumber: this.curReportInfo.jhsnumber, workid: this.curWorkId}
       ).then(res => {
         switch (res.data.code) {
           case 0:
@@ -803,7 +821,7 @@ export default {
               badnumber: res.data.badnumber,
               fnumber: res.data.fnumber,
               isback: res.data.isback,
-              ischeck: res.data.ischeck,
+              // ischeck: res.data.ischeck,
               jhnumber: res.data.jhnumber,
               jhsnumber: res.data.jhsnumber,
               kcnumber: res.data.kcnumber,

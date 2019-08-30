@@ -18,6 +18,7 @@ const state = {
   topLineInfo: null,
   reportPerson: null,
   curWorkId: null,
+  selectedAllList: [],
   urlPre: 'http://ep23767307.qicp.vip:31379/haianJK/',
   imgPreUrl: 'http://ep23767307.qicp.vip:31379/upload/'
 }
@@ -53,6 +54,9 @@ const actions = {
   },
   updateTopLineInfo ({commit, state}, Info) {
     commit('setTopLineInfo', Info)
+  },
+  updateSelectedAllList ({commit, state}, Info) {
+    commit('setSelectedAllList', Info)
   }
 }
 
@@ -84,6 +88,9 @@ const mutations = {
   },
   setTopLineInfo (state, Info) {
     state.topLineInfo = Info
+  },
+  setSelectedAllList (state, List) {
+    state.selectedAllList = List
   }
 }
 

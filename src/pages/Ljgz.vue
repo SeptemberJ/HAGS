@@ -3,6 +3,16 @@
     <el-row>
       <el-form :inline="true" class="demo-form-inline">
         <el-form-item label="零件名称">
+          <el-select v-model="formSearch.gongxu" placeholder="请选择" @change="search">
+            <el-option
+              v-for="item in GXOptions"
+              :key="item"
+              :label="item"
+              :value="item">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="零件名称">
           <el-input v-model="formSearch.ljname" placeholder="请输入零件名称" size="small" clearable></el-input>
         </el-form-item>
         <el-form-item label="材料名称">
@@ -21,6 +31,13 @@
         fixed
         type="index"
         width="50">
+      </el-table-column>
+      <el-table-column
+        label="图纸"
+        width="80">
+        <template slot-scope="scope">
+          <el-button size="mini" type="primary" @click="tuzhi(scope.$index, scope.row)">图纸</el-button>
+        </template>
       </el-table-column>
       <el-table-column
         property="F0Txt"
@@ -87,11 +104,11 @@
         label="切管"
         width="80">
         <template slot-scope="scope">
-          <el-button v-if="scope.row.fqg"
+          <el-button v-if="scope.row.fqg && ljgzFromType == 1"
             size="mini"
             type="text"
             @click="addReport(scope.$index, scope.row, '切管')">{{scope.row.fqg}}</el-button>
-          <el-button v-else size="mini" type="text" @click="canNotAddReport">--</el-button>
+          <span v-else>{{scope.row.fqg}}</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -104,12 +121,12 @@
         label="激光"
         width="80">
         <template slot-scope="scope">
-          <el-button v-if="scope.row.fjg"
+          <el-button v-if="scope.row.fjg && ljgzFromType == 1"
             size="mini"
             type="text"
             style="color:#606266;"
             @click="addReport(scope.$index, scope.row, '激光')">{{scope.row.fjg}}</el-button>
-          <el-button v-else size="mini" type="text" @click="canNotAddReport">--</el-button>
+          <span v-else>{{scope.row.fjg}}</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -122,12 +139,12 @@
         label="折弯"
         width="80">
         <template slot-scope="scope">
-          <el-button v-if="scope.row.fzw"
+          <el-button v-if="scope.row.fzw && ljgzFromType == 1"
             size="mini"
             type="text"
             style="color:#606266;"
             @click="addReport(scope.$index, scope.row, '折弯')">{{scope.row.fzw}}</el-button>
-          <el-button v-else size="mini" type="text" @click="canNotAddReport">--</el-button>
+          <span v-else>{{scope.row.fzw}}</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -140,12 +157,12 @@
         label="焊接"
         width="80">
         <template slot-scope="scope">
-          <el-button v-if="scope.row.fhj"
+          <el-button v-if="scope.row.fhj && ljgzFromType == 1"
             size="mini"
             type="text"
             style="color:#606266;"
             @click="addReport(scope.$index, scope.row, '焊接')">{{scope.row.fhj}}</el-button>
-          <el-button v-else size="mini" type="text" @click="canNotAddReport">--</el-button>
+          <span v-else>{{scope.row.fhj}}</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -158,12 +175,12 @@
         label="抛丸"
         width="80">
         <template slot-scope="scope">
-          <el-button v-if="scope.row.fpw"
+          <el-button v-if="scope.row.fpw && ljgzFromType == 1"
             size="mini"
             type="text"
             style="color:#606266;"
             @click="addReport(scope.$index, scope.row, '抛丸')">{{scope.row.fpw}}</el-button>
-          <el-button v-else size="mini" type="text" @click="canNotAddReport">--</el-button>
+          <span v-else>{{scope.row.fpw}}</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -176,12 +193,12 @@
         label="喷涂"
         width="80">
         <template slot-scope="scope">
-          <el-button v-if="scope.row.fpt"
+          <el-button v-if="scope.row.fpt && ljgzFromType == 1"
             size="mini"
             type="text"
             style="color:#606266;"
             @click="addReport(scope.$index, scope.row, '喷涂')">{{scope.row.fpt}}</el-button>
-          <el-button v-else size="mini" type="text" @click="canNotAddReport">--</el-button>
+          <span v-else>{{scope.row.fpt}}</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -194,12 +211,12 @@
         label="包装"
         width="80">
         <template slot-scope="scope">
-          <el-button v-if="scope.row.fbz"
+          <el-button v-if="scope.row.fbz && ljgzFromType == 1"
             size="mini"
             type="text"
             style="color:#606266;"
             @click="addReport(scope.$index, scope.row, '包装')">{{scope.row.fbz}}</el-button>
-          <el-button v-else size="mini" type="text" @click="canNotAddReport">--</el-button>
+          <span v-else>{{scope.row.fbz}}</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -225,10 +242,13 @@ export default {
   name: 'Ljgz',
   data () {
     return {
+      ljgzFromType: 0, // 0 WorkerOrder 1 HBDetail
       formSearch: {
         ljname: '',
-        clname: ''
+        clname: '',
+        gongxu: '全部'
       },
+      GXOptions: ['全部', '切管', '激光', '折弯', '焊接', '抛丸', '喷涂', '包装'],
       curPage: 1,
       pageSize: 5,
       sum: 0,
@@ -238,12 +258,31 @@ export default {
   },
   created () {
     this.getLjgzList()
+    if (this.curWorkId) {
+      this.ljgzFromType = 1
+    } else {
+      this.ljgzFromType = 0
+    }
   },
   computed: {
     ...mapState({
+      userInfo: state => state.userInfo,
+      curWorkId: state => state.curWorkId,
       workOrderFshortnumber: state => state.workOrderFshortnumber,
-      workOrderFqty: state => state.workOrderFqty
+      workOrderFqty: state => state.workOrderFqty,
+      curReportInfo: state => state.curReportInfo
     })
+  },
+  watch: {
+    // curPageG: function (newVal, oldVal) {
+    //   console.log(newVal, oldVal)
+    //   if (oldVal === 'WorkOrder' && newVal === 'Ljgz') {
+    //     this.ljgzFromType = 0
+    //   }
+    //   if (oldVal === 'HBDetail' && newVal === 'Ljgz') {
+    //     this.ljgzFromType = 1
+    //   }
+    // }
   },
   methods: {
     ...mapActions([
@@ -251,6 +290,13 @@ export default {
       'updateCurPage'
     ]),
     addReport (idx, row, gxName) {
+      if (gxName !== this.userInfo.gongxu) {
+        this.$message({
+          message: '对不起，您没有操作此道工序的权限!',
+          type: 'warning'
+        })
+        return false
+      }
       row.gxName = gxName
       this.updateCurReportInfo(row)
       this.updateCurPage('Report')
@@ -260,6 +306,27 @@ export default {
       this.$message({
         message: '没有此道工序!',
         type: 'warning'
+      })
+    },
+    tuzhi () {
+      this.Http.get('sertuzhi', {fidz: this.curReportInfo.fidz, fidc: this.curReportInfo.fidc}
+      ).then(res => {
+        switch (res.data.code) {
+          case '1':
+            window.open(res.data.maplist, '_blank')
+            break
+          default:
+            this.$message({
+              message: res.data.messge + '!',
+              type: 'error'
+            })
+        }
+      }).catch((error) => {
+        console.log(error)
+        this.$message({
+          message: '服务器繁忙!',
+          type: 'error'
+        })
       })
     },
     search () {
@@ -275,6 +342,9 @@ export default {
         page_num: this.curPage,
         fshortnumber: this.workOrderFshortnumber,
         fqty: this.workOrderFqty
+      }
+      if (this.formSearch.gongxu !== '全部') {
+        Data.gongxu = this.formSearch.gongxu
       }
       if (this.formSearch.ljname && this.formSearch.ljname.trim() !== '') {
         Data.ljname = this.formSearch.ljname

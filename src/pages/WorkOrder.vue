@@ -10,6 +10,7 @@
           <el-button type="primary" icon="el-icon-search" size="small" @click="search">搜索</el-button>
         </el-form-item>
         <el-form-item style="float: right;">
+          <el-button size="small" type="info" @click="getHBHistoryDay">当日汇报记录</el-button>
           <el-button size="small" type="info" @click="getHBHistory">汇报记录</el-button>
           <el-button type="warning" size="small" @click="huibao">汇报</el-button>
         </el-form-item>
@@ -17,6 +18,7 @@
     </el-row>
     <section>
       <el-table @row-dblclick="goLjgz"
+        ref="selectedList"
         :data="orderList"
         v-loading="listLoading"
         @selection-change="handleSelectionChange"
@@ -105,7 +107,7 @@
           <template slot-scope="scope">
             <el-select v-model="scope.row.id" @change="(value) => changePerson(value, scope.$index)" size="mini" placeholder="请选择">
               <el-option
-                v-for="item in defaultPersonList"
+                v-for="item in selectPeopleList"
                 :key="item.id"
                 :label="item.fname"
                 :value="item.id">
@@ -183,6 +185,7 @@
         :close-on-click-modal="false"
         append-to-body>
         <el-time-picker
+          disabled
           v-model="time"
           format="HH 点 mm 分"
           value-format="HH-mm"
@@ -202,19 +205,21 @@
 <script>
 import { mapState, mapActions } from 'vuex'
 import {secondToFormat} from '../util/utils'
+// import { setTimeout } from 'timers';
 
 export default {
   name: 'WorkOrder',
   data () {
     return {
       listLoading: true,
-      filterProductionName: '', // 5.14.WLK-003
+      filterProductionName: '', // 5.03.AA-P-RZRXPT-HC-SBJ-003.0003
       curPage: 1,
       pageSize: 15,
       sum: 0,
       huibaoOrderList: [],
       orderList: [],
       defaultPersonList: [],
+      selectPeopleList: [],
       personList: [],
       curPersonId: null,
       dialogAddFormVisible: false,
@@ -222,39 +227,68 @@ export default {
       dialogTimeVisible: false,
       hbHistory: [],
       curPageHB: 1,
-      pageSizeHB: 15,
+      pageSizeHB: 5,
       sumHB: 0,
       openOrClose: 1, // 0 关机 1 开机
       curWorkId: null,
+      curStartTmie: null,
       time: '',
-      btLoading: false
+      btLoading: false,
+      selectedList: [], // 当前页的选中项
+      selectedAllList: [],
+      copySelectedAllList: []
     }
   },
   computed: {
     ...mapState({
       curModuleInfo: state => state.curModuleInfo,
       userInfo: state => state.userInfo
+      // selectedAllList: state => state.selectedAllList
     })
   },
   created () {
+    // this.handleCurrentChange()
     this.getWorkOrderList()
   },
   methods: {
     ...mapActions([
       'updateLjgzOption',
       'updateCurPage',
-      'updateCurWorkId'
+      'updateCurWorkId',
+      'updateSelectedAllList'
     ]),
     search () {
+      this.selectedList = []
+      this.selectedAllList = []
+      this.curPage = 1
       this.getWorkOrderList()
     },
-    handleSelectionChange (val) {
-      this.huibaoOrderList = val
+    handleSelectionChange (curSelection) {
+      this.huibaoOrderList = []
+      this.selectedList = curSelection
+      this.selectedAllList[this.curPage - 1] = curSelection
+      this.selectedAllList.map(itemOut => {
+        itemOut.map(itemIner => {
+          this.huibaoOrderList.push(itemIner)
+        })
+      })
+      // this.updateSelectedAllList(this.selectedAllList)
       // console.log(val)
     },
-    handleCurrentChange () {
+    async handleCurrentChange () {
       // this.goTop()
-      this.getWorkOrderList()
+      let temp = this.selectedAllList[this.curPage - 1] ? this.selectedAllList[this.curPage - 1] : []
+      let PurchaseList = await this.getWorkOrderList()
+      this.selectedList = temp
+      if (this.selectedList.length > 0) {
+        this.selectedList.map((itemS) => {
+          PurchaseList.map((item, idx) => {
+            if (item.fbillno === itemS.fbillno) {
+              this.$refs.selectedList.toggleRowSelection(PurchaseList[idx], true)
+            }
+          })
+        })
+      }
     },
     huibao () {
       if (this.huibaoOrderList.length === 0) {
@@ -265,8 +299,41 @@ export default {
         return false
       } else {
         this.getPeopleList()
+        this.getDefaultPeopleList()
         this.dialogAddFormVisible = true
       }
+    },
+    // 当日汇报记录
+    getHBHistoryDay () {
+      this.Http.get('serhuibaoworknow', {number: this.pageSizeHB, page_num: this.curPageHB, fbiller: this.userInfo.fname, gongxu: this.userInfo.gongxu}
+      ).then(res => {
+        switch (res.data.code) {
+          case '1':
+            this.hbHistory = res.data.list.map(item => {
+              item.create_timeTxt = secondToFormat(item.create_time.time)
+              item.ifCanOpen = !item.starttime
+              item.ifCanClose = !item.endtime
+              item.starttimeTxt = item.starttime ? (item.starttime).replace('-', '点') + '分' : ''
+              item.endtimeTxt = item.endtime ? (item.endtime).replace('-', '点') + '分' : ''
+              return item
+            })
+            this.sumHB = res.data.count
+            this.dialogHBHistoryVisible = true
+            break
+          default:
+            // this.listLoading = false
+            this.$message({
+              message: res.data.message + '!',
+              type: 'error'
+            })
+        }
+      }).catch((error) => {
+        console.log(error)
+        this.$message({
+          message: '服务器繁忙!',
+          type: 'error'
+        })
+      })
     },
     getHBHistory () {
       this.Http.get('serhuibaowork', {number: this.pageSizeHB, page_num: this.curPageHB, fbiller: this.userInfo.fname, gongxu: this.userInfo.gongxu}
@@ -300,7 +367,12 @@ export default {
       })
     },
     showTimeDialog (idx, row, type) {
+      if (type === 0) {
+        this.curStartTmie = row.starttime
+      }
       this.dialogTimeVisible = true
+      let curDate = new Date()
+      this.time = curDate.getHours() + '-' + curDate.getMinutes()
       this.curWorkId = row.id
       this.openOrClose = type
     },
@@ -349,8 +421,13 @@ export default {
       })
     },
     shutDown () {
+      let afterSplitS = this.curStartTmie.split('-')
+      let afterSplitE = this.time.split('-')
+      let minS = Number(afterSplitS[0]) * 60 + Number(afterSplitS[1])
+      let minE = Number(afterSplitE[0]) * 60 + Number(afterSplitE[1])
+      let worktime = parseInt((minE - minS) / 60) + ' 时' + ((minE - minS) % 60) + ' 分'
       this.btLoading = true
-      this.Http.post('guanji?endtime=' + this.time + '&workid=' + this.curWorkId
+      this.Http.post('guanji?endtime=' + this.time + '&workid=' + this.curWorkId + '&worktime=' + worktime
       ).then(res => {
         switch (res.data.code) {
           case '1':
@@ -387,7 +464,19 @@ export default {
     getPeopleList () {
       this.Http.get('serpeople', {department: this.curModuleInfo.departid}
       ).then(res => {
-        this.defaultPersonList = res.data.list
+        this.personList = res.data.list
+      }).catch((error) => {
+        console.log(error)
+        this.$message({
+          message: '服务器繁忙!',
+          type: 'error'
+        })
+      })
+    },
+    getDefaultPeopleList () {
+      this.Http.get('departpeople'
+      ).then(res => {
+        this.selectPeopleList = res.data.list
       }).catch((error) => {
         console.log(error)
         this.$message({
@@ -417,7 +506,7 @@ export default {
         this.personList[idx].fname = ''
         this.curPersonId = ''
       } else {
-        this.defaultPersonList.map(item => {
+        this.selectPeopleList.map(item => {
           if (item.id === val) {
             this.personList[idx].fname = item.fname
           }
@@ -452,6 +541,9 @@ export default {
             })
             this.getWorkOrderList()
             // 初始化数据
+            this.curPage = 1
+            this.selectedList = []
+            this.selectedAllList = []
             this.huibaoOrderList = []
             this.personList = []
             this.curPersonId = ''
@@ -501,37 +593,44 @@ export default {
       }, 30)
     },
     getWorkOrderList () {
-      let DATA = {number: this.pageSize, page_num: this.curPage}
-      if (this.filterProductionName && this.filterProductionName.trim() !== '') {
-        DATA.fnumber = this.filterProductionName
-      }
-      this.listLoading = true
-      this.Http.get('orderList', DATA
-      ).then(res => {
-        switch (res.data.code) {
-          case 1:
-            this.orderList = res.data.orderlist.map((item) => {
-              item.FCheckDateTxt = secondToFormat(item.FCheckDate.time)
-              item.FPlanFinishDateTxt = secondToFormat(item.FPlanFinishDate.time)
-              item.fshortTxt = item.fshort === 0 ? '否' : '是' // 1  缺料
-              return item
-            })
-            this.listLoading = false
-            this.sum = res.data.orderCount
-            break
-          default:
-            this.listLoading = false
-            this.$message({
-              message: res.data.message + '!',
-              type: 'error'
-            })
+      return new Promise((resolve, reject) => {
+        let DATA = {number: this.pageSize, page_num: this.curPage}
+        if (this.filterProductionName && this.filterProductionName.trim() !== '') {
+          DATA.fnumber = this.filterProductionName
         }
-      }).catch((error) => {
-        console.log(error)
-        this.listLoading = false
-        this.$message({
-          message: '服务器繁忙!',
-          type: 'error'
+        this.listLoading = true
+        this.Http.get('orderList', DATA
+        ).then(res => {
+          switch (res.data.code) {
+            case 1:
+              this.orderList = res.data.orderlist.map((item, idx) => {
+                item.FCheckDateTxt = secondToFormat(item.FCheckDate.time)
+                item.FPlanFinishDateTxt = secondToFormat(item.FPlanFinishDate.time)
+                item.fshortTxt = item.fshort === 0 ? '否' : '是' // 1  缺料
+                return item
+              })
+              this.listLoading = false
+              this.sum = res.data.orderCount
+              resolve(this.orderList)
+              // --
+              // temp.map(row => {
+              //   this.$refs.selectedList.toggleRowSelection(row, true)
+              // })
+              break
+            default:
+              this.listLoading = false
+              this.$message({
+                message: res.data.message + '!',
+                type: 'error'
+              })
+          }
+        }).catch((error) => {
+          console.log(error)
+          this.listLoading = false
+          this.$message({
+            message: '服务器繁忙!',
+            type: 'error'
+          })
         })
       })
     }

@@ -4,8 +4,8 @@
       <span class="CursorPointer" @click="back"><i class="el-icon-arrow-left" title="返回"></i></span>
     </div>
     <div class="MainBlock" v-if="curPage == 'Home'"><span>MES-SYSTEM</span></div>
-    <div class="MainBlock" v-if="curPage == 'WorkOrder'"><span>{{curModuleInfo.department + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + '汇报人: ' + userInfo.fname}}</span></div>
-    <div class="MainBlock" v-if="curPage != 'Home' && curPage != 'WorkOrder'"><span>{{curModuleInfo.department + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + '汇报人: ' + userInfo.fname + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0成品计划数：' + workOrderFqty}}</span></div>
+    <div class="MainBlock" v-if="curPage == 'WorkOrder'"><span>{{curModuleInfo.department + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + '汇报人: ' + userInfo.fname + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0工种: ' + userInfo.gongxu}}</span></div>
+    <div class="MainBlock" v-if="curPage != 'Home' && curPage != 'WorkOrder'"><span>{{curModuleInfo.department + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + '汇报人: ' + userInfo.fname + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0成品计划数：' + workOrderFqty + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0工种: ' + userInfo.gongxu}}</span></div>
     <div class="RightAccount">您好,{{userInfo.fname}}<span class="CursorPointer" style="margin-left: 10px;" @click="logOut"><i class="fa fa-sign-out" title="退出"></i></span></div>
     <!-- <div class="BackBlock">
       <span class="CursorPointer" @click="back"><i class="el-icon-arrow-left" title="返回"></i></span>
@@ -31,6 +31,7 @@ export default {
       curModuleInfo: state => state.curModuleInfo,
       userInfo: state => state.userInfo,
       curPage: state => state.curPage,
+      curPageG: state => state.curPage,
       workOrderFqty: state => state.workOrderFqty
     })
   },
@@ -39,22 +40,21 @@ export default {
   },
   watch: {
     curPage: function (newVal, oldVal) {
+      // console.log(newVal, oldVal)
       if (oldVal === 'WorkOrder' && newVal === 'Ljgz') {
         this.ljgzFromType = 0
       }
       if (oldVal === 'HBDetail' && newVal === 'Ljgz') {
         this.ljgzFromType = 1
       }
-      console.log('newVal', newVal)
-      console.log('oldVal', oldVal)
     }
   },
   methods: {
     ...mapActions([
-      'updateCurPage'
+      'updateCurPage',
+      'updateCurWorkId'
     ]),
     back () {
-      console.log(this.$route)
       if (this.$route.name === 'Home') {
         this.updateCurPage('Login')
         this.$router.push({name: 'Login'})
@@ -113,7 +113,7 @@ export default {
   line-height: 1rem;
   text-align: center;
   color: white;
-  font-size: .4rem;
+  font-size: .3rem;
   background: #4A5F7A;
   .BackBlock{
     width: 10%;

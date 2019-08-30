@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-// import store from '../vuex/store'
+import store from '../vuex/store'
 import Login from '@/pages/Login'
 import Home from '@/pages/Home'
 import WorkOrder from '@/pages/WorkOrder'
@@ -33,7 +33,7 @@ const router = new VueRouter({
       meta: {requireAuth: true}
     },
     {
-      path: '/HBDetail/:id/',
+      path: '/HBDetail',
       name: 'HBDetail',
       component: HBDetail,
       meta: {requireAuth: true}
@@ -68,7 +68,9 @@ const router = new VueRouter({
 
 // 登录控制
 router.beforeEach((to, from, next) => {
-  // store.dispatch('changePath', to.name)
+  if (to.name === 'WorkOrder') {
+    store.dispatch('updateCurWorkId', null)
+  }
   if (to.meta.requireAuth) {
     if (getCookie('gs_28a807940bba58c2c')) {
       next()
