@@ -2,7 +2,7 @@
   <div class="Ljgz">
     <el-row>
       <el-form :inline="true" class="demo-form-inline">
-        <el-form-item label="零件名称">
+        <el-form-item label="工序">
           <el-select v-model="formSearch.gongxu" placeholder="请选择" @change="search">
             <el-option
               v-for="item in GXOptions"
@@ -20,6 +20,7 @@
         </el-form-item>
         <el-form-item>
           <el-button type="primary" icon="el-icon-search" size="small" @click="search">搜索</el-button>
+          <el-button size="small" icon="el-icon-refresh" @click="reset">重置</el-button>
         </el-form-item>
       </el-form>
     </el-row>
@@ -113,6 +114,24 @@
       </el-table-column>
       <el-table-column
         property="qg"
+        label="完成数"
+        width="100"
+        show-overflow-tooltip>
+      </el-table-column>
+      <el-table-column
+        label="CNC"
+        width="80">
+        <template slot-scope="scope">
+          <el-button v-if="scope.row.fsk && ljgzFromType == 1"
+            size="mini"
+            type="text"
+            style="color:#606266;"
+            @click="addReport(scope.$index, scope.row, 'CNC')">{{scope.row.fsk}}</el-button>
+          <span v-else>{{scope.row.fsk}}</span>
+        </template>
+      </el-table-column>
+      <el-table-column
+        property="sk"
         label="完成数"
         width="100"
         show-overflow-tooltip>
@@ -246,17 +265,18 @@ export default {
       formSearch: {
         ljname: '',
         clname: '',
-        gongxu: '全部'
+        gongxu: ''
       },
-      GXOptions: ['全部', '切管', '激光', '折弯', '焊接', '抛丸', '喷涂', '包装'],
+      GXOptions: ['全部', '切管', 'CNC', '激光', '折弯', '焊接', '抛丸', '喷涂', '包装'],
       curPage: 1,
-      pageSize: 5,
+      pageSize: 10,
       sum: 0,
       listLoading: false,
       ljgzList: []
     }
   },
   created () {
+    this.formSearch.gongxu = this.userInfo.gongxu
     this.getLjgzList()
     if (this.curWorkId) {
       this.ljgzFromType = 1
@@ -273,17 +293,6 @@ export default {
       curReportInfo: state => state.curReportInfo
     })
   },
-  watch: {
-    // curPageG: function (newVal, oldVal) {
-    //   console.log(newVal, oldVal)
-    //   if (oldVal === 'WorkOrder' && newVal === 'Ljgz') {
-    //     this.ljgzFromType = 0
-    //   }
-    //   if (oldVal === 'HBDetail' && newVal === 'Ljgz') {
-    //     this.ljgzFromType = 1
-    //   }
-    // }
-  },
   methods: {
     ...mapActions([
       'updateCurReportInfo',
@@ -298,6 +307,7 @@ export default {
         return false
       }
       row.gxName = gxName
+      console.log('updateCurReportInfo', row)
       this.updateCurReportInfo(row)
       this.updateCurPage('Report')
       this.$router.push({name: 'Report'})
@@ -308,8 +318,8 @@ export default {
         type: 'warning'
       })
     },
-    tuzhi () {
-      this.Http.get('sertuzhi', {fidz: this.curReportInfo.fidz, fidc: this.curReportInfo.fidc}
+    tuzhi (idx, row) {
+      this.Http.get('sertuzhi', {fidz: row.fidz, fidc: row.fidc}
       ).then(res => {
         switch (res.data.code) {
           case '1':
@@ -330,7 +340,14 @@ export default {
       })
     },
     search () {
-      this.page_num = 1
+      this.curPage = 1
+      this.getLjgzList()
+    },
+    // 重置
+    reset () {
+      this.formSearch.ljname = ''
+      this.formSearch.clname = ''
+      this.curPage = 1
       this.getLjgzList()
     },
     handleCurrentChange () {

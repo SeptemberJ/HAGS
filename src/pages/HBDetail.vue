@@ -116,10 +116,12 @@ export default {
     ...mapActions([
       'updateLjgzOption',
       'updateCurPage',
-      'updateCurWorkId'
+      'updateCurWorkId',
+      'updateCurFbillno'
     ]),
     goLjgz (row) {
       this.updateCurWorkId(row.workid)
+      this.updateCurFbillno(row.fbillno)
       this.updateLjgzOption({fshortnumber: row.FShortNumber, fqty: row.fqty})
       this.updateCurPage('Ljgz')
       this.$router.push({name: 'Ljgz'})

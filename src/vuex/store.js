@@ -10,6 +10,7 @@ Vue.use(Vuex)
 const state = {
   userInfo: null,
   curPage: 'Login',
+  beforePage: '',
   curModuleInfo: null,
   cpjhNumber: null,
   workOrderFshortnumber: null,
@@ -18,6 +19,7 @@ const state = {
   topLineInfo: null,
   reportPerson: null,
   curWorkId: null,
+  curFbillno: null,
   selectedAllList: [],
   urlPre: 'http://ep23767307.qicp.vip:31379/haianJK/',
   imgPreUrl: 'http://ep23767307.qicp.vip:31379/upload/'
@@ -40,11 +42,17 @@ const actions = {
   updateCurWorkId ({commit, state}, CurWorkId) {
     commit('setCurWorkId', CurWorkId)
   },
+  updateCurFbillno ({commit, state}, CurFbillno) {
+    commit('setCurFbillno', CurFbillno)
+  },
   updateReportPerson ({commit, state}, Person) {
     commit('setReportPerson', Person)
   },
   updateCurPage ({commit, state}, CurPage) {
     commit('setCurPage', CurPage)
+  },
+  updateBeforePage ({commit, state}, BeforePage) {
+    commit('setBeforePage', BeforePage)
   },
   updateLjgzOption ({commit, state}, Option) {
     commit('setLjgzOption', Option)
@@ -73,11 +81,17 @@ const mutations = {
   setCurWorkId (state, CurWorkId) {
     state.curWorkId = CurWorkId
   },
+  setCurFbillno (state, curFbillno) {
+    state.curFbillno = curFbillno
+  },
   setReportPerson (state, Person) {
     state.reportPerson = Person
   },
   setCurPage (state, CurPage) {
     state.curPage = CurPage
+  },
+  setBeforePage (state, BeforePage) {
+    state.beforePage = BeforePage
   },
   setLjgzOption (state, Option) {
     state.workOrderFshortnumber = Option.fshortnumber

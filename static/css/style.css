@@ -38,6 +38,12 @@ body{
 #addPerson .el-dialog__body{
   padding-top: 0 !important;
 }
+#saerchNameForm .el-form-item{
+  width: 95% !important;
+}
+#saerchNameForm .el-form-item__content{
+  width: 80% !important;
+}
 /* .TopLineBlock{
   height: 1rem;
   line-height: 1rem;

@@ -2,6 +2,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import store from '../vuex/store'
 import Login from '@/pages/Login'
+import ModifyPSD from '@/pages/ModifyPSD'
 import Home from '@/pages/Home'
 import WorkOrder from '@/pages/WorkOrder'
 import Ljgz from '@/pages/Ljgz'
@@ -19,6 +20,12 @@ const router = new VueRouter({
       name: 'Login',
       component: Login,
       meta: {requireAuth: false}
+    },
+    {
+      path: '/ModifyPSD',
+      name: 'ModifyPSD',
+      component: ModifyPSD,
+      meta: {requireAuth: true}
     },
     {
       path: '/Home',

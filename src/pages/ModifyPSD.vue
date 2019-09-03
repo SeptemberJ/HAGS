@@ -11,32 +11,40 @@
         </div>
       </div>
       <div class="RightMain">
-        <el-form :model="loginForm" :rules="rules" ref="loginForm" label-position="left" label-width="1rem" class="InputBlock">
-          <el-form-item label="部门" prop="accountDepartment">
-            <el-select v-model="loginForm.accountDepartment" placeholder="请选择" style="width: 100%;" @change="changeDepartment">
+        <el-form :model="modifyForm" :rules="rules" ref="modifyForm" label-position="left" label-width="1.2rem" class="InputBlock">
+          <el-form-item label="部门" prop="accountDepartment" class="TextAlignL">
+            {{userInfo.gongxu}}
+            <!-- <el-select v-model="modifyForm.accountDepartment" disabled style="width: 100%;" @change="changeDepartment">
               <el-option
                 v-for="item in departmentList"
                 :key="item.id"
                 :label="item.ftype"
                 :value="item.id">
               </el-option>
-            </el-select>
+            </el-select> -->
           </el-form-item>
-          <el-form-item label="用户名" prop="accountName">
-            <el-select v-model="loginForm.accountName" placeholder="请选择" style="width: 100%;">
+          <el-form-item label="用户名" prop="accountName"  class="TextAlignL">
+            {{userInfo.fname}}
+            <!-- <el-select v-model="modifyForm.accountName" disabled style="width: 100%;">
               <el-option
                 v-for="item in userList"
                 :key="item.id"
                 :label="item.fname"
                 :value="item.id">
               </el-option>
-            </el-select>
+            </el-select> -->
           </el-form-item>
-          <el-form-item label="密码" prop="accountPsd">
-            <el-input v-model="loginForm.accountPsd" type="password" placeholder="密码" clearable @keyup.enter.native='enterEvent' style="width: 100%;"></el-input>
+          <!-- <el-form-item label="旧密码" prop="accountPsd">
+            <el-input v-model="modifyForm.accountPsd" type="password" placeholder="密码" clearable style="width: 100%;"></el-input>
+          </el-form-item> -->
+          <el-form-item label="新密码" prop="accountPsdNew">
+            <el-input v-model="modifyForm.accountPsdNew" type="password" placeholder="密码" clearable style="width: 100%;"></el-input>
           </el-form-item>
-          <!-- <el-button type="text" style="display:block;float:right;padding:0;" @click="toChangePsd">修改密码</el-button> -->
-          <el-button type="primary" size="small" :loading="btLoading" class="bt" @click="Login('loginForm')">登陆</el-button>
+          <el-form-item label="确认密码" prop="accountPsdNewAgain">
+            <el-input v-model="modifyForm.accountPsdNewAgain" type="password" placeholder="密码" clearable style="width: 100%;"></el-input>
+          </el-form-item>
+          <!-- <el-button type="primary" size="small" :loading="btLoading" class="bt" style="color: #000;background:#fff;" @click="backLogin">返回登陆</el-button> -->
+          <el-button type="primary" size="small" :loading="btLoading" class="bt" @click="Modify('modifyForm')">确认修改</el-button>
         </el-form>
       </div>
     </div>
@@ -44,20 +52,22 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex'
-import {setCookie} from '../util/utils'
-import CryptoJS from 'crypto-js'
+import { mapState, mapActions } from 'vuex'
+import {clearCookie} from '../util/utils'
+// import CryptoJS from 'crypto-js'
 export default {
-  name: 'Login',
+  name: 'Modify',
   data () {
     return {
       btLoading: false,
       departmentList: [],
       userList: [],
-      loginForm: {
+      modifyForm: {
         accountDepartment: '',
         accountName: '',
-        accountPsd: ''
+        accountPsd: '',
+        accountPsdNew: '',
+        accountPsdNewAgain: ''
       },
       rules: {
         accountDepartment: [
@@ -67,48 +77,56 @@ export default {
           { required: true, message: '请选择用户名', trigger: 'change' }
         ],
         accountPsd: [
-          { required: true, message: '请输入密码', trigger: 'change' }
+          { required: true, message: '请输入旧密码', trigger: 'change' }
+        ],
+        accountPsdNew: [
+          { required: true, message: '请输入新密码', trigger: 'change' }
+        ],
+        accountPsdNewAgain: [
+          { required: true, message: '请确认新密码', trigger: 'change' }
         ]
       }
     }
   },
+  computed: {
+    ...mapState({
+      userInfo: state => state.userInfo
+    })
+  },
   created () {
-    this.updateCurPage('Login')
+    this.updateCurPage('Modify')
     this.getDepartmentList()
+    this.modifyForm.accountDepartment = this.userInfo.id
+    this.changeDepartment()
   },
   methods: {
     ...mapActions([
       'unitUserInfo',
       'updateCurPage'
     ]),
-    enterEvent () {
-      let keyCode = event.keyCode ? event.keyCode : event.which ? event.which : event.charCode
-      if (keyCode === 13) {
-        this.Login('loginForm')
-      }
+    backLogin () {
+      this.$router.push({name: 'Login'})
     },
-    toChangePsd () {
-      this.$router.push({name: 'ModifyPSD'})
-    },
-    Login (formName) {
+    Modify (formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
+          if (this.modifyForm.accountPsdNew !== this.modifyForm.accountPsdNewAgain) {
+            this.$message({
+              message: '两次输入的新密码不一致!',
+              type: 'warning'
+            })
+            return false
+          }
           this.btLoading = true
-          this.Http.post('leaderLogin?username=' + this.loginForm.accountName + '&password=' + this.loginForm.accountPsd
+          this.Http.post('updatepassword?userid=' + this.userInfo.id + '&password=' + this.modifyForm.accountPsdNew
           ).then(res => {
             switch (res.data.code) {
               case 1:
-                let cookieStr = CryptoJS.HmacSHA256((this.loginForm.accountName + this.loginForm.accountPsd).toString(), '28a807940bba58c2c')
-                setCookie('gs_28a807940bba58c2c', cookieStr, 6)
-                this.$message({
-                  message: '登陆成功!',
-                  type: 'success'
-                })
                 this.btLoading = false
-                this.updateCurPage('Home')
-                this.$router.push({name: 'Home'})
-                // 刷新信息
-                this.unitUserInfo(res.data.memberInfo)
+                this.updateCurPage('Login')
+                this.$router.push({name: 'Login'})
+                localStorage.clear('vuex-along')
+                clearCookie('gs_28a807940bba58c2c')
                 break
               default:
                 this.btLoading = false
@@ -131,7 +149,6 @@ export default {
       })
     },
     changeDepartment () {
-      this.loginForm.accountName = ''
       this.getUserList()
     },
     getDepartmentList () {
@@ -144,7 +161,7 @@ export default {
       })
     },
     getUserList () {
-      this.Http.get('serleaderlist', {ftypeid: this.loginForm.accountDepartment}
+      this.Http.get('serleaderlist', {ftypeid: this.modifyForm.accountDepartment}
       ).then(res => {
         this.userList = res.data.list
       }).catch((error) => {
@@ -165,7 +182,7 @@ export default {
 }
 .Login{
   width: 8rem;
-  height: 4rem;
+  height: 4.6rem;
   border-radius: 8px;
   overflow: hidden;
   background: transparent;

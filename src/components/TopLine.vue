@@ -3,10 +3,13 @@
     <div class="BackBlock">
       <span class="CursorPointer" @click="back"><i class="el-icon-arrow-left" title="返回"></i></span>
     </div>
-    <div class="MainBlock" v-if="curPage == 'Home'"><span>MES-SYSTEM</span></div>
+    <div class="MainBlock" v-if="curPage == 'Home' || curPage == 'Modify'"><span>MES-SYSTEM</span></div>
     <div class="MainBlock" v-if="curPage == 'WorkOrder'"><span>{{curModuleInfo.department + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + '汇报人: ' + userInfo.fname + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0工种: ' + userInfo.gongxu}}</span></div>
     <div class="MainBlock" v-if="curPage != 'Home' && curPage != 'WorkOrder'"><span>{{curModuleInfo.department + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + '汇报人: ' + userInfo.fname + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0成品计划数：' + workOrderFqty + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0工种: ' + userInfo.gongxu}}</span></div>
-    <div class="RightAccount">您好,{{userInfo.fname}}<span class="CursorPointer" style="margin-left: 10px;" @click="logOut"><i class="fa fa-sign-out" title="退出"></i></span></div>
+    <div class="RightAccount">您好,{{userInfo.fname}}
+      <span class="CursorPointer" style="margin-left: 10px;" @click="toMofify"><i class="el-icon-edit" title="修改密码"></i></span>
+      <span class="CursorPointer" style="margin-left: 5px;" @click="logOut"><i class="fa fa-sign-out" title="退出"></i></span>
+      </div>
     <!-- <div class="BackBlock">
       <span class="CursorPointer" @click="back"><i class="el-icon-arrow-left" title="返回"></i></span>
     </div>
@@ -31,16 +34,14 @@ export default {
       curModuleInfo: state => state.curModuleInfo,
       userInfo: state => state.userInfo,
       curPage: state => state.curPage,
-      curPageG: state => state.curPage,
+      beforePage: state => state.beforePage,
       workOrderFqty: state => state.workOrderFqty
     })
   },
   created () {
-    // alert(this.workOrderFqty)
   },
   watch: {
     curPage: function (newVal, oldVal) {
-      // console.log(newVal, oldVal)
       if (oldVal === 'WorkOrder' && newVal === 'Ljgz') {
         this.ljgzFromType = 0
       }
@@ -52,7 +53,8 @@ export default {
   methods: {
     ...mapActions([
       'updateCurPage',
-      'updateCurWorkId'
+      'updateCurWorkId',
+      'updateBeforePage'
     ]),
     back () {
       if (this.$route.name === 'Home') {
@@ -87,6 +89,15 @@ export default {
         this.updateCurPage('Report')
         this.$router.push({name: 'Report'})
       }
+      if (this.$route.name === 'ModifyPSD') {
+        this.updateCurPage(this.beforePage)
+        this.$router.push({name: this.beforePage})
+      }
+    },
+    toMofify () {
+      this.updateBeforePage(this.curPage)
+      this.updateCurPage('ModifyPSD')
+      this.$router.push({name: 'ModifyPSD'})
     },
     logOut () {
       this.$confirm('确认退出当前账号?', '提示', {
@@ -116,7 +127,7 @@ export default {
   font-size: .3rem;
   background: #4A5F7A;
   .BackBlock{
-    width: 10%;
+    width: 5%;
     float: left;
     text-align: left;
     span{
@@ -125,7 +136,7 @@ export default {
     }
   }
   .MainBlock{
-    width: 80%;
+    width: 75%;
     float: left;
     span{
       width: 100%;
@@ -134,7 +145,7 @@ export default {
     }
   }
   .RightAccount{
-    width: 10%;
+    width: 20%;
     float: left;
     text-align: right;
     font-size: .2rem;

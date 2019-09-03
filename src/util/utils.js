@@ -69,12 +69,36 @@ export function secondToFormat (second) {
   return oTime
 }
 
+export function secondToFormatAll (second) {
+  var oDate = new Date(second)
+  var oYear = oDate.getFullYear()
+  var oMonth = oDate.getMonth() + 1
+  var oDay = oDate.getDate()
+  var oHour = oDate.getHours()
+  var oMin = oDate.getMinutes()
+  var oSen = oDate.getSeconds()
+  // var oTime = oYear + '-' + getzf(oMonth) + '-' + getzf(oDay)
+  var oTime = oYear + '-' + getzf(oMonth) + '-' + getzf(oDay) + ' ' + getzf(oHour) + ':' + getzf(oMin) + ':' + getzf(oSen)
+  return oTime
+}
+
 // date转年月日
 export function dateToFormat (oDate) {
   var oYear = oDate.getFullYear()
   var oMonth = oDate.getMonth() + 1
   var oDay = oDate.getDate()
   var oTime = oYear + '-' + getzf(oMonth) + '-' + getzf(oDay)
+  return oTime
+}
+
+// date转年月日时分
+export function dateToFormatAll (oDate) {
+  var oYear = oDate.getFullYear()
+  var oMonth = oDate.getMonth() + 1
+  var oDay = oDate.getDate()
+  var oHour = oDate.getHours()
+  var oMin = oDate.getMinutes()
+  var oTime = oYear + '-' + getzf(oMonth) + '-' + getzf(oDay) + ' ' + getzf(oHour) + ':' + getzf(oMin)
   return oTime
 }
 
@@ -187,7 +211,7 @@ function getCookieR (name) {
 export function Adaptation () {
   var dpr, rem, scale
   var docEl = document.documentElement
-  console.log(docEl.clientWidth)
+  // console.log(docEl.clientWidth)
   var fontEl = document.createElement('style')
   var metaEl = document.querySelector('meta[name="viewport"]')
   // dpr = window.devicePixelRatio || 1

@@ -1,7 +1,5 @@
 <template>
   <div class="Home">
-    <!-- <TopLineBlock :pathName="pathName" :navTxt='navTxt'/> -->
-    <!-- <TopLineBlock :pathName="pathName" :navTxt='navTxt'/> -->
     <el-row>
       <el-col class="ModuleItem" :span="6" v-for="(item, idx) in moduleList" :key="idx">
         <div class="ItemInner" @click="toWorkerOrder(item)">{{item.department}}</div>
@@ -12,8 +10,6 @@
 
 <script>
 import { mapState, mapActions } from 'vuex'
-import {clearCookie} from '../util/utils'
-import TopLineBlock from '../components/TopLine'
 export default {
   name: 'Home',
   data () {
@@ -28,9 +24,6 @@ export default {
       userInfo: state => state.userInfo
     })
   },
-  components: {
-    TopLineBlock
-  },
   created () {
     this.getModuleList()
   },
@@ -39,11 +32,6 @@ export default {
       'updateCurModule',
       'updateCurPage'
     ]),
-    LogOut () {
-      localStorage.clear('vuex-along')
-      this.$router.push({name: 'Login'})
-      clearCookie('gs_28a807940bba58c2c')
-    },
     toWorkerOrder (item) {
       this.updateCurModule(item)
       this.updateCurPage('WorkOrder')
@@ -61,7 +49,6 @@ export default {
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="less" scoped>
 .Home{
   width: 100%;

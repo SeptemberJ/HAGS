@@ -10,9 +10,11 @@ import router from './router'
 import Http from './util/request'
 import '../static/css/style.css'
 import 'lib-flexible'
+import moment from 'moment'
 // import '../static/js/common.js'
 
 Vue.prototype.Http = Http
+Vue.prototype.$moment = moment
 
 Vue.use(Vuex)
 Vue.use(ElementUI)

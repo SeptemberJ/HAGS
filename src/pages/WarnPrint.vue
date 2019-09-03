@@ -104,13 +104,13 @@ export default {
       this.$router.push({name: 'WorkOrder'})
     },
     print () {
-      var tableToPrint = document.getElementById('table') // 要打印的表格
-      var newWin = window.open('') // 打开新的窗口
-      newWin.document.write(tableToPrint.outerHTML) // 将表格添加进新的窗口
-      newWin.document.close() // 在IE浏览器中必须加这一句
-      newWin.focus() // 在IE浏览器中必须加这一句
-      newWin.print() // 打印
-      newWin.close() // 关闭窗口
+      var tableToPrint = document.getElementById('table')
+      var newWin = window.open('')
+      newWin.document.write(tableToPrint.outerHTML)
+      newWin.document.close()
+      newWin.focus()
+      newWin.print()
+      newWin.close()
     }
   }
 }
