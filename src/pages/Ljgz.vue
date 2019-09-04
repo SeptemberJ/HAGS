@@ -24,7 +24,7 @@
         </el-form-item>
       </el-form>
     </el-row>
-    <el-table
+    <el-table @row-dblclick="addReportThroughRow"
       :data="ljgzList"
       v-loading="listLoading"
       style="width: 100%">
@@ -298,6 +298,16 @@ export default {
       'updateCurReportInfo',
       'updateCurPage'
     ]),
+    addReportThroughRow (row) {
+      if (this.ljgzFromType === 0) { // 非历史纪录过来的不可以点击
+        return false
+      } else {
+        row.gxName = this.userInfo.gongxu
+        this.updateCurReportInfo(row)
+        this.updateCurPage('Report')
+        this.$router.push({name: 'Report'})
+      }
+    },
     addReport (idx, row, gxName) {
       if (gxName !== this.userInfo.gongxu) {
         this.$message({
@@ -307,7 +317,6 @@ export default {
         return false
       }
       row.gxName = gxName
-      console.log('updateCurReportInfo', row)
       this.updateCurReportInfo(row)
       this.updateCurPage('Report')
       this.$router.push({name: 'Report'})

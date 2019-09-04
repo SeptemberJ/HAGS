@@ -106,7 +106,8 @@ export default {
   },
   computed: {
     ...mapState({
-      curWorkId: state => state.curWorkId
+      curWorkId: state => state.curWorkId,
+      ifJustSee: state => state.ifJustSee
     })
   },
   created () {
@@ -120,11 +121,13 @@ export default {
       'updateCurFbillno'
     ]),
     goLjgz (row) {
-      this.updateCurWorkId(row.workid)
-      this.updateCurFbillno(row.fbillno)
-      this.updateLjgzOption({fshortnumber: row.FShortNumber, fqty: row.fqty})
-      this.updateCurPage('Ljgz')
-      this.$router.push({name: 'Ljgz'})
+      if (!this.ifJustSee) {
+        this.updateCurWorkId(row.workid)
+        this.updateCurFbillno(row.fbillno)
+        this.updateLjgzOption({fshortnumber: row.FShortNumber, fqty: row.fqty})
+        this.updateCurPage('Ljgz')
+        this.$router.push({name: 'Ljgz'})
+      }
     },
     getHBDetail () {
       this.listLoading = true

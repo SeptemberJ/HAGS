@@ -19,6 +19,7 @@ const state = {
   topLineInfo: null,
   reportPerson: null,
   curWorkId: null,
+  ifJustSee: false,
   curFbillno: null,
   selectedAllList: [],
   urlPre: 'http://ep23767307.qicp.vip:31379/haianJK/',
@@ -41,6 +42,9 @@ const actions = {
   },
   updateCurWorkId ({commit, state}, CurWorkId) {
     commit('setCurWorkId', CurWorkId)
+  },
+  updateIfJustSee ({commit, state}, Status) {
+    commit('setIfJustSee', Status)
   },
   updateCurFbillno ({commit, state}, CurFbillno) {
     commit('setCurFbillno', CurFbillno)
@@ -80,6 +84,9 @@ const mutations = {
   },
   setCurWorkId (state, CurWorkId) {
     state.curWorkId = CurWorkId
+  },
+  setIfJustSee (state, Status) {
+    state.ifJustSee = Status
   },
   setCurFbillno (state, curFbillno) {
     state.curFbillno = curFbillno

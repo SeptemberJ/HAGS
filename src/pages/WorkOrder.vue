@@ -49,23 +49,24 @@
         <el-table-column
           property="fname"
           label="生产车间"
+          width="150"
           show-overflow-tooltip>
         </el-table-column>
         <el-table-column
           property="FCheckDateTxt"
           label="日期"
-          width="140">
+          width="100">
         </el-table-column>
         <el-table-column
           property="ddfbillno"
           label="订单号"
-          width="120"
+          width="80"
           show-overflow-tooltip>
         </el-table-column>
         <el-table-column
           property="fbillno"
           label="工单号"
-          width="170"
+          width="120"
           show-overflow-tooltip>
         </el-table-column>
         <el-table-column
@@ -76,17 +77,17 @@
         <el-table-column
           property="fqty"
           label="数量"
-          width="100">
+          width="70">
         </el-table-column>
         <el-table-column
           property="FPlanFinishDateTxt"
           label="交期"
-          width="140">
+          width="100">
         </el-table-column>
         <el-table-column
           property="fshortTxt"
           label="是否缺料"
-          width="100">
+          width="80">
         </el-table-column>
         <el-table-column
           fixed="right"
@@ -152,7 +153,7 @@
     </el-dialog>
     <!-- 汇报历史 -->
     <el-dialog :title="ifHistoryDay ? '当日汇报记录' : '汇报记录'" :visible.sync="dialogHBHistoryVisible" :close-on-click-modal="false" width="900px">
-      <el-table @row-dblclick="historyDetail"
+      <el-table @row-dblclick="seeHistoryDetail"
         :data="hbHistory"
         v-loading="listLoading"
         style="width: 100%">
@@ -186,10 +187,11 @@
         <el-table-column
           fixed="right"
           label="操作"
-          width="150">
+          width="200">
           <template slot-scope="scope">
             <el-button type="success" size="mini" :disabled="!scope.row.ifCanOpen" @click="showTimeDialog(scope.$index, scope.row, 1)">开机</el-button>
             <el-button type="danger" size="mini" :disabled="!scope.row.ifCanClose" @click="showTimeDialog(scope.$index, scope.row, 0)">关机</el-button>
+            <el-button size="mini" @click="seeHistoryDetail(scope.row)">查看</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -205,7 +207,7 @@
       </div>
       <!-- 内层时间选择 -->
       <el-dialog
-        width="30%"
+        width="50%"
         :title="openOrClose ==  0 ? '请选择关机时间' : '请选择开机时间'"
         :visible.sync="dialogTimeVisible"
         :close-on-click-modal="false"
@@ -233,7 +235,7 @@
       </el-dialog>
     </el-dialog>
     <!-- 加入的汇报list -->
-    <el-dialog title="汇报工单列表" :visible.sync="dialogHBListVisible" :close-on-click-modal="false" width="650px">
+    <el-dialog title="汇报工单列表" :visible.sync="dialogHBListVisible" :close-on-click-modal="false" width="850px">
       <el-table
         :data="HBListData"
         ref="selectedHBList"
@@ -251,18 +253,24 @@
         <el-table-column
           property="fbillno"
           label="工单号"
-          width="150"
+          width="120"
           show-overflow-tooltip>
         </el-table-column>
         <el-table-column
           property="ddfbillno"
           label="订单号"
-          width="120"
+          width="80"
           show-overflow-tooltip>
         </el-table-column>
         <el-table-column
           property="fnumber"
           label="产品名称"
+          show-overflow-tooltip>
+        </el-table-column>
+        <el-table-column
+          property="jhsnumber"
+          label="数量"
+          width="70"
           show-overflow-tooltip>
         </el-table-column>
         <el-table-column
@@ -339,6 +347,7 @@ export default {
       'updateLjgzOption',
       'updateCurPage',
       'updateCurWorkId',
+      'updateIfJustSee',
       'updateSelectedAllList'
     ]),
     // 条件查询
@@ -403,7 +412,7 @@ export default {
         return false
       } else {
         let ifCanHB = await this.ifCanHB()
-        if (ifCanHB === '0') {
+        if (ifCanHB !== '1') {
           this.$message({
             message: this.canNotAddReason + '!',
             type: 'warning'
@@ -610,6 +619,16 @@ export default {
       }
       // this.$router.push({name: 'HBDetail', params: {id: row.id}})
     },
+    seeHistoryDetail (row) {
+      if (!row.endtime) {
+        this.updateIfJustSee(true)
+      } else {
+        this.updateIfJustSee(false)
+      }
+      this.updateCurWorkId(row.id)
+      this.updateCurPage('HBDetail')
+      this.$router.push({name: 'HBDetail'})
+    },
     // 获取默认人员列表
     getPeopleList () {
       this.Http.get('serpeople', {department: this.curModuleInfo.departid}
@@ -757,7 +776,7 @@ export default {
     addToHBList (idx, row) {
       // let Data = {gongxu: this.userInfo.gongxu, fbiller: this.userInfo.fname, fbillno: row.fbillno, fshortnumber: row.FShortNumber, fnumber: row.fnumber, ddfbillno: row.ddfbillno, userno: this.userInfo.userno}
       // console.log(JSON.stringify(Data))
-      this.Http.post('addgngdanrecord', {gongxu: this.userInfo.gongxu, fbiller: this.userInfo.fname, fbillno: row.fbillno, fshortnumber: row.FShortNumber, fnumber: row.fnumber, ddfbillno: row.ddfbillno, userno: this.userInfo.userno}
+      this.Http.post('addgngdanrecord', {gongxu: this.userInfo.gongxu, fbiller: this.userInfo.fname, fbillno: row.fbillno, fshortnumber: row.FShortNumber, fnumber: row.fnumber, jhsfnumber: row.fqty, ddfbillno: row.ddfbillno, userno: this.userInfo.userno}
       ).then(res => {
         switch (res.data.code) {
           case '1':
