@@ -208,7 +208,7 @@
       <!-- 内层时间选择 -->
       <el-dialog
         width="50%"
-        :title="openOrClose ==  0 ? '请选择关机时间' : '请选择开机时间'"
+        :title="openOrClose ==  0 ? '提交关机时间' : '提交开机时间'"
         :visible.sync="dialogTimeVisible"
         :close-on-click-modal="false"
         append-to-body>
@@ -230,15 +230,47 @@
           }">
         </el-time-picker> -->
         <div slot="footer" class="dialog-footer">
-          <el-button @click="submitTime" :loading="btLoading">提 交</el-button>
+          <el-button type="danger" @click="submitTime" :loading="btLoading">提 交</el-button>
         </div>
       </el-dialog>
+    </el-dialog>
+    <!-- 关机后不选择汇报 -->
+    <el-dialog
+      width="50%"
+      title="关机原因"
+      :visible.sync="dialogShutDownReasonVisible"
+      :close-on-click-modal="false"
+      append-to-body>
+      <el-form label-width="80px">
+        <el-form-item label="原因">
+          <el-select v-model="shutDownReason" placeholder="请选择原因">
+            <el-option
+              v-for="item in shutDownReasonList"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="备注">
+          <el-input
+            type="textarea"
+            :rows="2"
+            placeholder="请输入备注"
+            v-model="shutDownNote">
+          </el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="danger" @click="submitShutDownReason" :loading="btLoading">提 交</el-button>
+      </div>
     </el-dialog>
     <!-- 加入的汇报list -->
     <el-dialog title="汇报工单列表" :visible.sync="dialogHBListVisible" :close-on-click-modal="false" width="850px">
       <el-table
         :data="HBListData"
         ref="selectedHBList"
+        show-summary
         v-loading="listLoading"
         @selection-change="handleSelectionChangeHBList"
         style="width: 100%">
@@ -283,7 +315,6 @@
         </el-table-column>
       </el-table>
       <div slot="footer" class="dialog-footer">
-        <!-- <el-button @click="removeFromListAll">移 除</el-button> -->
         <el-button type="danger" @click="sureToHB">确认 并去汇报</el-button>
         <el-button @click="dialogHBListVisible = false">取 消</el-button>
       </div>
@@ -301,7 +332,7 @@ export default {
     return {
       listLoading: true,
       btLoading: false,
-      filterProductionName: '', // 5.03.AA-P-RZRXPT-HC-SBJ-003.0003
+      filterProductionName: '',
       filterOrderNo: '',
       curPage: 1,
       pageSize: 15,
@@ -330,7 +361,16 @@ export default {
       selectedAllList: [], // 所有页的选中项集合
       HBListData: [], // 汇报列表数据
       selectedHBList: [], // 勾选加入汇报列表的项
-      dialogHBListVisible: false
+      dialogHBListVisible: false,
+      dialogShutDownReasonVisible: false,
+      shutDownReasonList: [
+        {label: '明天汇报', value: '明天汇报'},
+        {label: '缺料', value: '缺料'},
+        {label: '明天继续生产', value: '明天继续生产'},
+        {label: '其他原因', value: '其他原因'}
+      ],
+      shutDownReason: '',
+      shutDownNote: ''
     }
   },
   computed: {
@@ -357,14 +397,14 @@ export default {
       this.curPage = 1
       this.getWorkOrderList()
     },
-    // 重置
+    // 重置按钮事件
     reset () {
       this.filterProductionName = ''
       this.filterOrderNo = ''
       this.curPage = 1
       this.getWorkOrderList()
     },
-    // 勾选工单列表
+    // 工单列表的勾选切换
     handleSelectionChange (curSelection) {
       this.huibaoOrderList = []
       this.selectedList = curSelection
@@ -375,6 +415,7 @@ export default {
         })
       })
     },
+    // 已加入的汇报列表的勾选切换 暂时无用
     handleSelectionChangeHBList (curSelection) {
       this.selectedHBList = curSelection
     },
@@ -394,7 +435,7 @@ export default {
         })
       }
     },
-    // 当天回报记录或者汇报记录的切换页
+    // 当天汇报记录或者汇报记录的页面切换
     handleCurrentChangeHB () {
       if (this.ifHistoryDay) {
         this.getHBHistoryDay()
@@ -402,28 +443,31 @@ export default {
         this.getHBHistory()
       }
     },
-    async huibao () {
-      let noEmptyArray = await this.ifHasNoEmpty()
-      if (noEmptyArray.length === 0) {
-        this.$message({
-          message: '请先勾选需要汇报的工单!',
-          type: 'warning'
-        })
-        return false
-      } else {
-        let ifCanHB = await this.ifCanHB()
-        if (ifCanHB !== '1') {
-          this.$message({
-            message: this.canNotAddReason + '!',
-            type: 'warning'
-          })
-          return false
-        }
-        this.getPeopleList()
-        this.getDefaultPeopleList()
-        this.dialogAddFormVisible = true
-      }
-    },
+    // 勾选分页汇报 已更改为先加入汇报列表
+    // async huibao () {
+    //   let noEmptyArray = await this.ifHasNoEmpty()
+    //   if (noEmptyArray.length === 0) {
+    //     this.$message({
+    //       message: '请先勾选需要汇报的工单!',
+    //       type: 'warning'
+    //     })
+    //     return false
+    //   } else {
+    //     let ifCanHB = await this.ifCanHB()
+    //     alert(ifCanHB)
+    //     if (ifCanHB !== '1') {
+    //       debugger
+    //       this.$message({
+    //         message: this.canNotAddReason + '!',
+    //         type: 'warning'
+    //       })
+    //       return false
+    //     }
+    //     this.getPeopleList()
+    //     this.getDefaultPeopleList()
+    //     this.dialogAddFormVisible = true
+    //   }
+    // },
     // 分页勾选确认是否勾选为空
     ifHasNoEmpty () {
       return new Promise((resolve, reject) => {
@@ -436,6 +480,7 @@ export default {
     // 查询接口是否可以进行汇报
     ifCanHB () {
       let Data = {
+        jlruserno: this.userInfo.id,
         gongxu: this.userInfo.gongxu,
         worklist: this.HBListData
         // worklist: this.huibaoOrderList.map(item => {
@@ -517,9 +562,18 @@ export default {
         })
       })
     },
+    // 显示开关机的日期时间弹窗
     showTimeDialog (idx, row, type) {
       if (type === 0) {
-        this.curStartTmie = row.starttime
+        if (!row.starttime) {
+          this.$message({
+            message: '还未开机，不能关机!',
+            type: 'warning'
+          })
+          return false
+        } else {
+          this.curStartTmie = row.starttime
+        }
       }
       this.dialogTimeVisible = true
       let curDate = new Date()
@@ -527,6 +581,7 @@ export default {
       this.curWorkId = row.id
       this.openOrClose = type
     },
+    // 开关机保存时间
     submitTime () {
       if (!this.time) {
         this.$message({
@@ -541,7 +596,7 @@ export default {
         this.bootUp()
       }
     },
-    // 开机
+    // 提交开机时间
     bootUp () {
       this.btLoading = true
       this.Http.post('kaiji?starttime=' + dateToFormatAll(this.time) + '&workid=' + this.curWorkId
@@ -572,7 +627,7 @@ export default {
         })
       })
     },
-    // 关机
+    // 提交关机时间
     shutDown () {
       let DateStart = this.$moment(this.curStartTmie)
       let DateEnd = this.$moment(dateToFormatAll(this.time))
@@ -589,6 +644,16 @@ export default {
             this.btLoading = false
             this.dialogTimeVisible = false
             this.handleCurrentChangeHB()
+            // 关机后是否进行汇报
+            this.$confirm('是否汇报产量?', '提示', {
+              confirmButtonText: '否',
+              cancelButtonText: '是',
+              type: 'warning'
+            }).then(() => {
+              this.dialogShutDownReasonVisible = true
+            }).catch((error) => {
+              console.log(error)
+            })
             break
           default:
             this.btLoading = false
@@ -606,19 +671,66 @@ export default {
         })
       })
     },
-    historyDetail (row) {
-      if (!row.endtime) {
+    submitShutDownReason () {
+      if (!this.shutDownReason) {
         this.$message({
-          message: '还未关机，不能进行汇报!',
+          message: '请选择关机原因!',
           type: 'warning'
         })
+        return false
       } else {
-        this.updateCurWorkId(row.id)
-        this.updateCurPage('HBDetail')
-        this.$router.push({name: 'HBDetail'})
+        if ((this.shutDownReason === '缺料' || this.shutDownReason === '其他原因') && !this.shutDownNote) {
+          this.$message({
+            message: '请先输入备注再提交!',
+            type: 'warning'
+          })
+          return false
+        } else {
+          this.btLoading = true
+          this.Http.post('guanjireason?workid=' + this.curWorkId + '&freason=' + this.shutDownReason + '&fnote=' + this.shutDownNote
+          ).then(res => {
+            switch (res.data.code) {
+              case '1':
+                this.$message({
+                  message: '关机原因提交成功!',
+                  type: 'success'
+                })
+                this.dialogShutDownReasonVisible = false
+                this.btLoading = false
+                break
+              default:
+                this.btLoading = false
+                this.$message({
+                  message: res.data.message + '!',
+                  type: 'error'
+                })
+            }
+          }).catch((error) => {
+            console.log(error)
+            this.btLoading = false
+            this.$message({
+              message: '服务器繁忙!',
+              type: 'error'
+            })
+          })
+        }
       }
-      // this.$router.push({name: 'HBDetail', params: {id: row.id}})
     },
+    // 查看汇报详情 已更改
+    // historyDetail (row) {
+    //   if (!row.endtime) {
+    //     this.$message({
+    //       message: '还未关机，不能进行汇报!',
+    //       type: 'warning'
+    //     })
+    //   } else {
+    //     this.updateCurWorkId(row.id)
+    //     this.updateCurPage('HBDetail')
+    //     this.$router.push({name: 'HBDetail'})
+    //   }
+    //   // this.$router.push({name: 'HBDetail', params: {id: row.id}})
+    // },
+    // 查看汇报详情 未关机的只能查看到详情为止
     seeHistoryDetail (row) {
       if (!row.endtime) {
         this.updateIfJustSee(true)
@@ -642,7 +754,7 @@ export default {
         })
       })
     },
-    // 获取select人员选项
+    // 获取新增人员时的select框选项
     getDefaultPeopleList () {
       this.Http.get('departpeople', {worktype: this.userInfo.worktype}
       ).then(res => {
@@ -655,15 +767,19 @@ export default {
         })
       })
     },
+    // 添加一行人员记录
     addPerson () {
       this.personList.push({id: '', fname: '', userno: ''})
     },
+    // 移除人员记录
     delPerson (idx, row) {
       this.personList.splice(idx, 1)
     },
+    // 查看是否重复
     checkId (pesron) {
       return pesron.id === this.curPersonId
     },
+    // 人员选项改变
     changePerson (val, idx) {
       // 校验重复
       this.curPersonId = val
@@ -685,7 +801,7 @@ export default {
         })
       }
     },
-    // 是否都选了人员
+    // 人员select框是否都已选择
     ifAllSelect () {
       return new Promise((resolve, reject) => {
         let ifAllSelect = true
@@ -699,7 +815,7 @@ export default {
         })
       })
     },
-    // 新增人员
+    // 提交保存新增人员
     async savePerson () {
       if (this.personList.length < 1) {
         this.$message({
@@ -767,6 +883,7 @@ export default {
         })
       })
     },
+    // 跳转预警详情
     warnDetail (idx, row) {
       this.updateLjgzOption({fshortnumber: row.FShortNumber, fqty: row.fqty})
       this.updateCurPage('WarnPrint')
@@ -774,8 +891,6 @@ export default {
     },
     // 加入汇报列表
     addToHBList (idx, row) {
-      // let Data = {gongxu: this.userInfo.gongxu, fbiller: this.userInfo.fname, fbillno: row.fbillno, fshortnumber: row.FShortNumber, fnumber: row.fnumber, ddfbillno: row.ddfbillno, userno: this.userInfo.userno}
-      // console.log(JSON.stringify(Data))
       this.Http.post('addgngdanrecord', {gongxu: this.userInfo.gongxu, fbiller: this.userInfo.fname, fbillno: row.fbillno, fshortnumber: row.FShortNumber, fnumber: row.fnumber, jhsfnumber: row.fqty, ddfbillno: row.ddfbillno, userno: this.userInfo.userno}
       ).then(res => {
         switch (res.data.code) {
@@ -799,6 +914,7 @@ export default {
         })
       })
     },
+    // 显示汇报列表
     showHBlList () {
       this.dialogHBListVisible = true
       this.getHBList()
@@ -813,7 +929,7 @@ export default {
         return false
       } else {
         let ifCanHB = await this.ifCanHB()
-        if (ifCanHB === '0') {
+        if (ifCanHB !== '1') {
           this.$message({
             message: this.canNotAddReason + '!',
             type: 'warning'
@@ -826,7 +942,6 @@ export default {
         this.dialogAddFormVisible = true
       }
     },
-    removeFromListAll () {},
     // 获取已加入汇报的工单列表
     getHBList () {
       this.Http.get('recordlist', {gongxu: this.userInfo.gongxu, fbiller: this.userInfo.fname}

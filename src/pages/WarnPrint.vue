@@ -75,6 +75,7 @@ export default {
     ...mapActions([
       'updateCurPage'
     ]),
+    // 获取预警数据
     getWarnList () {
       this.Http.get('yujingList', {fshortnumber: this.curFShortNumber}
       ).then(res => {
@@ -99,10 +100,12 @@ export default {
         })
       })
     },
+    // 返回工单列表
     back () {
       this.updateCurPage('WorkOrder')
       this.$router.push({name: 'WorkOrder'})
     },
+    // 打印
     print () {
       var tableToPrint = document.getElementById('table')
       var newWin = window.open('')

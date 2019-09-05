@@ -261,7 +261,7 @@ export default {
   name: 'Ljgz',
   data () {
     return {
-      ljgzFromType: 0, // 0 WorkerOrder 1 HBDetail
+      ljgzFromType: 0, // 0 - WorkerOrder 1 - HBDetail
       formSearch: {
         ljname: '',
         clname: '',
@@ -298,6 +298,7 @@ export default {
       'updateCurReportInfo',
       'updateCurPage'
     ]),
+    // table双击事件 跳转report页面
     addReportThroughRow (row) {
       if (this.ljgzFromType === 0) { // 非历史纪录过来的不可以点击
         return false
@@ -308,6 +309,7 @@ export default {
         this.$router.push({name: 'Report'})
       }
     },
+    // 通过点击工序数值跳转report页面
     addReport (idx, row, gxName) {
       if (gxName !== this.userInfo.gongxu) {
         this.$message({
@@ -321,12 +323,13 @@ export default {
       this.updateCurPage('Report')
       this.$router.push({name: 'Report'})
     },
-    canNotAddReport () {
-      this.$message({
-        message: '没有此道工序!',
-        type: 'warning'
-      })
-    },
+    // canNotAddReport () {
+    //   this.$message({
+    //     message: '没有此道工序!',
+    //     type: 'warning'
+    //   })
+    // },
+    // 查看图纸
     tuzhi (idx, row) {
       this.Http.get('sertuzhi', {fidz: row.fidz, fidc: row.fidc}
       ).then(res => {
@@ -348,20 +351,23 @@ export default {
         })
       })
     },
+    // 条件查询
     search () {
       this.curPage = 1
       this.getLjgzList()
     },
-    // 重置
+    // 重置按钮事件
     reset () {
       this.formSearch.ljname = ''
       this.formSearch.clname = ''
       this.curPage = 1
       this.getLjgzList()
     },
+    // 页面切换
     handleCurrentChange () {
       this.getLjgzList()
     },
+    // 获取零件管制列表
     getLjgzList () {
       let Data = {
         number: this.pageSize,

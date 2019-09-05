@@ -17,23 +17,20 @@
         <el-col :span="3" class="TextAlignL">库存数: {{topLineInfo.kcnumber}}</el-col>
         <el-col :span="3" class="TextAlignL">是否返工: {{topLineInfo.isback}}</el-col>
         <el-col :span="3" class="TextAlignL">备注: {{topLineInfo.fnote}}</el-col>
-        <!-- <el-col :span="3" class="TextAlignL">是否首检: {{topLineInfo.ischeck}}</el-col> -->
       </el-row>
       <el-row style="margin:10px 0;">
         <el-col :span="24" class="TextAlignR" v-if="ifCanAdd">
           <el-button size="small" type="Info" v-if="userInfo.gongxu == '激光'" @click="getAppendProduction">附加产品列表</el-button>
           <el-button size="small" type="success" v-if="userInfo.gongxu == '激光'" @click="addAppendProduction">附加产品新增</el-button>
           <el-button size="small" type="warning" @click="huizong">汇报</el-button>
-          <!-- <el-button size="small" type="primary" @click="tuzhi">图纸</el-button>
-          <el-button size="small" type="info" @click="getHBHistory">历史汇报</el-button>
-          <el-button size="small" type="success" @click="addRecord">新增</el-button> -->
         </el-col>
       </el-row>
     </div>
     <el-table
       :data="reportList"
+      ref="selectedPersonList"
       v-loading="listLoading"
-      @selection-change="handleSelectionChange"
+      @selection-change="handleSelectionPersonChange"
       style="width: 100%">
       <el-table-column
         fixed
@@ -94,7 +91,7 @@
       </el-table-column>
     </el-table>
     <el-pagination v-if="reportList.length > 0" style="margin: .2rem 0;"
-      @current-change="handleCurrentChange"
+      @current-change="handleCurrentChangePerson"
       :current-page.sync="curPage"
       :page-size="pageSize"
       layout="total, prev, pager, next, jumper"
@@ -139,9 +136,6 @@
         <el-form-item label="库存数" prop="kcnumber" v-if="ifHZ">
           <el-input v-model="form.kcnumber" prop="kcnumber"></el-input>
         </el-form-item>
-        <!-- <el-form-item label="工作时间" v-if="!ifAdd">
-          <el-input v-model="form.worktime" prop="worktime" disabled></el-input>
-        </el-form-item> -->
         <el-form-item label="是否返工" prop="isback" v-if="!ifAdd">
           <el-select v-model="form.isback" placeholder="请选择是否返工" :disabled="ifEdit">
             <el-option label="Y" value="Y"></el-option>
@@ -151,20 +145,11 @@
         <el-form-item label="备注" prop="fnote" v-if="!ifAdd">
           <el-input type="textarea" v-model="form.fnote" :disabled="ifEdit" placeholder="请输入备注..."></el-input>
         </el-form-item>
-        <!-- <el-form-item label="是否首检" prop="ischeck" v-if="!ifAdd">
-          <el-select v-model="form.ischeck" placeholder="请选择是否返工">
-            <el-option label="Y" value="Y"></el-option>
-            <el-option label="N" value="N"></el-option>
-          </el-select>
-        </el-form-item> -->
         <el-form-item label="等待时间" prop="waittime" v-if="!ifAdd">
           <el-input v-model="form.waittime">
             <template slot="append">分钟</template>
           </el-input>
         </el-form-item>
-        <!-- <el-form-item label="调机时间" prop="tuntime" v-if="!ifAdd">
-          <el-input v-model="form.tuntime"></el-input>
-        </el-form-item> -->
         <el-form-item label="停机原因" prop="freason" v-if="!ifAdd">
           <el-select v-model="form.freason" placeholder="请选择停机原因">
             <el-option label="首检" value="首检"></el-option>
@@ -200,23 +185,30 @@
         <el-table-column
           prop="fjnumber"
           label="数量"
-          width="100"
+          width="120"
           show-overflow-tooltip>
         </el-table-column>
-        <el-table-column
+        <!-- <el-table-column
           prop="username"
           label="人员"
           width="100"
           show-overflow-tooltip>
+        </el-table-column> -->
+        <el-table-column
+          fixed="right"
+          label="人员"
+          width="100">
+          <template slot-scope="scope">
+            <!-- <el-button type="primary" size="mini" @click="seePersonAP(scope.row)" icon="el-icon-view">查看</el-button> -->
+            <el-button type="primary" size="mini" @click="seePersonAP(scope.row)">查看</el-button>
+          </template>
         </el-table-column>
         <el-table-column
           fixed="right"
           label="操作"
-          width="100">
+          width="80">
           <template slot-scope="scope">
-            <el-button
-              size="mini"
-              @click="removeAP(scope.row)">删除</el-button>
+            <el-button type="danger" size="mini" @click="removeAP(scope.row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -227,6 +219,38 @@
         layout="total, prev, pager, next, jumper"
         :total="sumAP">
       </el-pagination>
+      <!-- 内嵌人员列表 -->
+      <el-dialog
+        width="50%"
+        title="人员列表"
+        :visible.sync="dialogAPPersonVisible"
+        :close-on-click-modal="false"
+        append-to-body>
+        <el-table
+          :data="personListDetailAP"
+          style="width: 100%">
+          <el-table-column
+            type="index"
+            width="50">
+          </el-table-column>
+          <el-table-column
+            prop="username"
+            label="人员"
+            show-overflow-tooltip>
+          </el-table-column>
+          <el-table-column
+            fixed="right"
+            label="操作"
+            width="80">
+            <template slot-scope="scope">
+              <el-button type="danger" size="mini" @click="removeAPPerson(scope.row)">删除</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="dialogAPPersonVisible = false">关 闭</el-button>
+        </div>
+      </el-dialog>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogAppendListVisible = false">关 闭</el-button>
       </div>
@@ -239,9 +263,11 @@
           <el-col :span="12" class="TextAlignL">
             <el-form-item label="物料名称" :prop="'list.' + idx + '.materie'" :rules="rulesAppendProduction.materie">
               <el-select v-model="itemAppend.materie" filterable remote :remote-method="getMaterielList" :loading="selectLoading" placeholder="请选择物料名称" style="width: 90%;">
-                <el-option v-for="(materiel, idx) in materielList" :key="idx" :label="materiel.fname" :value="materiel.fname + '|' + materiel.fnumber"></el-option>
+                <el-option v-for="(materiel, idx) in materielList" :key="idx" :label="materiel.fname" :value="materiel.fname + '|' + materiel.fnumber">
+                  <span style="float: left">{{ materiel.fname }}</span>
+                  <span style="float: right; color: #8492a6; font-size: 13px">{{ materiel.fnumber }}</span>
+                </el-option>
               </el-select>
-              <p>{{itemAppend.materie}}</p>
             </el-form-item>
           </el-col>
           <el-col :span="7" class="TextAlignL">
@@ -276,11 +302,12 @@ export default {
       dialogHBHistoryVisible: false,
       dialogHBDetailVisible: false,
       dialogAppendListVisible: false,
+      dialogAPPersonVisible: false,
       dialogAppendAddVisible: false,
       ifCanAdd: true,
       ifHasTwoTime: true,
       curPage: 1,
-      pageSize: 10,
+      pageSize: 50,
       sum: 0,
       hbHistory: [],
       curPageHB: 1,
@@ -291,15 +318,17 @@ export default {
       ifHZ: false,
       zhubiaoid: null,
       isshow: 0,
-      reportList: [],
-      huibaoIdList: [],
-      peopleList: [],
+      reportList: [], // 页面汇报列表(人员列表)
+      selectedPersonList: [], // 当前页的选中项
+      selectedAllPersonList: [], // 所有页的选中项集合
+      huibaoIdList: [], // 汇报时勾选的人员id列表
+      peopleList: [], // 选择操作人员的select选项
       pageSizeAP: 5,
       curPageAP: 1,
       sumAP: 0,
-      appendProductionList: [],
-      materielList: [],
-      personListAppend: [],
+      appendProductionList: [], // 附加产品列表
+      materielList: [], // 物料选项
+      personListAppend: [], // 附加产品时勾选的人员列表
       formAppendProduction: {
         list: [{fname: '', fnumber: '', materie: ''}]
       },
@@ -311,6 +340,8 @@ export default {
           { required: true, message: '请输入数量', trigger: 'change' }
         ]
       },
+      curAPRecordId: null, // 当前附加产品记录id
+      personListDetailAP: [], // 附加产品的人员详情
       topLineInfo: {
         badnumber: '',
         fnumber: '',
@@ -461,19 +492,43 @@ export default {
       'updateTopLineInfo',
       'updateCurPage'
     ]),
-    handleCurrentChange () {
-      this.getHBList()
+    // 汇报列表的页面切换
+    async handleCurrentChangePerson () {
+      // this.getHBList()
+      let temp = this.selectedAllPersonList[this.curPage - 1] ? this.selectedAllPersonList[this.curPage - 1] : []
+      let defaultPersonList = await this.getHBList()
+      this.selectedPersonList = temp
+      if (this.selectedPersonList.length > 0) {
+        this.selectedPersonList.map((itemS) => {
+          defaultPersonList.map((item, idx) => {
+            if (item.id === itemS.id) {
+              this.$refs.selectedPersonList.toggleRowSelection(defaultPersonList[idx], true)
+            }
+          })
+        })
+      }
     },
-    handleSelectionChange (val) {
-      this.huibaoIdList = []
-      val.map(item => {
-        this.huibaoIdList.push({id: item.id})
-      })
+    // 汇报列表人员的勾选切换
+    handleSelectionPersonChange (curSelection) {
       this.personListAppend = []
-      val.map(item => {
-        this.personListAppend.push({fname: item.username, userno: item.userno})
+      this.huibaoIdList = []
+      this.selectedAllPersonList[this.curPage - 1] = curSelection
+      this.selectedAllPersonList.map(itemOut => {
+        itemOut.map(itemIner => {
+          this.huibaoIdList.push({id: itemIner.id})
+          this.personListAppend.push({fname: itemIner.username, userno: itemIner.userno})
+        })
       })
+      // this.huibaoIdList = []
+      // curSelection.map(item => {
+      //   this.huibaoIdList.push({id: item.id})
+      // })
+      // this.personListAppend = []
+      // curSelection.map(item => {
+      //   this.personListAppend.push({fname: item.username, userno: item.userno})
+      // })
     },
+    // 编辑按钮事件
     edit (idx, row) {
       this.ifAdd = false
       this.ifEdit = true
@@ -481,6 +536,7 @@ export default {
       this.dialogAddFormVisible = true
       this.form = row
     },
+    // 删除按钮事件
     dele (idx, row) {
       this.$confirm('此操作将删除该调记录, 是否继续?', '提示', {
         confirmButtonText: '确定',
@@ -491,6 +547,7 @@ export default {
       }).catch(() => {
       })
     },
+    // 确认删除
     sureDele (row) {
       this.Http.get('delhuibao', {huibaoid: row.id}
       ).then(res => {
@@ -569,6 +626,59 @@ export default {
         })
       })
     },
+    // 查看附加产品记录人员
+    seePersonAP (row) {
+      this.curAPRecordId = row.id
+      this.dialogAPPersonVisible = true
+      this.getAPPersonList()
+    },
+    getAPPersonList () {
+      this.Http.get('serfujiawuliaodetail', {id: this.curAPRecordId}
+      ).then(res => {
+        switch (res.data.code) {
+          case '1':
+            this.personListDetailAP = res.data.list
+            break
+          default:
+            this.$message({
+              message: res.data.message + '!',
+              type: 'error'
+            })
+        }
+      }).catch((error) => {
+        console.log(error)
+        this.$message({
+          message: '服务器繁忙!',
+          type: 'error'
+        })
+      })
+    },
+    // 删除附加产品人员
+    removeAPPerson (row) {
+      this.Http.get('delfujiary', {id: row.id}
+      ).then(res => {
+        switch (res.data.code) {
+          case '1':
+            this.$message({
+              message: '人员删除成功!',
+              type: 'success'
+            })
+            this.getAPPersonList()
+            break
+          default:
+            this.$message({
+              message: res.data.message + '!',
+              type: 'error'
+            })
+        }
+      }).catch((error) => {
+        console.log(error)
+        this.$message({
+          message: '服务器繁忙!',
+          type: 'error'
+        })
+      })
+    },
     // 附加产品列表
     getAppendProduction () {
       this.appendProductionList = []
@@ -619,7 +729,6 @@ export default {
     submitAppendProduction (formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          // sure add
           this.btLoading = true
           let Data = {
             workid: this.curWorkId,
@@ -667,6 +776,7 @@ export default {
         }
       })
     },
+    // 汇报按钮事件
     async huizong () {
       let ifCanHB = await this.ifCanHB()
       if (ifCanHB === '0') {
@@ -704,6 +814,7 @@ export default {
         freason: ''
       }
     },
+    // 接口确认是否可以进行汇报
     ifCanHB () {
       return new Promise((resolve, reject) => {
         this.Http.get('checkhuibao', {zhubiaoid: this.zhubiaoid}
@@ -718,28 +829,29 @@ export default {
         })
       })
     },
-    addRecord () {
-      this.ifAdd = true
-      this.ifHZ = false
-      this.ifEdit = false
-      this.dialogAddFormVisible = true
-      // 初始化数据
-      this.form = {
-        username: '',
-        starttime: '',
-        endtime: '',
-        fnumber: '',
-        badnumber: '',
-        kcnumber: '',
-        worktime: '',
-        isback: '',
-        fnote: '',
-        ischeck: '',
-        waittime: '',
-        tuntime: '',
-        freason: ''
-      }
-    },
+    // addRecord () {
+    //   this.ifAdd = true
+    //   this.ifHZ = false
+    //   this.ifEdit = false
+    //   this.dialogAddFormVisible = true
+    //   // 初始化数据
+    //   this.form = {
+    //     username: '',
+    //     starttime: '',
+    //     endtime: '',
+    //     fnumber: '',
+    //     badnumber: '',
+    //     kcnumber: '',
+    //     worktime: '',
+    //     isback: '',
+    //     fnote: '',
+    //     ischeck: '',
+    //     waittime: '',
+    //     tuntime: '',
+    //     freason: ''
+    //   }
+    // },
+    // 新增/编辑的保存
     save (formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
@@ -752,6 +864,14 @@ export default {
             if (this.form.waittime && !this.form.freason) {
               this.$message({
                 message: '由于存在等待时间，故请选择停机原因!',
+                type: 'warning'
+              })
+              return false
+            }
+            // 停机原因为其他的备注必填
+            if (this.form.freason === '其他' && !this.form.fnote) {
+              this.$message({
+                message: '由于停机原因为其他，故请填写备注!',
                 type: 'warning'
               })
               return false
@@ -793,6 +913,7 @@ export default {
         }
       })
     },
+    // 编辑提交
     sureEdit () {
       if (this.form.waittime && !this.form.freason) {
         this.$message({
@@ -833,6 +954,7 @@ export default {
         })
       })
     },
+    // 新增提交
     sureAdd () {
       this.btLoading = true
       this.form.zhubiaoid = this.zhubiaoid
@@ -871,6 +993,7 @@ export default {
         })
       })
     },
+    // 汇报提交
     addHz () {
       if (this.ifHasTwoTime && this.isshow !== '1') {
         this.addHzHasTime()
@@ -878,6 +1001,7 @@ export default {
         this.addHzNoTime()
       }
     },
+    // 有时间时的汇报
     addHzHasTime () {
       this.btLoading = true
       this.form.zhubiaoid = this.zhubiaoid
@@ -890,7 +1014,6 @@ export default {
       this.form.fnumber = this.form.fnumber ? this.form.fnumber : 0
       this.form.badnumber = this.form.badnumber ? this.form.badnumber : 0
       this.form.kcnumber = this.form.kcnumber ? this.form.kcnumber : 0
-      // console.log(this.form)
       this.Http.post('pilianghuibao', {huibaolist: this.form}
       ).then(res => {
         switch (res.data.code) {
@@ -919,6 +1042,7 @@ export default {
         })
       })
     },
+    // 没有时间时的汇报
     addHzNoTime () {
       this.btLoading = true
       this.form.zhubiaoid = this.zhubiaoid
@@ -931,7 +1055,6 @@ export default {
       this.form.fnumber = this.form.fnumber ? this.form.fnumber : 0
       this.form.badnumber = this.form.badnumber ? this.form.badnumber : 0
       this.form.kcnumber = this.form.kcnumber ? this.form.kcnumber : 0
-      // console.log(this.form)
       this.Http.post('plhuibaonumber', {huibaolist: this.form}
       ).then(res => {
         switch (res.data.code) {
@@ -960,86 +1083,92 @@ export default {
         })
       })
     },
-    getHBHistory () {
-      this.Http.get('oldhuibao', {number: this.pageSizeHB, page_num: this.curPageHB, fidz: this.curReportInfo.fidz, fidc: this.curReportInfo.fidc, gongxu: this.curReportInfo.gxName, forder: this.forder}
-      ).then(res => {
-        switch (res.data.code) {
-          case '1':
-            this.hbHistory = res.data.list
-            this.sumHB = res.data.oldhuibaocount
-            this.dialogHBHistoryVisible = true
-            break
-          default:
-            this.$message({
-              message: res.data.message + '!',
-              type: 'error'
-            })
-        }
-      }).catch((error) => {
-        console.log(error)
-        this.$message({
-          message: '服务器繁忙!',
-          type: 'error'
-        })
-      })
-    },
+    // getHBHistory () {
+    //   this.Http.get('oldhuibao', {number: this.pageSizeHB, page_num: this.curPageHB, fidz: this.curReportInfo.fidz, fidc: this.curReportInfo.fidc, gongxu: this.curReportInfo.gxName, forder: this.forder}
+    //   ).then(res => {
+    //     switch (res.data.code) {
+    //       case '1':
+    //         this.hbHistory = res.data.list
+    //         this.sumHB = res.data.oldhuibaocount
+    //         this.dialogHBHistoryVisible = true
+    //         break
+    //       default:
+    //         this.$message({
+    //           message: res.data.message + '!',
+    //           type: 'error'
+    //         })
+    //     }
+    //   }).catch((error) => {
+    //     console.log(error)
+    //     this.$message({
+    //       message: '服务器繁忙!',
+    //       type: 'error'
+    //     })
+    //   })
+    // },
+    // 跳转汇报详情
     historyDetail (row) {
       this.updateTopLineInfo(this.topLineInfo)
       this.updateCurPage('History')
       this.$router.push({name: 'History'})
     },
+    // 获取页面汇报列表(人员列表)
     getHBList () {
-      this.listLoading = true
-      this.Http.get('huibaolist2', {number: this.pageSize, page_num: this.curPage, fidz: this.curReportInfo.fidz, fidc: this.curReportInfo.fidc, gongxu: this.curReportInfo.gxName, department: this.curModuleInfo.departid, forder: this.forder, jhsnumber: this.curReportInfo.jhsnumber, workid: this.curWorkId, fbillno: this.curFbillno}
-      ).then(res => {
-        switch (res.data.code) {
-          case 0:
-            this.ifCanAdd = false
-            this.$message({
-              message: res.data.message + '!',
-              type: 'warning'
-            })
-            this.listLoading = false
-            break
-          case 1:
-            this.zhubiaoid = res.data.zhubiaoid
-            this.isshow = res.data.isshow
-            this.topLineInfo = {
-              badnumber: res.data.badnumber,
-              fnumber: res.data.fnumber,
-              isback: res.data.isback,
-              // ischeck: res.data.ischeck,
-              jhnumber: res.data.jhnumber,
-              jhsnumber: res.data.jhsnumber,
-              kcnumber: res.data.kcnumber,
-              synumber: res.data.synumber,
-              fnote: res.data.fnote
-            }
-            this.reportList = res.data.list
-            // res.data.list.map(item => {
-            //   item.starttimeTxt = item.starttime ? (item.starttime).replace('-', '点') + '分' : ''
-            //   item.endtimeTxt = item.endtime ? (item.endtime).replace('-', '点') + '分' : ''
-            //   return item
-            // })
-            this.sum = res.data.orderCount
-            this.listLoading = false
-            break
-          default:
-            this.listLoading = false
-            this.$message({
-              message: res.data.message + '!',
-              type: 'error'
-            })
-        }
-      }).catch((error) => {
-        console.log(error)
-        this.listLoading = false
-        this.$message({
-          message: '服务器繁忙!',
-          type: 'error'
+      return new Promise((resolve, reject) => {
+        this.listLoading = true
+        this.Http.get('huibaolist2', {number: this.pageSize, page_num: this.curPage, fidz: this.curReportInfo.fidz, fidc: this.curReportInfo.fidc, gongxu: this.curReportInfo.gxName, department: this.curModuleInfo.departid, forder: this.forder, jhsnumber: this.curReportInfo.jhsnumber, workid: this.curWorkId, fbillno: this.curFbillno}
+        ).then(res => {
+          switch (res.data.code) {
+            case 0:
+              this.ifCanAdd = false
+              this.$message({
+                message: res.data.message + '!',
+                type: 'warning'
+              })
+              this.listLoading = false
+              break
+            case 1:
+              this.zhubiaoid = res.data.zhubiaoid
+              this.isshow = res.data.isshow
+              this.topLineInfo = {
+                badnumber: res.data.badnumber,
+                fnumber: res.data.fnumber,
+                isback: res.data.isback,
+                // ischeck: res.data.ischeck,
+                jhnumber: res.data.jhnumber,
+                jhsnumber: res.data.jhsnumber,
+                kcnumber: res.data.kcnumber,
+                synumber: res.data.synumber,
+                fnote: res.data.fnote
+              }
+              this.reportList = res.data.list
+              // res.data.list.map(item => {
+              //   item.starttimeTxt = item.starttime ? (item.starttime).replace('-', '点') + '分' : ''
+              //   item.endtimeTxt = item.endtime ? (item.endtime).replace('-', '点') + '分' : ''
+              //   return item
+              // })
+              this.sum = res.data.orderCount
+              this.listLoading = false
+              resolve(res.data.list)
+              break
+            default:
+              this.listLoading = false
+              this.$message({
+                message: res.data.message + '!',
+                type: 'error'
+              })
+          }
+        }).catch((error) => {
+          console.log(error)
+          this.listLoading = false
+          this.$message({
+            message: '服务器繁忙!',
+            type: 'error'
+          })
         })
       })
     },
+    // 选择操作人员的select选项
     getPeopleList () {
       this.Http.get('departpeople', {department: this.curModuleInfo.departid}
       ).then(res => {

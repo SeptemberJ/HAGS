@@ -43,7 +43,6 @@
           <el-form-item label="确认密码" prop="accountPsdNewAgain">
             <el-input v-model="modifyForm.accountPsdNewAgain" type="password" placeholder="密码" clearable style="width: 100%;"></el-input>
           </el-form-item>
-          <!-- <el-button type="primary" size="small" :loading="btLoading" class="bt" style="color: #000;background:#fff;" @click="backLogin">返回登陆</el-button> -->
           <el-button type="primary" size="small" :loading="btLoading" class="bt" @click="Modify('modifyForm')">确认修改</el-button>
         </el-form>
       </div>
@@ -104,9 +103,7 @@ export default {
       'unitUserInfo',
       'updateCurPage'
     ]),
-    backLogin () {
-      this.$router.push({name: 'Login'})
-    },
+    // 提交修改密码
     Modify (formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {

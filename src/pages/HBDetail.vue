@@ -66,16 +66,6 @@
           label="是否缺料"
           width="100">
         </el-table-column>
-        <!-- <el-table-column
-          fixed="right"
-          label="操作"
-          width="100">
-          <template slot-scope="scope">
-            <el-button
-              size="mini"
-              @click="warnDetail(scope.$index, scope.row)">预警</el-button>
-          </template>
-        </el-table-column> -->
       </el-table>
       <el-pagination v-if="detailList.length > 0" style="margin: .2rem 0;"
         @current-change="getHBDetail"
@@ -90,14 +80,13 @@
 
 <script>
 import { mapState, mapActions } from 'vuex'
-// import {secondToFormat} from '../util/utils'
 
 export default {
   name: 'WorkOrder',
   data () {
     return {
       listLoading: true,
-      filterProductionName: '', // 5.14.WLK-003
+      filterProductionName: '',
       curPage: 1,
       pageSize: 15,
       sum: 0,
@@ -120,6 +109,7 @@ export default {
       'updateCurWorkId',
       'updateCurFbillno'
     ]),
+    // 跳转零件管制页面
     goLjgz (row) {
       if (!this.ifJustSee) {
         this.updateCurWorkId(row.workid)
@@ -129,6 +119,7 @@ export default {
         this.$router.push({name: 'Ljgz'})
       }
     },
+    // 获取汇报详情
     getHBDetail () {
       this.listLoading = true
       this.Http.get('serhuibaoworkdetail', {number: this.pageSize, page_num: this.curPage, workid: this.curWorkId}
