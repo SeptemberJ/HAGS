@@ -35,7 +35,7 @@ body{
 .TextAlignR{
   text-align: right;
 }
-#addPerson .el-dialog__body, #appendProduction .el-dialog__body{
+#addCnc .el-dialog__body, #addPerson .el-dialog__body, #appendProduction .el-dialog__body{
   padding-top: 0 !important;
 }
 #saerchNameForm .el-form-item{

@@ -138,17 +138,9 @@
         </el-form-item>
         <el-form-item label="是否返工" prop="isback" v-if="!ifAdd">
           <el-select v-model="form.isback" placeholder="请选择是否返工" :disabled="ifEdit">
-            <el-option label="Y" value="Y"></el-option>
-            <el-option label="N" value="N"></el-option>
+            <el-option label="不是返工" value="不是返工"></el-option>
+            <el-option label="是返工" value="是返工"></el-option>
           </el-select>
-        </el-form-item>
-        <el-form-item label="备注" prop="fnote" v-if="!ifAdd">
-          <el-input type="textarea" v-model="form.fnote" :disabled="ifEdit" placeholder="请输入备注..."></el-input>
-        </el-form-item>
-        <el-form-item label="等待时间" prop="waittime" v-if="!ifAdd">
-          <el-input v-model="form.waittime">
-            <template slot="append">分钟</template>
-          </el-input>
         </el-form-item>
         <el-form-item label="停机原因" prop="freason" v-if="!ifAdd">
           <el-select v-model="form.freason" placeholder="请选择停机原因">
@@ -156,6 +148,20 @@
             <el-option label="停机" value="停机"></el-option>
             <el-option label="其他" value="其他"></el-option>
           </el-select>
+        </el-form-item>
+        <el-form-item label="备注" prop="fnote" v-if="!ifAdd">
+          <el-input type="textarea" v-model="form.fnote" :disabled="ifEdit" placeholder="请输入备注..."></el-input>
+        </el-form-item>
+        <el-form-item label="" v-if="!ifAdd">
+          <el-tag class="CursorPointer" @click="addNoteByTag('纸箱')">纸箱</el-tag>
+          <el-tag class="CursorPointer" @click="addNoteByTag('工程')">工程</el-tag>
+          <el-tag class="CursorPointer" @click="addNoteByTag('喷塑')">喷塑</el-tag>
+          <el-tag class="CursorPointer" @click="addNoteByTag('配件不全')">配件不全</el-tag>
+        </el-form-item>
+        <el-form-item label="等待时间" prop="waittime" v-if="!ifAdd">
+          <el-input v-model="form.waittime">
+            <template slot="append">分钟</template>
+          </el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -361,9 +367,9 @@ export default {
         badnumber: '',
         kcnumber: '',
         worktime: '',
-        // isback: '',
+        isback: '',
         fnote: '',
-        ischeck: '',
+        // ischeck: '',
         waittime: '',
         // tuntime: '',
         freason: ''
@@ -371,6 +377,9 @@ export default {
       rules: {
         username: [
           { required: true, message: '请选择操作工', trigger: 'change' }
+        ],
+        isback: [
+          { required: true, message: '请选择是否返工', trigger: 'change' }
         ],
         starttime: [
           { required: true, message: '请选择操开机时间', trigger: 'change' }
@@ -395,6 +404,9 @@ export default {
       switch (Info.gxName) {
         case '切管':
           forder = Info.fqg
+          break
+        case 'CNC':
+          forder = Info.sk
           break
         case '激光':
           forder = Info.fjg
@@ -851,6 +863,9 @@ export default {
     //     freason: ''
     //   }
     // },
+    addNoteByTag (tag) {
+      this.form.fnote = tag
+    },
     // 新增/编辑的保存
     save (formName) {
       this.$refs[formName].validate((valid) => {

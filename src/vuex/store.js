@@ -15,6 +15,7 @@ const state = {
   cpjhNumber: null,
   workOrderFshortnumber: null,
   workOrderFqty: null,
+  workOrderFbillno: null,
   curReportInfo: null,
   topLineInfo: null,
   reportPerson: null,
@@ -103,6 +104,7 @@ const mutations = {
   setLjgzOption (state, Option) {
     state.workOrderFshortnumber = Option.fshortnumber
     state.workOrderFqty = Option.fqty
+    state.workOrderFbillno = Option.fbillno
   },
   setCurReportInfo (state, Info) {
     state.curReportInfo = Info

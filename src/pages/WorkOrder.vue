@@ -21,8 +21,8 @@
         </el-col>
         <el-col :span="24" style="text-align: right;">
           <el-form-item>
-            <el-button size="small" type="info" @click="getHBHistoryDay">当日汇报记录</el-button>
-            <el-button size="small" type="info" @click="getHBHistory">汇报记录</el-button>
+            <el-button size="small" type="info" @click="showHBHistoryDay">当日汇报记录</el-button>
+            <el-button size="small" type="info" @click="showHBHistory">汇报记录</el-button>
             <el-button size="small" type="warning" @click="showHBlList">汇报列表</el-button>
             <!-- <el-button size="small" type="warning" @click="huibao">汇报</el-button> -->
           </el-form-item>
@@ -151,8 +151,8 @@
         <el-button type="primary" :loading="btLoading" @click="savePerson">保 存</el-button>
       </div>
     </el-dialog>
-    <!-- 汇报历史 -->
-    <el-dialog :title="ifHistoryDay ? '当日汇报记录' : '汇报记录'" :visible.sync="dialogHBHistoryVisible" :close-on-click-modal="false" width="900px">
+    <!-- 当日汇报记录 汇报记录 -->
+    <el-dialog :title="ifHistoryDay ? '当日汇报记录' : '汇报记录'" :visible.sync="dialogHBHistoryVisible" :close-on-click-modal="false" width="950px">
       <el-table @row-dblclick="seeHistoryDetail"
         :data="hbHistory"
         v-loading="listLoading"
@@ -164,19 +164,25 @@
         <el-table-column
           property="workno"
           label="汇报单号"
-          width="140"
+          width="130"
           show-overflow-tooltip>
         </el-table-column>
         <el-table-column
           property="starttime"
           label="开机时间"
-          width="170"
+          width="125"
           show-overflow-tooltip>
         </el-table-column>
         <el-table-column
           property="endtime"
           label="关机时间"
-          width="170"
+          width="125"
+          show-overflow-tooltip>
+        </el-table-column>
+        <el-table-column
+          property="freason"
+          label="关机原因"
+          width="90"
           show-overflow-tooltip>
         </el-table-column>
         <el-table-column
@@ -187,11 +193,12 @@
         <el-table-column
           fixed="right"
           label="操作"
-          width="200">
+          width="250">
           <template slot-scope="scope">
             <el-button type="success" size="mini" :disabled="!scope.row.ifCanOpen" @click="showTimeDialog(scope.$index, scope.row, 1)">开机</el-button>
             <el-button type="danger" size="mini" :disabled="!scope.row.ifCanClose" @click="showTimeDialog(scope.$index, scope.row, 0)">关机</el-button>
-            <el-button size="mini" @click="seeHistoryDetail(scope.row)">查看</el-button>
+            <el-button type='text' @click="seeHistoryDetail(scope.row)">查看</el-button>
+            <el-button type='text' v-if="userInfo.gongxu == 'CNC'" @click="ShowaAddCNC(scope.row)">机器设备</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -219,16 +226,16 @@
             type="datetime"
             placeholder="请选择时间">
           </el-date-picker>
-        <!-- <el-time-picker
-          disabled
-          v-model="time"
-          format="YY - MM - DD HH 点 mm 分"
-          value-format="YY-MM-DD-HH-mm"
-          placeholder="请选择时间"
-          :picker-options="{
-            selectableRange: '00:00:00 - 23:59:59'
-          }">
-        </el-time-picker> -->
+          <!-- <el-time-picker
+            disabled
+            v-model="time"
+            format="YY - MM - DD HH 点 mm 分"
+            value-format="YY-MM-DD-HH-mm"
+            placeholder="请选择时间"
+            :picker-options="{
+              selectableRange: '00:00:00 - 23:59:59'
+            }">
+          </el-time-picker> -->
         <div slot="footer" class="dialog-footer">
           <el-button type="danger" @click="submitTime" :loading="btLoading">提 交</el-button>
         </div>
@@ -263,6 +270,58 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button type="danger" @click="submitShutDownReason" :loading="btLoading">提 交</el-button>
+      </div>
+    </el-dialog>
+    <!-- CNC添加机器设备 -->
+    <el-dialog id="addCnc" title="机器设备" :visible.sync="dialogAddCncVisible" :close-on-click-modal="false" width="500px">
+      <div style="text-align: right;diplay: block;">
+        <el-button type="success" size="small" @click="addCnc">新增</el-button>
+      </div>
+      <!-- 机器设备list -->
+      <el-table
+        :data="cncRecordList"
+        v-loading="listLoading"
+        max-height="250"
+        style="width: 100%;margin-top: .2rem;">
+        <el-table-column
+          type="index"
+          width="50">
+        </el-table-column>
+        <el-table-column
+          label="设备">
+          <template slot-scope="scope">
+            <el-select v-model="scope.row.shebei" filterable @change="(value) => changeEquipment(value, scope.$index)" size="mini" placeholder="请选择">
+              <el-option
+                v-for="item in equipmentList"
+                :key="item.id"
+                :label="item.shebei"
+                :value="item.id">
+              </el-option>
+            </el-select>
+          </template>
+        </el-table-column>
+        <el-table-column
+          label="机床">
+          <template slot-scope="scope">
+            <el-select v-model="scope.row.jichuang" filterable @change="(value) => changeJC(value, scope.$index)" size="mini" placeholder="请选择">
+              <el-option
+                v-for="item in scope.row.jcList"
+                :key="item.id"
+                :label="item.jichuang"
+                :value="item.id">
+              </el-option>
+            </el-select>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" fixed="right" width="80">
+          <template slot-scope="scope">
+            <el-button size="mini" @click="delCnc(scope.$index, scope.row)">移 除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogAddCncVisible = false">取 消</el-button>
+        <el-button type="primary" :loading="btLoading" @click="saveCnc">保 存</el-button>
       </div>
     </el-dialog>
     <!-- 加入的汇报list -->
@@ -337,8 +396,8 @@ export default {
       curPage: 1,
       pageSize: 15,
       sum: 0,
-      huibaoOrderList: [],
-      orderList: [],
+      huibaoOrderList: [], // 勾选的工单列表
+      orderList: [], // 工单列表
       defaultPersonList: [], // 页面默认的人员列表
       selectChoosePeopleList: [], // select可选择的person的list
       personList: [], // 新增页上所有person的list
@@ -355,8 +414,8 @@ export default {
       ifHistoryDay: false,
       openOrClose: 1, // 0 关机 1 开机
       curWorkId: null,
-      curStartTmie: null,
-      time: '',
+      curStartTmie: null, // 记录的开机时间
+      time: '', // 开机或关机的提交时间
       selectedList: [], // 当前页的选中项
       selectedAllList: [], // 所有页的选中项集合
       HBListData: [], // 汇报列表数据
@@ -370,7 +429,12 @@ export default {
         {label: '其他原因', value: '其他原因'}
       ],
       shutDownReason: '',
-      shutDownNote: ''
+      shutDownNote: '',
+      dialogAddCncVisible: false,
+      cncRecordList: [], // 机器设备列表
+      equipmentList: [],
+      jichuangList: [],
+      curJCId: null // 当前的选择的机床id
     }
   },
   computed: {
@@ -381,6 +445,7 @@ export default {
   },
   created () {
     this.getWorkOrderList()
+    this.getEquipmentList()
   },
   methods: {
     ...mapActions([
@@ -502,9 +567,15 @@ export default {
         })
       })
     },
+    // 显示当日汇报记录
+    showHBHistoryDay () {
+      this.curPageHB = 1
+      this.dialogHBHistoryVisible = true
+      this.ifHistoryDay = true
+      this.getHBHistoryDay()
+    },
     // 当日汇报记录
     getHBHistoryDay () {
-      this.ifHistoryDay = true
       this.Http.get('serhuibaoworknow', {number: this.pageSizeHB, page_num: this.curPageHB, fbiller: this.userInfo.fname, gongxu: this.userInfo.gongxu}
       ).then(res => {
         switch (res.data.code) {
@@ -516,7 +587,6 @@ export default {
               return item
             })
             this.sumHB = res.data.count
-            this.dialogHBHistoryVisible = true
             break
           default:
             this.$message({
@@ -532,9 +602,15 @@ export default {
         })
       })
     },
+    // 显示汇报历史
+    showHBHistory () {
+      this.curPageHB = 1
+      this.dialogHBHistoryVisible = true
+      this.ifHistoryDay = false
+      this.getHBHistory()
+    },
     // 汇报历史
     getHBHistory () {
-      this.ifHistoryDay = false
       this.Http.get('serhuibaowork', {number: this.pageSizeHB, page_num: this.curPageHB, fbiller: this.userInfo.fname, gongxu: this.userInfo.gongxu}
       ).then(res => {
         switch (res.data.code) {
@@ -546,7 +622,6 @@ export default {
               return item
             })
             this.sumHB = res.data.count
-            this.dialogHBHistoryVisible = true
             break
           default:
             this.$message({
@@ -563,7 +638,7 @@ export default {
       })
     },
     // 显示开关机的日期时间弹窗
-    showTimeDialog (idx, row, type) {
+    async showTimeDialog (idx, row, type) {
       if (type === 0) {
         if (!row.starttime) {
           this.$message({
@@ -571,15 +646,39 @@ export default {
             type: 'warning'
           })
           return false
-        } else {
-          this.curStartTmie = row.starttime
         }
+        if (this.userInfo.gongxu === 'CNC') {
+          let ifCanBootupResult = await this.checkBootUp(row.id)
+          if (ifCanBootupResult.code === '1') {
+            this.$message({
+              message: ifCanBootupResult.message + '!',
+              type: 'warning'
+            })
+            return false
+          }
+        }
+        this.curStartTmie = row.starttime
       }
       this.dialogTimeVisible = true
       let curDate = new Date()
       this.time = curDate // curDate.getHours() + '-' + curDate.getMinutes()
       this.curWorkId = row.id
       this.openOrClose = type
+    },
+    // CNC检查是否允许关机
+    checkBootUp (id) {
+      return new Promise((resolve, reject) => {
+        this.Http.get('checkguanji', {workid: id}
+        ).then(res => {
+          resolve(res.data)
+        }).catch((error) => {
+          console.log(error)
+          this.$message({
+            message: '服务器繁忙!',
+            type: 'error'
+          })
+        })
+      })
     },
     // 开关机保存时间
     submitTime () {
@@ -610,6 +709,10 @@ export default {
             this.btLoading = false
             this.dialogTimeVisible = false
             this.handleCurrentChangeHB()
+            // CNC开机后显示机器设备弹框
+            if (this.userInfo.gongxu === 'CNC') {
+              this.ShowaAddCNC()
+            }
             break
           default:
             this.btLoading = false
@@ -642,6 +745,7 @@ export default {
               type: 'success'
             })
             this.btLoading = false
+            this.shutDownReason = ''
             this.dialogTimeVisible = false
             this.handleCurrentChangeHB()
             // 关机后是否进行汇报
@@ -653,6 +757,16 @@ export default {
               this.dialogShutDownReasonVisible = true
             }).catch((error) => {
               console.log(error)
+              // 再次弹出
+              this.$confirm('请再次确认是否汇报产量?', '提示', {
+                confirmButtonText: '否',
+                cancelButtonText: '是',
+                type: 'warning'
+              }).then(() => {
+                this.dialogShutDownReasonVisible = true
+              }).catch((error) => {
+                console.log(error)
+              })
             })
             break
           default:
@@ -671,6 +785,7 @@ export default {
         })
       })
     },
+    // 提交关机原因
     submitShutDownReason () {
       if (!this.shutDownReason) {
         this.$message({
@@ -741,6 +856,59 @@ export default {
       this.updateCurPage('HBDetail')
       this.$router.push({name: 'HBDetail'})
     },
+    // 显示CNC机器设备列表弹窗
+    ShowaAddCNC (row) {
+      if (row) { // 点击行查看弹出
+        this.dialogAddCncVisible = true
+        this.curWorkId = row.id
+        this.getCncRecordList(row.id)
+        // if (row.starttime && !row.endtime) {
+        //   debugger
+        //   this.dialogAddCncVisible = true
+        //   this.curWorkId = row.id
+        //   this.getCncRecordList(row.id)
+        // }
+      } else { // 开完机后自动弹出
+        this.dialogAddCncVisible = true
+        this.getCncRecordList(this.curWorkId)
+      }
+    },
+    // 获取CNC机器设备记录列表
+    async getCncRecordList (id) {
+      this.listLoading = true
+      this.cncRecordList = []
+      this.Http.get('sershebeilist', {workid: id}
+      ).then(res => {
+        res.data.list.map(async (item, idx) => {
+          let resData = await this.initJCSelect(item.shebei)
+          item.jcList = resData
+          this.cncRecordList.push(item)
+        })
+        this.listLoading = false
+      }).catch((error) => {
+        console.log(error)
+        this.listLoading = false
+        this.$message({
+          message: '服务器繁忙!',
+          type: 'error'
+        })
+      })
+    },
+    // 初始化机器设备列表每行记录中jichuang的下拉选项
+    initJCSelect (EQ) {
+      return new Promise((resolve, reject) => {
+        this.Http.get('serjichuang', {shebeiid: EQ}
+        ).then(res => {
+          resolve(res.data.list)
+        }).catch((error) => {
+          console.log(error)
+          this.$message({
+            message: '服务器繁忙!',
+            type: 'error'
+          })
+        })
+      })
+    },
     // 获取默认人员列表
     getPeopleList () {
       this.Http.get('serpeople', {department: this.curModuleInfo.departid}
@@ -764,6 +932,122 @@ export default {
         this.$message({
           message: '服务器繁忙!',
           type: 'error'
+        })
+      })
+    },
+    // 获取CNC设备的select框选项
+    getEquipmentList () {
+      this.Http.get('sershebei'
+      ).then(res => {
+        this.equipmentList = res.data.list
+      }).catch((error) => {
+        console.log(error)
+        this.$message({
+          message: '服务器繁忙!',
+          type: 'error'
+        })
+      })
+    },
+    // 且换设备的select框选项
+    changeEquipment (val, idx) {
+      return new Promise((resolve, reject) => {
+        this.Http.get('serjichuang', {shebeiid: val}
+        ).then(res => {
+          this.cncRecordList[idx].jcList = res.data.list
+          resolve(res.data.list)
+        }).catch((error) => {
+          console.log(error)
+          this.$message({
+            message: '服务器繁忙!',
+            type: 'error'
+          })
+        })
+      })
+    },
+    // 切换机床的select框选项
+    changeJC (val, idx) {
+      this.curJCId = val
+      if (this.cncRecordList.filter(this.checkJCId).length > 1) {
+        this.$message({
+          message: '该机床已存在!',
+          type: 'warning'
+        })
+        this.cncRecordList[idx].jichuang = ''
+      }
+    },
+    // 添加一行CNC记录
+    addCnc () {
+      this.cncRecordList.push({id: '', shebei: '', jichuang: '', jcList: []})
+    },
+    delCnc (idx, row) {
+      this.cncRecordList.splice(idx, 1)
+    },
+    // 查看机床是否重复
+    checkJCId (JC) {
+      return JC.jichuang === this.curJCId
+    },
+    // 保存CNC
+    async saveCnc () {
+      if (this.cncRecordList.length < 1) {
+        this.$message({
+          message: '请添机器设备记录!',
+          type: 'warning'
+        })
+        return false
+      }
+      let ifAllSelect = await this.ifAllSelectJC() // 是否还有未选择的机床
+      if (!ifAllSelect) {
+        this.$message({
+          message: '请将信息选择完整!',
+          type: 'warning'
+        })
+        return false
+      }
+      let Data = {
+        workid: this.curWorkId,
+        peoplelist: this.cncRecordList
+      }
+      this.btLoading = true
+      this.Http.post('addshebei', Data
+      ).then(res => {
+        switch (res.data.code) {
+          case '1':
+            this.$message({
+              message: '机器设备保存成功!',
+              type: 'success'
+            })
+            // 初始化数据
+            this.curJCId = ''
+            this.dialogAddCncVisible = false
+            this.btLoading = false
+            break
+          default:
+            this.btLoading = false
+            this.$message({
+              message: res.data.message + '!',
+              type: 'error'
+            })
+        }
+      }).catch((error) => {
+        console.log(error)
+        this.btLoading = false
+        this.$message({
+          message: '服务器繁忙!',
+          type: 'error'
+        })
+      })
+    },
+    // 人员select框是否都已选择
+    ifAllSelectJC () {
+      return new Promise((resolve, reject) => {
+        let ifAllSelect = true
+        this.cncRecordList.map((item, idx) => {
+          if (!item.shebei || !item.jichuang) {
+            ifAllSelect = false
+          }
+          if (idx === this.cncRecordList.length - 1) {
+            resolve(ifAllSelect)
+          }
         })
       })
     },
@@ -858,7 +1142,7 @@ export default {
             })
             this.getWorkOrderList()
             // 初始化数据
-            this.curPage = 1
+            // this.curPage = 1
             this.selectedList = []
             this.selectedAllList = []
             this.huibaoOrderList = []
@@ -983,7 +1267,7 @@ export default {
     },
     // 跳转零件管制
     goLjgz (row) {
-      this.updateLjgzOption({fshortnumber: row.FShortNumber, fqty: row.fqty})
+      this.updateLjgzOption({fshortnumber: row.FShortNumber, fqty: row.fqty, fbillno: row.fbillno})
       this.updateCurPage('Ljgz')
       this.$router.push({name: 'Ljgz'})
     },

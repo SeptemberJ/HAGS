@@ -68,37 +68,37 @@
       <el-table-column
         property="fnumber"
         label="零件号"
-        width="200"
+        width="300"
         show-overflow-tooltip>
       </el-table-column>
       <el-table-column
         property="fname"
         label="零件名称"
-        width="200"
+        width="300"
         show-overflow-tooltip>
       </el-table-column>
       <el-table-column
         property="clnumber"
         label="材料代码"
-        width="200"
+        width="300"
         show-overflow-tooltip>
       </el-table-column>
       <el-table-column
         property="clname"
         label="材料名称"
-        width="200"
+        width="300"
         show-overflow-tooltip>
       </el-table-column>
       <el-table-column
         property="bbh"
         label="版本号"
-        width="100"
+        width="80"
         show-overflow-tooltip>
       </el-table-column>
       <el-table-column
         property="jhsnumber"
         label="计划数"
-        width="100"
+        width="80"
         show-overflow-tooltip>
       </el-table-column>
       <el-table-column
@@ -290,6 +290,7 @@ export default {
       curWorkId: state => state.curWorkId,
       workOrderFshortnumber: state => state.workOrderFshortnumber,
       workOrderFqty: state => state.workOrderFqty,
+      workOrderFbillno: state => state.workOrderFbillno,
       curReportInfo: state => state.curReportInfo
     })
   },
@@ -373,7 +374,8 @@ export default {
         number: this.pageSize,
         page_num: this.curPage,
         fshortnumber: this.workOrderFshortnumber,
-        fqty: this.workOrderFqty
+        fqty: this.workOrderFqty,
+        fbillno: this.workOrderFbillno
       }
       if (this.formSearch.gongxu !== '全部') {
         Data.gongxu = this.formSearch.gongxu
