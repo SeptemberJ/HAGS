@@ -3,13 +3,10 @@ import CryptoJS from 'crypto-js'
 export function Encrypt (plaintText) {
   var keyStr = 'fsgs_liubai'
   var key = CryptoJS.enc.Utf8.parse(keyStr)
-  // var iv = CryptoJS.enc.Utf8.parse('qwertyuiopasdfgh')
   var encryptedData = CryptoJS.AES.encrypt(plaintText, key, {
-    // iv: iv,
     mode: CryptoJS.mode.ECB,
     padding: CryptoJS.pad.Pkcs7
   })
-  // var encryptedBase64Str = encryptedData.toString()
   var encryptedStr = encryptedData.ciphertext.toString()
   return encryptedStr
 }
@@ -32,9 +29,7 @@ export function Decrypt (encryptedStr) {
 export function setCookie (cname, cvalue, exhours) {
   var d = new Date()
   d.setTime(d.getTime() + (exhours * 60 * 60 * 1000))
-  // d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000))
   var expires = 'expires=' + d.toUTCString()
-  // console.info(cname + '=' + cvalue + '; ' + expires)
   document.cookie = cname + '=' + cvalue + '; ' + expires
 }
 
@@ -61,11 +56,7 @@ export function secondToFormat (second) {
   var oYear = oDate.getFullYear()
   var oMonth = oDate.getMonth() + 1
   var oDay = oDate.getDate()
-  // var oHour = oDate.getHours()
-  // var oMin = oDate.getMinutes()
-  // var oSen = oDate.getSeconds()
   var oTime = oYear + '-' + getzf(oMonth) + '-' + getzf(oDay)
-  // var oTime = oYear + '-' + getzf(oMonth) + '-' + getzf(oDay) + ' ' + getzf(oHour) + ':' + getzf(oMin) + ':' + getzf(oSen)
   return oTime
 }
 

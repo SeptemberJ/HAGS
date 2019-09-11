@@ -6,7 +6,7 @@
     <div class="MainBlock" v-if="curPage == 'Home' || curPage == 'Modify'"><span>MES-SYSTEM</span></div>
     <div class="MainBlock" v-if="curPage == 'WorkOrder'"><span>{{curModuleInfo.department + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + '汇报人: ' + userInfo.fname + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0工种: ' + userInfo.gongxu}}</span></div>
     <div class="MainBlock" v-if="curPage != 'Home' && curPage != 'WorkOrder'"><span>{{curModuleInfo.department + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + '汇报人: ' + userInfo.fname + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0成品计划数：' + workOrderFqty + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0工种: ' + userInfo.gongxu}}</span></div>
-    <div class="RightAccount">您好,{{userInfo.fname}}
+    <div class="RightAccount">您好, {{userInfo.fname}}
       <span class="CursorPointer" style="margin-left: 10px;" @click="toMofify"><i class="el-icon-edit" title="修改密码"></i></span>
       <span class="CursorPointer" style="margin-left: 5px;" @click="logOut"><i class="fa fa-sign-out" title="退出"></i></span>
       </div>

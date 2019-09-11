@@ -9,14 +9,26 @@
         <el-col :span="3" class="TextAlignL">当前工序: {{curReportInfo.gxName}}</el-col>
         <el-col :span="3" class="TextAlignL">零件计划数: {{topLineInfo.jhsnumber}}</el-col>
         <el-col :span="3" class="TextAlignL">接收数: {{topLineInfo.jhnumber}}</el-col>
-        <el-col :span="3" class="TextAlignL">剩余接收数: {{topLineInfo.synumber}}</el-col>
+        <el-col :span="3" class="TextAlignL">剩余接收数: {{topLineInfo.syjsnumber}}</el-col>
       </el-row>
       <el-row style="height:.5rem;line-height:.5rem;">
-        <el-col :span="6" class="TextAlignL">完工产量: {{topLineInfo.fnumber}}</el-col>
-        <el-col :span="6" class="TextAlignL">报废数: {{topLineInfo.badnumber}}</el-col>
-        <el-col :span="3" class="TextAlignL">库存数: {{topLineInfo.kcnumber}}</el-col>
-        <el-col :span="3" class="TextAlignL">是否返工: {{topLineInfo.isback}}</el-col>
-        <el-col :span="3" class="TextAlignL">备注: {{topLineInfo.fnote}}</el-col>
+        <el-col :span="4" class="TextAlignL">本次完工产量: {{topLineInfo.fnumber}}</el-col>
+        <el-col :span="4" class="TextAlignL">本次报废数: {{topLineInfo.badnumber}}</el-col>
+        <el-col :span="4" class="TextAlignL">库存数: {{topLineInfo.kcnumber}}</el-col>
+        <el-col :span="4" class="TextAlignL">是否返工: {{topLineInfo.isback}}</el-col>
+        <el-col :span="8" class="TextAlignL">备注: {{topLineInfo.fnote}}</el-col>
+      </el-row>
+      <el-row style="height:.5rem;line-height:.5rem;">
+        <el-col :span="4" class="TextAlignL">累计完工产量: {{topLineInfo.wcnumber}}</el-col>
+        <el-col :span="4" class="TextAlignL">累计库存数量: {{topLineInfo.wckcnumber}}</el-col>
+        <el-col :span="4" class="TextAlignL">累计报废数: {{topLineInfo.bfnumber}}</el-col>
+        <el-col :span="4" class="TextAlignL">剩余未完成数: {{topLineInfo.synumber}}</el-col>
+        <el-col :span="4" class="TextAlignL">累计返工完工产量: {{topLineInfo.ljfgnumber}}</el-col>
+        <el-col :span="4" class="TextAlignL">累计返工完工报废数: {{topLineInfo.ljfgbfnumber}}</el-col>
+      </el-row>
+      <el-row style="height:.5rem;line-height:.5rem;">
+        <el-col :span="4" class="TextAlignL">本次返工完工产量: {{topLineInfo.fgnumber}}</el-col>
+        <el-col :span="4" class="TextAlignL">本次返工完工报废数: {{topLineInfo.fgbfnumber}}</el-col>
       </el-row>
       <el-row style="margin:10px 0;">
         <el-col :span="24" class="TextAlignR" v-if="ifCanAdd">
@@ -128,13 +140,25 @@
           </el-date-picker>
         </el-form-item>
         <el-form-item label="完工产量" prop="fnumber" v-if="ifHZ">
-          <el-input v-model="form.fnumber"></el-input>
+          <el-input v-model="form.fnumber" placeholder="请输入完工产量"></el-input>
+        </el-form-item>
+        <el-form-item label="因料报废" prop="ylbfnumber" v-if="ifHZ">
+          <el-input v-model="form.ylbfnumber" placeholder="请输入因料报废数量"></el-input>
+        </el-form-item>
+        <el-form-item label="因料报废原因" prop="ylbffreason" v-if="ifHZ">
+          <el-input v-model="form.ylbffreason" type="textarea" placeholder="请输入因料报废原因..."></el-input>
+        </el-form-item>
+        <el-form-item label="因工报废" prop="ygbfbumber" v-if="ifHZ">
+          <el-input v-model="form.ygbfbumber" placeholder="请输入因工报废数量"></el-input>
+        </el-form-item>
+        <el-form-item label="因工报废原因" prop="ygbfreason" v-if="ifHZ">
+          <el-input v-model="form.ygbfreason" type="textarea" placeholder="请输入因工报废原因..."></el-input>
         </el-form-item>
         <el-form-item label="报废数" prop="badnumber" v-if="ifHZ">
-          <el-input v-model="form.badnumber" prop="badnumber"></el-input>
+          <el-input v-model="form.badnumber" disabled prop="badnumber" placeholder="请输入报废数"></el-input>
         </el-form-item>
         <el-form-item label="库存数" prop="kcnumber" v-if="ifHZ">
-          <el-input v-model="form.kcnumber" prop="kcnumber"></el-input>
+          <el-input v-model="form.kcnumber" prop="kcnumber" placeholder="请输入库存数"></el-input>
         </el-form-item>
         <el-form-item label="是否返工" prop="isback" v-if="!ifAdd">
           <el-select v-model="form.isback" placeholder="请选择是否返工" :disabled="ifEdit">
@@ -159,7 +183,7 @@
           <el-tag class="CursorPointer" @click="addNoteByTag('配件不全')">配件不全</el-tag>
         </el-form-item>
         <el-form-item label="等待时间" prop="waittime" v-if="!ifAdd">
-          <el-input v-model="form.waittime">
+          <el-input v-model="form.waittime" placeholder="请输入等待时间">
             <template slot="append">分钟</template>
           </el-input>
         </el-form-item>
@@ -249,7 +273,7 @@
             label="操作"
             width="80">
             <template slot-scope="scope">
-              <el-button type="danger" size="mini" @click="removeAPPerson(scope.row)">删除</el-button>
+              <el-button type="danger" size="mini" @click="removeAPPerson(scope.row)">移除</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -265,10 +289,10 @@
     <el-dialog title="附加产品新增" :visible.sync="dialogAppendAddVisible" :close-on-click-modal="false" width="850px">
        <el-form class="TextAlignL" :model="formAppendProduction" :rules="rulesAppendProduction" ref="formAppendProduction" label-width="80px">
         <el-row v-for="(itemAppend, idx) in formAppendProduction.list" :key="itemAppend.key">
-          <el-col :span="2" class="TextAlignL"><span style="margin-top:10px;display:block;">{{idx + 1}}</span></el-col>
+          <el-col :span="2" class="TextAlignL"><span style="margin-top:5px;display:block;">{{idx + 1}}</span></el-col>
           <el-col :span="12" class="TextAlignL">
-            <el-form-item label="物料名称" :prop="'list.' + idx + '.materie'" :rules="rulesAppendProduction.materie">
-              <el-select v-model="itemAppend.materie" filterable remote :remote-method="getMaterielList" :loading="selectLoading" placeholder="请选择物料名称" style="width: 90%;">
+            <el-form-item label="物料名称" :prop="'list.' + idx + '.materie'" size="mini" :rules="rulesAppendProduction.materie">
+              <el-select v-model="itemAppend.materie" filterable remote :remote-method="getMaterielList" size="mini" :loading="selectLoading" placeholder="请输入物料名称" style="width: 90%;">
                 <el-option v-for="(materiel, idx) in materielList" :key="idx" :label="materiel.fname" :value="materiel.fname + '|' + materiel.fnumber">
                   <span style="float: left">{{ materiel.fname }}</span>
                   <span style="float: right; color: #8492a6; font-size: 13px">{{ materiel.fnumber }}</span>
@@ -277,16 +301,16 @@
             </el-form-item>
           </el-col>
           <el-col :span="7" class="TextAlignL">
-            <el-form-item label="数量" :prop="'list.' + idx + '.amount'" :rules="rulesAppendProduction.amount">
-              <el-input v-model="itemAppend.amount" placeholder="请输入数量" style="width: 90%;"></el-input>
+            <el-form-item label="数量" :prop="'list.' + idx + '.amount'" size="mini" :rules="rulesAppendProduction.amount">
+              <el-input v-model="itemAppend.amount" placeholder="请输入数量" size="mini" style="width: 90%;"></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="3" class="TextAlignR">
-            <el-button @click.prevent="removeLine(idx)">删除</el-button>
+            <el-button size="mini" @click.prevent="removeLine(idx)">移 除</el-button>
           </el-col>
         </el-row>
        </el-form>
-      <el-button @click="addLine">添加一行</el-button>
+      <el-button size="small" icon="el-icon-plus" @click="addLine">添加一行</el-button>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogAppendAddVisible = false">取 消</el-button>
         <el-button type="danger" @click="submitAppendProduction('formAppendProduction')" :loading="btLoading">提 交</el-button>
@@ -357,13 +381,25 @@ export default {
         jhsnumber: '',
         kcnumber: '',
         synumber: '',
-        fnote: ''
+        fnote: '',
+        wcnumber: '',
+        bfnumber: '',
+        syjsnumber: '',
+        ljfgnumber: '',
+        ljfgbfnumber: '',
+        fgnumber: '',
+        fgbfnumber: '',
+        wckcnumber: ''
       },
       form: {
         username: '',
         starttime: '',
         endtime: '',
         fnumber: '',
+        ylbfnumber: '',
+        ylbffreason: '',
+        ygbfbumber: '',
+        ygbfreason: '',
         badnumber: '',
         kcnumber: '',
         worktime: '',
@@ -406,7 +442,7 @@ export default {
           forder = Info.fqg
           break
         case 'CNC':
-          forder = Info.sk
+          forder = Info.fsk
           break
         case '激光':
           forder = Info.fjg
@@ -435,6 +471,12 @@ export default {
       if (!newVal) {
         this.$refs['formAppendProduction'].resetFields()
       }
+    },
+    'form.ylbfnumber': function (newVal) {
+      this.form.badnumber = Number(newVal) + Number(this.form.ygbfbumber)
+    },
+    'form.ygbfbumber': function (newVal) {
+      this.form.badnumber = Number(this.form.ylbfnumber) + Number(newVal)
     }
   },
   created () {
@@ -550,7 +592,7 @@ export default {
     },
     // 删除按钮事件
     dele (idx, row) {
-      this.$confirm('此操作将删除该调记录, 是否继续?', '提示', {
+      this.$confirm('此操作将删除该条记录, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -601,41 +643,41 @@ export default {
             type: 'error'
           })
         })
-        // setTimeout(() => {
-        //   this.loading = false
-        //   this.options = this.list.filter(item => {
-        //     return item.label.toLowerCase()
-        //       .indexOf(query.toLowerCase()) > -1
-        //   })
-        // }, 200)
       } else {
         this.materielList = []
       }
     },
     // 删除物料记录
     removeAP (row) {
-      this.Http.get('delfujia', {id: row.id}
-      ).then(res => {
-        switch (res.data.code) {
-          case '1':
-            this.$message({
-              message: '删除成功!',
-              type: 'success'
-            })
-            this.getAppendProduction()
-            break
-          default:
-            this.$message({
-              message: res.data.message + '!',
-              type: 'error'
-            })
-        }
-      }).catch((error) => {
-        console.log(error)
-        this.$message({
-          message: '服务器繁忙!',
-          type: 'error'
+      this.$confirm('此操作将删除该条记录, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.Http.get('delfujia', {id: row.id}
+        ).then(res => {
+          switch (res.data.code) {
+            case '1':
+              this.$message({
+                message: '删除成功!',
+                type: 'success'
+              })
+              this.getAppendProduction()
+              break
+            default:
+              this.$message({
+                message: res.data.message + '!',
+                type: 'error'
+              })
+          }
+        }).catch((error) => {
+          console.log(error)
+          this.$message({
+            message: '服务器繁忙!',
+            type: 'error'
+          })
         })
+      }).catch(() => {
       })
     },
     // 查看附加产品记录人员
@@ -644,6 +686,7 @@ export default {
       this.dialogAPPersonVisible = true
       this.getAPPersonList()
     },
+    // 附加物料查看人员详情
     getAPPersonList () {
       this.Http.get('serfujiawuliaodetail', {id: this.curAPRecordId}
       ).then(res => {
@@ -667,28 +710,35 @@ export default {
     },
     // 删除附加产品人员
     removeAPPerson (row) {
-      this.Http.get('delfujiary', {id: row.id}
-      ).then(res => {
-        switch (res.data.code) {
-          case '1':
-            this.$message({
-              message: '人员删除成功!',
-              type: 'success'
-            })
-            this.getAPPersonList()
-            break
-          default:
-            this.$message({
-              message: res.data.message + '!',
-              type: 'error'
-            })
-        }
-      }).catch((error) => {
-        console.log(error)
-        this.$message({
-          message: '服务器繁忙!',
-          type: 'error'
+      this.$confirm('此操作将移除该人员, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.Http.get('delfujiary', {id: row.id}
+        ).then(res => {
+          switch (res.data.code) {
+            case '1':
+              this.$message({
+                message: '人员删除成功!',
+                type: 'success'
+              })
+              this.getAPPersonList()
+              break
+            default:
+              this.$message({
+                message: res.data.message + '!',
+                type: 'error'
+              })
+          }
+        }).catch((error) => {
+          console.log(error)
+          this.$message({
+            message: '服务器繁忙!',
+            type: 'error'
+          })
         })
+      }).catch(() => {
       })
     },
     // 附加产品列表
@@ -736,6 +786,7 @@ export default {
         return false
       }
       this.dialogAppendAddVisible = true
+      this.formAppendProduction.list = [{fname: '', fnumber: '', materie: ''}]
     },
     // 提交附加产品
     submitAppendProduction (formName) {
@@ -815,6 +866,10 @@ export default {
         starttime: '',
         endtime: '',
         fnumber: '',
+        ylbfnumber: '',
+        ylbffreason: '',
+        ygbfbumber: '',
+        ygbfreason: '',
         badnumber: '',
         kcnumber: '',
         worktime: '',
@@ -864,7 +919,9 @@ export default {
     //   }
     // },
     addNoteByTag (tag) {
-      this.form.fnote = tag
+      if (!this.ifEdit) {
+        this.form.fnote = tag
+      }
     },
     // 新增/编辑的保存
     save (formName) {
@@ -898,20 +955,28 @@ export default {
                 type: 'warning'
               })
             } else if (this.form.kcnumber && this.form.fnumber) {
-              if (Number(this.form.kcnumber) + Number(this.form.fnumber) > this.topLineInfo.synumber && this.userInfo.gongxu !== '激光') {
-                this.$message({
-                  message: '"库存数"和"完工产量"之和超过了剩余数!',
-                  type: 'warning'
-                })
+              if (this.form.isback === '不是返工') {
+                if (Number(this.form.kcnumber) + Number(this.form.fnumber) > this.topLineInfo.synumber && this.userInfo.gongxu !== '激光' && this.userInfo.gongxu !== 'CNC') {
+                  this.$message({
+                    message: '"库存数"和"完工产量"之和超过了剩余数!',
+                    type: 'warning'
+                  })
+                } else {
+                  this.addHz()
+                }
               } else {
                 this.addHz()
               }
             } else if (this.form.kcnumber || this.form.fnumber) {
-              if ((this.form.kcnumber > this.topLineInfo.synumber || this.form.fnumber > this.topLineInfo.synumber) && this.userInfo.gongxu !== '激光') {
-                this.$message({
-                  message: '"库存数"和"完工产量"之和超过了剩余数!',
-                  type: 'warning'
-                })
+              if (this.form.isback === '不是返工') {
+                if ((this.form.kcnumber > this.topLineInfo.synumber || this.form.fnumber > this.topLineInfo.synumber) && this.userInfo.gongxu !== '激光' && this.userInfo.gongxu !== 'CNC') {
+                  this.$message({
+                    message: '"库存数"和"完工产量"之和超过了剩余数!',
+                    type: 'warning'
+                  })
+                } else {
+                  this.addHz()
+                }
               } else {
                 this.addHz()
               }
@@ -978,6 +1043,8 @@ export default {
       this.form.gongxu = this.curReportInfo.gxName
       this.form.jhnumber = this.topLineInfo.synumber
       this.form.fnumber = this.form.fnumber ? this.form.fnumber : 0
+      this.form.ylbfnumber = this.form.ylbfnumber ? this.form.ylbfnumber : 0
+      this.form.ygbfbumber = this.form.ygbfbumber ? this.form.ygbfbumber : 0
       this.form.badnumber = this.form.badnumber ? this.form.badnumber : 0
       this.form.kcnumber = this.form.kcnumber ? this.form.kcnumber : 0
       this.Http.post('addhuibao', this.form
@@ -1027,6 +1094,8 @@ export default {
       this.form.department = this.curModuleInfo.departid
       this.form.huibaoid = this.huibaoIdList
       this.form.fnumber = this.form.fnumber ? this.form.fnumber : 0
+      this.form.ylbfnumber = this.form.ylbfnumber ? this.form.ylbfnumber : 0
+      this.form.ygbfbumber = this.form.ygbfbumber ? this.form.ygbfbumber : 0
       this.form.badnumber = this.form.badnumber ? this.form.badnumber : 0
       this.form.kcnumber = this.form.kcnumber ? this.form.kcnumber : 0
       this.Http.post('pilianghuibao', {huibaolist: this.form}
@@ -1068,6 +1137,8 @@ export default {
       this.form.department = this.curModuleInfo.departid
       this.form.huibaoid = this.huibaoIdList
       this.form.fnumber = this.form.fnumber ? this.form.fnumber : 0
+      this.form.ylbfnumber = this.form.ylbfnumber ? this.form.ylbfnumber : 0
+      this.form.ygbfbumber = this.form.ygbfbumber ? this.form.ygbfbumber : 0
       this.form.badnumber = this.form.badnumber ? this.form.badnumber : 0
       this.form.kcnumber = this.form.kcnumber ? this.form.kcnumber : 0
       this.Http.post('plhuibaonumber', {huibaolist: this.form}
@@ -1154,7 +1225,15 @@ export default {
                 jhsnumber: res.data.jhsnumber,
                 kcnumber: res.data.kcnumber,
                 synumber: res.data.synumber,
-                fnote: res.data.fnote
+                fnote: res.data.fnote,
+                wcnumber: res.data.wcnumber,
+                bfnumber: res.data.bfnumber,
+                syjsnumber: res.data.syjsnumber,
+                ljfgnumber: res.data.ljfgnumber,
+                ljfgbfnumber: res.data.ljfgbfnumber,
+                fgnumber: res.data.fgnumber,
+                fgbfnumber: res.data.fgbfnumber,
+                wckcnumber: res.data.wckcnumber
               }
               this.reportList = res.data.list
               // res.data.list.map(item => {

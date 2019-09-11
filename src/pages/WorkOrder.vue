@@ -130,12 +130,15 @@
         <el-table-column
           label="操作员">
           <template slot-scope="scope">
-            <el-select v-model="scope.row.id" filterable @change="(value) => changePerson(value, scope.$index)" size="mini" placeholder="请选择">
+            <!-- v-for="item in scope.row.options" selectChoosePeopleList -->
+            <el-select v-model="scope.row.id" filterable :filter-method="(value) => filterMethod(value, scope.$index)" @change="(value) => changePerson(value, scope.$index)" size="mini" placeholder="请选择">
               <el-option
-                v-for="item in selectChoosePeopleList"
+                v-for="item in scope.row.options"
                 :key="item.id"
                 :label="item.fname"
                 :value="item.id">
+                <span style="float: left">{{ item.fname }}</span>
+                <span style="float: right; color: #8492a6; font-size: 13px">{{ item.danhao }}</span>
               </el-option>
             </el-select>
           </template>
@@ -273,7 +276,7 @@
       </div>
     </el-dialog>
     <!-- CNC添加机器设备 -->
-    <el-dialog id="addCnc" title="机器设备" :visible.sync="dialogAddCncVisible" :close-on-click-modal="false" width="500px">
+    <el-dialog id="addCnc" title="机器设备列表" :visible.sync="dialogAddCncVisible" :close-on-click-modal="false" width="500px">
       <div style="text-align: right;diplay: block;">
         <el-button type="success" size="small" @click="addCnc">新增</el-button>
       </div>
@@ -639,31 +642,32 @@ export default {
     },
     // 显示开关机的日期时间弹窗
     async showTimeDialog (idx, row, type) {
-      if (type === 0) {
-        if (!row.starttime) {
-          this.$message({
-            message: '还未开机，不能关机!',
-            type: 'warning'
-          })
-          return false
+      let ifCanOpertionResult = await this.checkBootUp(row.id)
+      if (this.userInfo.gongxu === 'CNC' && ifCanOpertionResult.code === '1') { // CNC
+        this.$message({
+          message: ifCanOpertionResult.message + '!',
+          type: 'warning'
+        })
+        if (type === 1) { // 开机
+          this.ShowaAddCNC(row)
         }
-        if (this.userInfo.gongxu === 'CNC') {
-          let ifCanBootupResult = await this.checkBootUp(row.id)
-          if (ifCanBootupResult.code === '1') {
+      } else { // 其他
+        if (type === 0) {
+          if (!row.starttime) {
             this.$message({
-              message: ifCanBootupResult.message + '!',
+              message: '还未开机，不能关机!',
               type: 'warning'
             })
             return false
           }
+          this.curStartTmie = row.starttime
         }
-        this.curStartTmie = row.starttime
+        this.dialogTimeVisible = true
+        let curDate = new Date()
+        this.time = curDate // curDate.getHours() + '-' + curDate.getMinutes()
+        this.curWorkId = row.id
+        this.openOrClose = type
       }
-      this.dialogTimeVisible = true
-      let curDate = new Date()
-      this.time = curDate // curDate.getHours() + '-' + curDate.getMinutes()
-      this.curWorkId = row.id
-      this.openOrClose = type
     },
     // CNC检查是否允许关机
     checkBootUp (id) {
@@ -709,10 +713,6 @@ export default {
             this.btLoading = false
             this.dialogTimeVisible = false
             this.handleCurrentChangeHB()
-            // CNC开机后显示机器设备弹框
-            if (this.userInfo.gongxu === 'CNC') {
-              this.ShowaAddCNC()
-            }
             break
           default:
             this.btLoading = false
@@ -858,20 +858,23 @@ export default {
     },
     // 显示CNC机器设备列表弹窗
     ShowaAddCNC (row) {
-      if (row) { // 点击行查看弹出
-        this.dialogAddCncVisible = true
-        this.curWorkId = row.id
-        this.getCncRecordList(row.id)
-        // if (row.starttime && !row.endtime) {
-        //   debugger
-        //   this.dialogAddCncVisible = true
-        //   this.curWorkId = row.id
-        //   this.getCncRecordList(row.id)
-        // }
-      } else { // 开完机后自动弹出
-        this.dialogAddCncVisible = true
-        this.getCncRecordList(this.curWorkId)
-      }
+      this.dialogAddCncVisible = true
+      this.curWorkId = row.id
+      this.getCncRecordList(row.id)
+      // if (row) { // 点击行查看弹出
+      //   this.dialogAddCncVisible = true
+      //   this.curWorkId = row.id
+      //   this.getCncRecordList(row.id)
+      //   // if (row.starttime && !row.endtime) {
+      //   //   debugger
+      //   //   this.dialogAddCncVisible = true
+      //   //   this.curWorkId = row.id
+      //   //   this.getCncRecordList(row.id)
+      //   // }
+      // } else { // 开完机后自动弹出
+      //   this.dialogAddCncVisible = true
+      //   this.getCncRecordList(this.curWorkId)
+      // }
     },
     // 获取CNC机器设备记录列表
     async getCncRecordList (id) {
@@ -910,10 +913,14 @@ export default {
       })
     },
     // 获取默认人员列表
-    getPeopleList () {
+    async getPeopleList () {
+      let OptionList = await this.getDefaultPeopleList()
       this.Http.get('serpeople', {department: this.curModuleInfo.departid}
       ).then(res => {
-        this.personList = res.data.list
+        this.personList = res.data.list.map(item => {
+          item.options = OptionList
+          return item
+        })
       }).catch((error) => {
         console.log(error)
         this.$message({
@@ -924,14 +931,17 @@ export default {
     },
     // 获取新增人员时的select框选项
     getDefaultPeopleList () {
-      this.Http.get('departpeople', {worktype: this.userInfo.worktype}
-      ).then(res => {
-        this.selectChoosePeopleList = res.data.list
-      }).catch((error) => {
-        console.log(error)
-        this.$message({
-          message: '服务器繁忙!',
-          type: 'error'
+      return new Promise((resolve, reject) => {
+        this.Http.get('departpeople', {worktype: this.userInfo.worktype}
+        ).then(res => {
+          this.selectChoosePeopleList = res.data.list
+          resolve(res.data.list)
+        }).catch((error) => {
+          console.log(error)
+          this.$message({
+            message: '服务器繁忙!',
+            type: 'error'
+          })
         })
       })
     },
@@ -1053,7 +1063,7 @@ export default {
     },
     // 添加一行人员记录
     addPerson () {
-      this.personList.push({id: '', fname: '', userno: ''})
+      this.personList.push({id: '', fname: '', userno: '', options: this.selectChoosePeopleList})
     },
     // 移除人员记录
     delPerson (idx, row) {
@@ -1077,12 +1087,26 @@ export default {
         this.personList[idx].userno = ''
         this.curPersonId = ''
       } else {
+        this.personList[idx].options = this.selectChoosePeopleList
         this.selectChoosePeopleList.map(item => {
           if (item.id === val) {
             this.personList[idx].fname = item.fname
             this.personList[idx].userno = item.id // item.userno
           }
         })
+      }
+    },
+    // 人员过滤
+    filterMethod (val, idx) {
+      if (val) { // val存在
+        this.personList[idx].options = this.selectChoosePeopleList.filter((item) => {
+          console.log('item', item)
+          if (!!~item.danhao.indexOf(val) || !!~item.fname.indexOf(val)) {
+            return true
+          }
+        })
+      } else { // val为空时，还原数组
+        this.personList[idx].options = this.selectChoosePeopleList
       }
     },
     // 人员select框是否都已选择
@@ -1149,6 +1173,13 @@ export default {
             this.personList = []
             this.curPersonId = ''
             this.dialogAddFormVisible = false
+            this.btLoading = false
+            break
+          case '2':
+            this.$message({
+              message: res.data.message + '!',
+              type: 'warning'
+            })
             this.btLoading = false
             break
           default:
@@ -1286,7 +1317,7 @@ export default {
             return true
           }
         }
-      }, 30)
+      }, 5)
     },
     // 获取工单列表
     getWorkOrderList () {
@@ -1296,6 +1327,7 @@ export default {
         ).then(res => {
           switch (res.data.code) {
             case 1:
+              // this.goTop()
               this.orderList = res.data.orderlist.map((item, idx) => {
                 item.FCheckDateTxt = secondToFormat(item.FCheckDate.time)
                 item.FPlanFinishDateTxt = secondToFormat(item.FPlanFinishDate.time)

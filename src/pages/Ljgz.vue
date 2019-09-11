@@ -290,7 +290,7 @@ export default {
       curWorkId: state => state.curWorkId,
       workOrderFshortnumber: state => state.workOrderFshortnumber,
       workOrderFqty: state => state.workOrderFqty,
-      workOrderFbillno: state => state.workOrderFbillno,
+      curFbillno: state => state.curFbillno,
       curReportInfo: state => state.curReportInfo
     })
   },
@@ -375,7 +375,7 @@ export default {
         page_num: this.curPage,
         fshortnumber: this.workOrderFshortnumber,
         fqty: this.workOrderFqty,
-        fbillno: this.workOrderFbillno
+        fbillno: this.curFbillno
       }
       if (this.formSearch.gongxu !== '全部') {
         Data.gongxu = this.formSearch.gongxu

@@ -32,11 +32,13 @@ export default {
       'updateCurModule',
       'updateCurPage'
     ]),
+    // 跳转工单列表
     toWorkerOrder (item) {
       this.updateCurModule(item)
       this.updateCurPage('WorkOrder')
       this.$router.push({name: 'WorkOrder'})
     },
+    // 获取工序模块
     getModuleList () {
       this.Http.get('leaderdepart', {userid: this.userInfo.id}
       ).then(res => {
