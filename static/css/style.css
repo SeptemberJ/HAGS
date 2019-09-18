@@ -44,6 +44,10 @@ body{
 #saerchNameForm .el-form-item__content{
   width: 80% !important;
 }
+.time .el-input.is-disabled .el-input__inner{
+  background-color: #fff;
+  color: #000;
+}
 /* .TopLineBlock{
   height: 1rem;
   line-height: 1rem;

@@ -16,6 +16,9 @@ const state = {
   workOrderFshortnumber: null,
   workOrderFqty: null,
   workOrderFbillno: null,
+  workOrderIdCNC: null,
+  ifKeepShow: false,
+  HBList: [],
   curReportInfo: null,
   topLineInfo: null,
   reportPerson: null,
@@ -62,6 +65,12 @@ const actions = {
   updateLjgzOption ({commit, state}, Option) {
     commit('setLjgzOption', Option)
   },
+  updateLjgzLjgzIdCNC ({commit, state}, Id) {
+    commit('setLjgzIdCNC', Id)
+  },
+  // updateIfKeepShow ({commit, state}, Status) {
+  //   commit('setIfKeepShow', Status)
+  // },
   updateCurReportInfo ({commit, state}, Info) {
     commit('setCurReportInfo', Info)
   },
@@ -106,6 +115,12 @@ const mutations = {
     state.workOrderFqty = Option.fqty
     state.workOrderFbillno = Option.fbillno
   },
+  setLjgzIdCNC (state, Id) {
+    state.workOrderIdCNC = Id
+  },
+  // setIfKeepShow (state, Status) {
+  //   state.ifKeepShow = Status
+  // },
   setCurReportInfo (state, Info) {
     state.curReportInfo = Info
   },

@@ -10,11 +10,6 @@
       <span class="CursorPointer" style="margin-left: 10px;" @click="toMofify"><i class="el-icon-edit" title="修改密码"></i></span>
       <span class="CursorPointer" style="margin-left: 5px;" @click="logOut"><i class="fa fa-sign-out" title="退出"></i></span>
       </div>
-    <!-- <div class="BackBlock">
-      <span class="CursorPointer" @click="back"><i class="el-icon-arrow-left" title="返回"></i></span>
-    </div>
-    <div class="MainBlock"><span>{{navTxt}} {{curPlantNumber ? '\xa0\xa0\xa0\xa0\xa0\xa0\xa0成品计划数：' + curPlantNumber : ''}}</span></div>
-    <div class="RightAccount">您好,{{userInfo.fname}}<span class="CursorPointer" style="margin-left: 10px;" @click="logOut"><i class="fa fa-sign-out" title="退出"></i></span></div> -->
   </div>
 </template>
 
@@ -23,7 +18,6 @@ import { mapState, mapActions } from 'vuex'
 import {clearCookie} from '../util/utils'
 export default {
   name: 'TopLineBlock',
-  // props: ['navTxt', 'pathName', 'warnVisible', 'detailVisible', 'reportVisible', 'historyVisible', 'curPlantNumber'],
   data () {
     return {
       ljgzFromType: 0 // 0 WorkerOrder 1 HBDetail
@@ -35,6 +29,8 @@ export default {
       userInfo: state => state.userInfo,
       curPage: state => state.curPage,
       beforePage: state => state.beforePage,
+      workOrderIdCNC: state => state.workOrderIdCNC,
+      ifKeepShow: state => state.ifKeepShow,
       workOrderFqty: state => state.workOrderFqty
     })
   },

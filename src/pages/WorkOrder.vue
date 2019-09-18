@@ -116,7 +116,7 @@
     <!-- 新增人员 -->
     <el-dialog id="addPerson" title="新增人员" :visible.sync="dialogAddFormVisible" :close-on-click-modal="false" width="500px">
       <div style="text-align: right;diplay: block;">
-        <el-button type="success" size="small" @click="addPerson">新增</el-button>
+        <el-button type="success" size="small" @click="addPerson('hb')">新增</el-button>
       </div>
       <!-- person list -->
       <el-table
@@ -145,7 +145,7 @@
         </el-table-column>
         <el-table-column label="操作" fixed="right" width="80">
           <template slot-scope="scope">
-            <el-button size="mini" @click="delPerson(scope.$index, scope.row)">移 除</el-button>
+            <el-button size="mini" @click="delPerson(scope.$index, scope.row, 'hb')">移 除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -191,17 +191,19 @@
         <el-table-column
           property="create_timeTxt"
           label="汇报时间"
+          width="125"
           show-overflow-tooltip>
         </el-table-column>
         <el-table-column
           fixed="right"
-          label="操作"
-          width="250">
+          label="操作">
           <template slot-scope="scope">
-            <el-button type="success" size="mini" :disabled="!scope.row.ifCanOpen" @click="showTimeDialog(scope.$index, scope.row, 1)">开机</el-button>
-            <el-button type="danger" size="mini" :disabled="!scope.row.ifCanClose" @click="showTimeDialog(scope.$index, scope.row, 0)">关机</el-button>
-            <el-button type='text' @click="seeHistoryDetail(scope.row)">查看</el-button>
-            <el-button type='text' v-if="userInfo.gongxu == 'CNC'" @click="ShowaAddCNC(scope.row)">机器设备</el-button>
+            <el-button type="success" size="mini" :disabled="!scope.row.ifCanOpen" @click="showTimeDialog(scope.$index, scope.row, 1)">开 机</el-button>
+            <el-button type="danger" size="mini" :disabled="!scope.row.ifCanClose" @click="showTimeDialog(scope.$index, scope.row, 0)">关 机</el-button>
+            <el-button type='primary' size="mini" @click="bootUpAgain(scope.row)">重复开机</el-button>
+            <el-button type='text' @click="seeHistoryDetail(scope.row)">详 情</el-button>
+            <el-button type='text' @click="seeWorkOrderPerson(scope.row)">人 员</el-button>
+            <el-button type='text' v-if="userInfo.gongxu == 'CNC'" @click="ShowaAddCNC(scope.row.id)">机器设备</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -216,7 +218,7 @@
         <el-button @click="dialogHBHistoryVisible = false">关 闭</el-button>
       </div>
       <!-- 内层时间选择 -->
-      <el-dialog
+      <el-dialog class="time"
         width="50%"
         :title="openOrClose ==  0 ? '提交关机时间' : '提交开机时间'"
         :visible.sync="dialogTimeVisible"
@@ -327,13 +329,12 @@
         <el-button type="primary" :loading="btLoading" @click="saveCnc">保 存</el-button>
       </div>
     </el-dialog>
-    <!-- 加入的汇报list -->
+    <!-- 加入的汇报list v-loading="listLoading" -->
     <el-dialog title="汇报工单列表" :visible.sync="dialogHBListVisible" :close-on-click-modal="false" width="850px">
-      <el-table
+      <el-table @row-dblclick="cncToChooseLJ"
         :data="HBListData"
         ref="selectedHBList"
         show-summary
-        v-loading="listLoading"
         @selection-change="handleSelectionChangeHBList"
         style="width: 100%">
         <el-table-column
@@ -381,6 +382,105 @@
         <el-button @click="dialogHBListVisible = false">取 消</el-button>
       </div>
     </el-dialog>
+    <!-- 工单人员列表 -->
+    <el-dialog title="工单人员" :visible.sync="dialogGDPersonVisible" :close-on-click-modal="false" width="750px">
+      <div style="text-align: right;diplay: block;">
+        <el-button type="success" size="small" @click="addPerson('gd')">新增</el-button>
+      </div>
+      <!-- person list -->
+      <el-table
+        :data="personListGD"
+        max-height="250"
+        style="width: 100%;margin-top: .2rem;">
+        <el-table-column
+          type="index"
+          width="50">
+        </el-table-column>
+        <el-table-column
+          property="fname"
+          label="人员"
+          width="125"
+          show-overflow-tooltip>
+        </el-table-column>
+        <!-- <el-table-column
+          label="操作员">
+          <template slot-scope="scope">
+            <el-select v-model="scope.row.id" disabled size="mini" placeholder="请选择">
+              <el-option
+                v-for="item in scope.row.options"
+                :key="item.id"
+                :label="item.fname"
+                :value="item.id">
+                <span style="float: left">{{ item.fname }}</span>
+                <span style="float: right; color: #8492a6; font-size: 13px">{{ item.danhao }}</span>
+              </el-option>
+            </el-select>
+          </template>
+        </el-table-column> -->
+        <el-table-column
+          property="starttime"
+          label="开机时间"
+          width="125"
+          show-overflow-tooltip>
+        </el-table-column>
+        <el-table-column
+          property="endtime"
+          label="关机时间"
+          width="125"
+          show-overflow-tooltip>
+        </el-table-column>
+        <el-table-column label="操作" fixed="right">
+          <template slot-scope="scope">
+            <el-button type="success" size="mini" :disabled="!scope.row.ifCanOpen" @click="showTimeGDDialog(scope.$index, scope.row, 1)">开机</el-button>
+            <el-button type="danger" size="mini" :disabled="!scope.row.ifCanClose" @click="showTimeGDDialog(scope.$index, scope.row, 0)">关机</el-button>
+            <el-button size="mini" @click="delPerson(scope.$index, scope.row, 'gd')">移除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogGDPersonVisible = false">取 消</el-button>
+      </div>
+      <!-- 内层人员新增 -->
+      <el-dialog
+        width="50%"
+        title="人员新增"
+        :visible.sync="dialogAddPersonGDVisible"
+        :close-on-click-modal="false"
+        append-to-body>
+        <el-select v-model="addGDPerson.id" filterable :filter-method="(value) => filterMethodGD(value)" @change="(value) => changePersonGD(value)" size="mini" placeholder="请选择人员">
+          <el-option
+            v-for="item in addGDPerson.options"
+            :key="item.id"
+            :label="item.fname"
+            :value="item.id">
+            <span style="float: left">{{ item.fname }}</span>
+            <span style="float: right; color: #8492a6; font-size: 13px">{{ item.danhao }}</span>
+          </el-option>
+        </el-select>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="dialogAddPersonGDVisible = false">取 消</el-button>
+          <el-button type="danger" @click="saveGDPerson" :loading="btLoading">保 存</el-button>
+        </div>
+      </el-dialog>
+      <!-- 内层时间选择 -->
+      <el-dialog class="time"
+        width="50%"
+        :title="openOrClose ==  0 ? '提交关机时间' : '提交开机时间'"
+        :visible.sync="dialogTimeGDVisible"
+        :close-on-click-modal="false"
+        append-to-body>
+          <el-date-picker
+            disabled
+            v-model="time"
+            value-format="yyyy-MM-dd HH : mm"
+            type="datetime"
+            placeholder="请选择时间">
+          </el-date-picker>
+        <div slot="footer" class="dialog-footer">
+          <el-button type="danger" @click="submitTimeGD" :loading="btLoading">提 交</el-button>
+        </div>
+      </el-dialog>
+    </el-dialog>
   </div>
 </template>
 
@@ -392,7 +492,7 @@ export default {
   name: 'WorkOrder',
   data () {
     return {
-      listLoading: true,
+      listLoading: false,
       btLoading: false,
       filterProductionName: '',
       filterOrderNo: '',
@@ -403,7 +503,13 @@ export default {
       orderList: [], // 工单列表
       defaultPersonList: [], // 页面默认的人员列表
       selectChoosePeopleList: [], // select可选择的person的list
-      personList: [], // 新增页上所有person的list
+      personList: [], // 汇报时新增页上所有person的list
+      personListGD: [], // 工单人员新增页上所有person的list
+      addGDPerson: {id: '', fname: '', userno: '', options: {}}, // 工单新增的人员
+      workIdGDPerson: null, // 工单人员新增时的改的id
+      personIdGDPerson: null, // 开机人员id
+      dialogAddPersonGDVisible: false,
+      dialogTimeGDVisible: false,
       curPersonId: null,
       dialogAddFormVisible: false,
       dialogHBHistoryVisible: false,
@@ -421,9 +527,10 @@ export default {
       time: '', // 开机或关机的提交时间
       selectedList: [], // 当前页的选中项
       selectedAllList: [], // 所有页的选中项集合
-      HBListData: [], // 汇报列表数据
+      // HBListData: [], // 汇报列表数据
       selectedHBList: [], // 勾选加入汇报列表的项
-      dialogHBListVisible: false,
+      // dialogHBListVisible: false,
+      dialogGDPersonVisible: false,
       dialogShutDownReasonVisible: false,
       shutDownReasonList: [
         {label: '明天汇报', value: '明天汇报'},
@@ -437,22 +544,41 @@ export default {
       cncRecordList: [], // 机器设备列表
       equipmentList: [],
       jichuangList: [],
-      curJCId: null // 当前的选择的机床id
+      curJCId: null, // 当前的选择的机床id
+      ifBootUpAgain: false
     }
   },
   computed: {
     ...mapState({
       curModuleInfo: state => state.curModuleInfo,
       userInfo: state => state.userInfo
-    })
+    }),
+    dialogHBListVisible: {
+      get: function () {
+        return this.$store.state.ifKeepShow
+      },
+      set: function (newValue) {
+        this.$store.state.ifKeepShow = newValue
+      }
+    },
+    HBListData: {
+      get: function () {
+        return this.$store.state.HBList
+      },
+      set: function (newValue) {
+        this.$store.state.HBList = newValue
+      }
+    }
   },
   created () {
     this.getWorkOrderList()
     this.getEquipmentList()
+    this.updateLjgzLjgzIdCNC(null) // 初始化LjgzIdCNC 确保只有回报列表双击才会显示加入零件列表
   },
   methods: {
     ...mapActions([
       'updateLjgzOption',
+      'updateLjgzLjgzIdCNC',
       'updateCurPage',
       'updateCurWorkId',
       'updateIfJustSee',
@@ -640,18 +766,54 @@ export default {
         })
       })
     },
-    // 显示开关机的日期时间弹窗
-    async showTimeDialog (idx, row, type) {
-      let ifCanOpertionResult = await this.checkBootUp(row.id)
-      if (this.userInfo.gongxu === 'CNC' && ifCanOpertionResult.code === '1') { // CNC
-        this.$message({
-          message: ifCanOpertionResult.message + '!',
-          type: 'warning'
-        })
-        if (type === 1) { // 开机
-          this.ShowaAddCNC(row)
+    // 人员开关机
+    async showTimeGDDialog (idx, row, type) {
+      this.personIdGDPerson = row.id
+      this.openOrClose = type
+      if (type === 1 && this.userInfo.gongxu === 'CNC') { // CNC开机需要验证
+        let ifCanOpertionResult = await this.checkBootUp(this.workIdGDPerson)
+        if (ifCanOpertionResult.code === '1') { // CNC
+          this.$message({
+            message: ifCanOpertionResult.message + '!',
+            type: 'warning'
+          })
+          this.ShowaAddCNC(this.workIdGDPerson)
+        } else {
+          this.dialogTimeGDVisible = true
+          this.time = new Date()
         }
-      } else { // 其他
+      } else {
+        if (type === 0) {
+          if (!row.starttime) {
+            this.$message({
+              message: '还未开机，不能关机!',
+              type: 'warning'
+            })
+            return false
+          }
+          this.curStartTmie = row.starttime
+        }
+        this.dialogTimeGDVisible = true
+        this.time = new Date()
+      }
+    },
+    // 开关机
+    async showTimeDialog (idx, row, type) {
+      this.openOrClose = type
+      if (type === 1 && this.userInfo.gongxu === 'CNC') { // CNC开机需要验证
+        let ifCanOpertionResult = await this.checkBootUp(row.id)
+        if (ifCanOpertionResult.code === '1') { // CNC
+          this.$message({
+            message: ifCanOpertionResult.message + '!',
+            type: 'warning'
+          })
+          this.ShowaAddCNC(row.id)
+        } else {
+          this.dialogTimeVisible = true
+          this.time = new Date()
+          this.curWorkId = row.id
+        }
+      } else {
         if (type === 0) {
           if (!row.starttime) {
             this.$message({
@@ -663,13 +825,27 @@ export default {
           this.curStartTmie = row.starttime
         }
         this.dialogTimeVisible = true
-        let curDate = new Date()
-        this.time = curDate // curDate.getHours() + '-' + curDate.getMinutes()
+        this.time = new Date()
         this.curWorkId = row.id
-        this.openOrClose = type
       }
     },
-    // CNC检查是否允许关机
+    // 重复开机
+    bootUpAgain (row) {
+      if (!row.endtime) {
+        this.$message({
+          message: '还未关机，不能重复开机!',
+          type: 'warning'
+        })
+        return false
+      }
+      this.openOrClose = 2 // 重复开机
+      this.curWorkId = row.id
+      this.ifBootUpAgain = true
+      this.getPeopleList()
+      this.getDefaultPeopleList()
+      this.dialogAddFormVisible = true
+    },
+    // CNC检查是否允许开机
     checkBootUp (id) {
       return new Promise((resolve, reject) => {
         this.Http.get('checkguanji', {workid: id}
@@ -686,17 +862,17 @@ export default {
     },
     // 开关机保存时间
     submitTime () {
-      if (!this.time) {
-        this.$message({
-          message: '请选择时间!',
-          type: 'warning'
-        })
-        return false
-      }
       if (this.openOrClose === 0) {
         this.shutDown()
       } else {
         this.bootUp()
+      }
+    },
+    submitTimeGD () {
+      if (this.openOrClose === 0) {
+        this.shutDownGD()
+      } else {
+        this.bootUpGD()
       }
     },
     // 提交开机时间
@@ -713,6 +889,36 @@ export default {
             this.btLoading = false
             this.dialogTimeVisible = false
             this.handleCurrentChangeHB()
+            break
+          default:
+            this.btLoading = false
+            this.$message({
+              message: res.data.message + '!',
+              type: 'error'
+            })
+        }
+      }).catch((error) => {
+        console.log(error)
+        this.btLoading = false
+        this.$message({
+          message: '服务器繁忙!',
+          type: 'error'
+        })
+      })
+    },
+    bootUpGD () {
+      this.btLoading = true
+      this.Http.post('rykaiji?starttime=' + dateToFormatAll(this.time) + '&workid=' + this.workIdGDPerson + '&userno=' + this.personIdGDPerson
+      ).then(res => {
+        switch (res.data.code) {
+          case 1:
+            this.$message({
+              message: '开机成功!',
+              type: 'success'
+            })
+            this.btLoading = false
+            this.dialogTimeGDVisible = false
+            this.getPeopleListGD()
             break
           default:
             this.btLoading = false
@@ -768,6 +974,40 @@ export default {
                 console.log(error)
               })
             })
+            break
+          default:
+            this.btLoading = false
+            this.$message({
+              message: res.data.message + '!',
+              type: 'error'
+            })
+        }
+      }).catch((error) => {
+        console.log(error)
+        this.btLoading = false
+        this.$message({
+          message: '服务器繁忙!',
+          type: 'error'
+        })
+      })
+    },
+    shutDownGD () {
+      let DateStart = this.$moment(this.curStartTmie)
+      let DateEnd = this.$moment(dateToFormatAll(this.time))
+      let worktime = DateEnd.diff(DateStart, 'minute')
+      this.btLoading = true
+      this.Http.post('ryguanji?endtime=' + dateToFormatAll(this.time) + '&worktime=' + worktime + '&workid=' + this.workIdGDPerson + '&userno=' + this.personIdGDPerson
+      ).then(res => {
+        switch (res.data.code) {
+          case '1':
+            this.$message({
+              message: '关机成功!',
+              type: 'success'
+            })
+            this.btLoading = false
+            this.shutDownReason = ''
+            this.dialogTimeGDVisible = false
+            this.getPeopleListGD()
             break
           default:
             this.btLoading = false
@@ -856,11 +1096,17 @@ export default {
       this.updateCurPage('HBDetail')
       this.$router.push({name: 'HBDetail'})
     },
+    // 查看工单人员
+    seeWorkOrderPerson (row) {
+      this.dialogGDPersonVisible = true
+      this.workIdGDPerson = row.id
+      this.getPeopleListGD()
+    },
     // 显示CNC机器设备列表弹窗
-    ShowaAddCNC (row) {
+    ShowaAddCNC (Id) {
       this.dialogAddCncVisible = true
-      this.curWorkId = row.id
-      this.getCncRecordList(row.id)
+      this.curWorkId = Id
+      this.getCncRecordList(Id)
       // if (row) { // 点击行查看弹出
       //   this.dialogAddCncVisible = true
       //   this.curWorkId = row.id
@@ -919,6 +1165,25 @@ export default {
       ).then(res => {
         this.personList = res.data.list.map(item => {
           item.options = OptionList
+          return item
+        })
+      }).catch((error) => {
+        console.log(error)
+        this.$message({
+          message: '服务器繁忙!',
+          type: 'error'
+        })
+      })
+    },
+    // 工单列表获取默认人员列表
+    async getPeopleListGD () {
+      let OptionList = await this.getDefaultPeopleList()
+      this.Http.get('gdrylist', {workid: this.workIdGDPerson}
+      ).then(res => {
+        this.personListGD = res.data.list.map(item => {
+          item.options = OptionList
+          item.ifCanOpen = !item.starttime
+          item.ifCanClose = !item.endtime
           return item
         })
       }).catch((error) => {
@@ -1061,13 +1326,55 @@ export default {
         })
       })
     },
-    // 添加一行人员记录
-    addPerson () {
-      this.personList.push({id: '', fname: '', userno: '', options: this.selectChoosePeopleList})
+    // 添加人员
+    addPerson (type) {
+      if (type === 'gd') {
+        this.dialogAddPersonGDVisible = true
+        this.addGDPerson = {id: '', fname: '', userno: '', options: this.selectChoosePeopleList}
+      } else {
+        this.personList.push({id: '', fname: '', userno: '', options: this.selectChoosePeopleList})
+      }
     },
     // 移除人员记录
-    delPerson (idx, row) {
-      this.personList.splice(idx, 1)
+    delPerson (idx, row, type) {
+      if (type === 'hb') {
+        this.personList.splice(idx, 1)
+      } else {
+        this.$confirm('此操作将删除该人员, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.delGDPerson(row.id)
+        }).catch(() => {
+        })
+      }
+    },
+    delGDPerson (Id) {
+      this.Http.get('delhbry', {workid: this.workIdGDPerson, userno: Id}
+      ).then(res => {
+        switch (res.data.code) {
+          case '1':
+            this.$message({
+              message: '人员删除成功!',
+              type: 'success'
+            })
+            this.getPeopleListGD()
+            break
+          default:
+            this.$message({
+              message: res.data.message + '!',
+              type: 'error'
+            })
+        }
+      }).catch((error) => {
+        console.log(error)
+        this.btLoading = false
+        this.$message({
+          message: '服务器繁忙!',
+          type: 'error'
+        })
+      })
     },
     // 查看是否重复
     checkId (pesron) {
@@ -1086,6 +1393,7 @@ export default {
         this.personList[idx].fname = ''
         this.personList[idx].userno = ''
         this.curPersonId = ''
+        this.personList[idx].options = this.selectChoosePeopleList
       } else {
         this.personList[idx].options = this.selectChoosePeopleList
         this.selectChoosePeopleList.map(item => {
@@ -1096,17 +1404,51 @@ export default {
         })
       }
     },
+    changePersonGD (val) {
+      // 校验重复
+      this.curPersonId = val
+      if (this.personListGD.filter(this.checkId).length >= 1) {
+        this.$message({
+          message: '该操作员已存在!',
+          type: 'error'
+        })
+        this.addGDPerson.id = ''
+        this.addGDPerson.fname = ''
+        this.addGDPerson.userno = ''
+        this.curPersonId = ''
+        this.addGDPerson.options = this.selectChoosePeopleList
+      } else {
+        this.addGDPerson.options = this.selectChoosePeopleList
+        this.selectChoosePeopleList.map(item => {
+          if (item.id === val) {
+            this.addGDPerson.fname = item.fname
+            this.addGDPerson.userno = item.id // item.userno
+          }
+        })
+      }
+    },
     // 人员过滤
     filterMethod (val, idx) {
       if (val) { // val存在
         this.personList[idx].options = this.selectChoosePeopleList.filter((item) => {
-          console.log('item', item)
           if (!!~item.danhao.indexOf(val) || !!~item.fname.indexOf(val)) {
             return true
           }
         })
       } else { // val为空时，还原数组
         this.personList[idx].options = this.selectChoosePeopleList
+      }
+    },
+    // 工单人员过滤
+    filterMethodGD (val) {
+      if (val) { // val存在
+        this.addGDPerson.options = this.selectChoosePeopleList.filter((item) => {
+          if (!!~item.danhao.indexOf(val) || !!~item.fname.indexOf(val)) {
+            return true
+          }
+        })
+      } else { // val为空时，还原数组
+        this.addGDPerson.options = this.selectChoosePeopleList
       }
     },
     // 人员select框是否都已选择
@@ -1120,6 +1462,44 @@ export default {
           if (idx === this.personList.length - 1) {
             resolve(ifAllSelect)
           }
+        })
+      })
+    },
+    // 保存新增的工单人员
+    saveGDPerson () {
+      if (!this.addGDPerson.id) {
+        this.$message({
+          message: '请选择人员!',
+          type: 'warning'
+        })
+        return false
+      }
+      this.btLoading = true
+      this.Http.post('addry?workid=' + this.workIdGDPerson + '&userno=' + this.addGDPerson.id + '&fname=' + this.addGDPerson.fname
+      ).then(res => {
+        switch (res.data.code) {
+          case 1:
+            this.$message({
+              message: '人员保存成功!',
+              type: 'success'
+            })
+            this.getPeopleListGD()
+            this.dialogAddPersonGDVisible = false
+            this.btLoading = false
+            break
+          default:
+            this.btLoading = false
+            this.$message({
+              message: res.data.message + '!',
+              type: 'error'
+            })
+        }
+      }).catch((error) => {
+        console.log(error)
+        this.btLoading = false
+        this.$message({
+          message: '服务器繁忙!',
+          type: 'error'
         })
       })
     },
@@ -1141,6 +1521,77 @@ export default {
         return false
       }
       this.btLoading = true
+      if (this.ifBootUpAgain) { // 重复开机提交人员
+        this.savePersonBootUpAagin()
+      } else {
+        if (this.userInfo.gongxu === 'CNC') {
+          this.savePersonCNC()
+        } else {
+          this.savePersonOthers()
+        }
+      }
+    },
+    // 重复开机提交人员
+    savePersonBootUpAagin () {
+      let Data = {
+        workid: this.curWorkId,
+        peoplelist: this.personList.map(item => {
+          item.userno = item.id
+          return item
+        })
+        // worklist: this.HBListData,
+        // gongxu: this.userInfo.gongxu,
+        // fbiller: this.userInfo.fname,
+        // department: this.curModuleInfo.departid,
+        // jlruserno: this.userInfo.userno
+      }
+      this.Http.post('cfkaiji', Data
+      ).then(res => {
+        switch (res.data.code) {
+          case '1':
+            this.$message({
+              message: '人员保存成功!',
+              type: 'success'
+            })
+            if (this.ifHistoryDay) {
+              this.getHBHistoryDay()
+            } else {
+              this.getHBHistory()
+            }
+            // 初始化数据
+            this.selectedList = []
+            this.selectedAllList = []
+            this.huibaoOrderList = []
+            this.personList = []
+            this.curPersonId = ''
+            this.dialogAddFormVisible = false
+            this.btLoading = false
+            break
+          case '2':
+            this.$message({
+              message: res.data.message + '!',
+              type: 'warning'
+            })
+            this.btLoading = false
+            break
+          default:
+            this.btLoading = false
+            this.$message({
+              message: res.data.message + '!',
+              type: 'error'
+            })
+        }
+      }).catch((error) => {
+        console.log(error)
+        this.btLoading = false
+        this.$message({
+          message: '服务器繁忙!',
+          type: 'error'
+        })
+      })
+    },
+    // 非CNC保存人员
+    savePersonOthers () {
       let Data = {
         gongxu: this.userInfo.gongxu,
         fbiller: this.userInfo.fname,
@@ -1157,6 +1608,62 @@ export default {
         // }),
       }
       this.Http.post('insertwork', Data
+      ).then(res => {
+        switch (res.data.code) {
+          case '1':
+            this.$message({
+              message: '人员保存成功!',
+              type: 'success'
+            })
+            this.getWorkOrderList()
+            // 初始化数据
+            // this.curPage = 1
+            this.selectedList = []
+            this.selectedAllList = []
+            this.huibaoOrderList = []
+            this.personList = []
+            this.curPersonId = ''
+            this.dialogAddFormVisible = false
+            this.btLoading = false
+            break
+          case '2':
+            this.$message({
+              message: res.data.message + '!',
+              type: 'warning'
+            })
+            this.btLoading = false
+            break
+          default:
+            this.btLoading = false
+            this.$message({
+              message: res.data.message + '!',
+              type: 'error'
+            })
+        }
+      }).catch((error) => {
+        console.log(error)
+        this.btLoading = false
+        this.$message({
+          message: '服务器繁忙!',
+          type: 'error'
+        })
+      })
+    },
+    // CNC保存人员
+    savePersonCNC () {
+      let Data = {
+        gongxu: this.userInfo.gongxu,
+        fbiller: this.userInfo.fname,
+        department: this.curModuleInfo.departid,
+        jlruserno: this.userInfo.userno,
+        peoplelist: this.personList.map(item => {
+          item.userno = item.id
+          return item
+        }),
+        worklist: this.HBListData
+      }
+      console.log(Data)
+      this.Http.post('insertworkcnc', Data
       ).then(res => {
         switch (res.data.code) {
           case '1':
@@ -1234,6 +1741,10 @@ export default {
       this.dialogHBListVisible = true
       this.getHBList()
     },
+    toggleHBList (status) {
+      this.dialogHBListVisible = status
+      this.getHBList()
+    },
     // 确认去汇报
     async sureToHB () {
       if (this.HBListData.length === 0) {
@@ -1295,6 +1806,15 @@ export default {
           type: 'error'
         })
       })
+    },
+    // CNC
+    cncToChooseLJ (row) {
+      if (this.userInfo.gongxu === 'CNC') {
+        this.updateLjgzLjgzIdCNC(row.id)
+        row.FShortNumber = row.fshortnumber
+        row.fqty = row.jhsnumber
+        this.goLjgz(row)
+      }
     },
     // 跳转零件管制
     goLjgz (row) {

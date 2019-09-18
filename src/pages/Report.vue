@@ -31,7 +31,7 @@
         <el-col :span="4" class="TextAlignL">本次返工完工报废数: {{topLineInfo.fgbfnumber}}</el-col>
       </el-row>
       <el-row style="margin:10px 0;">
-        <el-col :span="24" class="TextAlignR" v-if="ifCanAdd">
+        <el-col :span="24" class="TextAlignR">
           <el-button size="small" type="Info" v-if="userInfo.gongxu == '激光'" @click="getAppendProduction">附加产品列表</el-button>
           <el-button size="small" type="success" v-if="userInfo.gongxu == '激光'" @click="addAppendProduction">附加产品新增</el-button>
           <el-button size="small" type="warning" @click="huizong">汇报</el-button>
@@ -87,7 +87,7 @@
       <el-table-column
         fixed="right"
         label="操作"
-        width="120">
+        width="140">
         <template slot-scope="scope">
           <el-button
             size="medium"
@@ -162,8 +162,9 @@
         </el-form-item>
         <el-form-item label="是否返工" prop="isback" v-if="!ifAdd">
           <el-select v-model="form.isback" placeholder="请选择是否返工" :disabled="ifEdit">
-            <el-option label="不是返工" value="不是返工"></el-option>
-            <el-option label="是返工" value="是返工"></el-option>
+            <el-option v-if="!(!curReportInfo.fsk && userInfo.gongxu === 'CNC')" label="不是返工" value="不是返工"></el-option>
+            <el-option v-if="!(!curReportInfo.fsk && userInfo.gongxu === 'CNC')" label="是返工" value="是返工"></el-option>
+            <el-option label="帮别人返工" value="帮别人返工"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="停机原因" prop="freason" v-if="!ifAdd">
@@ -442,7 +443,7 @@ export default {
           forder = Info.fqg
           break
         case 'CNC':
-          forder = Info.fsk
+          forder = Info.fsk ? Info.fsk : 1
           break
         case '激光':
           forder = Info.fjg
@@ -1204,54 +1205,79 @@ export default {
         this.listLoading = true
         this.Http.get('huibaolist2', {number: this.pageSize, page_num: this.curPage, fidz: this.curReportInfo.fidz, fidc: this.curReportInfo.fidc, gongxu: this.curReportInfo.gxName, department: this.curModuleInfo.departid, forder: this.forder, jhsnumber: this.curReportInfo.jhsnumber, workid: this.curWorkId, fbillno: this.curFbillno}
         ).then(res => {
-          switch (res.data.code) {
-            case 0:
-              this.ifCanAdd = false
-              this.$message({
-                message: res.data.message + '!',
-                type: 'warning'
-              })
-              this.listLoading = false
-              break
-            case 1:
-              this.zhubiaoid = res.data.zhubiaoid
-              this.isshow = res.data.isshow
-              this.topLineInfo = {
-                badnumber: res.data.badnumber,
-                fnumber: res.data.fnumber,
-                isback: res.data.isback,
-                // ischeck: res.data.ischeck,
-                jhnumber: res.data.jhnumber,
-                jhsnumber: res.data.jhsnumber,
-                kcnumber: res.data.kcnumber,
-                synumber: res.data.synumber,
-                fnote: res.data.fnote,
-                wcnumber: res.data.wcnumber,
-                bfnumber: res.data.bfnumber,
-                syjsnumber: res.data.syjsnumber,
-                ljfgnumber: res.data.ljfgnumber,
-                ljfgbfnumber: res.data.ljfgbfnumber,
-                fgnumber: res.data.fgnumber,
-                fgbfnumber: res.data.fgbfnumber,
-                wckcnumber: res.data.wckcnumber
-              }
-              this.reportList = res.data.list
-              // res.data.list.map(item => {
-              //   item.starttimeTxt = item.starttime ? (item.starttime).replace('-', '点') + '分' : ''
-              //   item.endtimeTxt = item.endtime ? (item.endtime).replace('-', '点') + '分' : ''
-              //   return item
-              // })
-              this.sum = res.data.orderCount
-              this.listLoading = false
-              resolve(res.data.list)
-              break
-            default:
-              this.listLoading = false
-              this.$message({
-                message: res.data.message + '!',
-                type: 'error'
-              })
+          this.zhubiaoid = res.data.zhubiaoid
+          this.isshow = res.data.isshow
+          this.topLineInfo = {
+            badnumber: res.data.badnumber,
+            fnumber: res.data.fnumber,
+            isback: res.data.isback,
+            // ischeck: res.data.ischeck,
+            jhnumber: res.data.jhnumber,
+            jhsnumber: res.data.jhsnumber,
+            kcnumber: res.data.kcnumber,
+            synumber: res.data.synumber,
+            fnote: res.data.fnote,
+            wcnumber: res.data.wcnumber,
+            bfnumber: res.data.bfnumber,
+            syjsnumber: res.data.syjsnumber,
+            ljfgnumber: res.data.ljfgnumber,
+            ljfgbfnumber: res.data.ljfgbfnumber,
+            fgnumber: res.data.fgnumber,
+            fgbfnumber: res.data.fgbfnumber,
+            wckcnumber: res.data.wckcnumber
           }
+          this.reportList = res.data.list
+          this.sum = res.data.orderCount
+          this.listLoading = false
+          resolve(res.data.list)
+          // switch (res.data.code) {
+          //   case 0:
+          //     // this.ifCanAdd = false
+          //     // this.$message({
+          //     //   message: res.data.message + '!',
+          //     //   type: 'warning'
+          //     // })
+          //     // this.listLoading = false
+          //     break
+          //   case 1:
+          //     this.zhubiaoid = res.data.zhubiaoid
+          //     this.isshow = res.data.isshow
+          //     this.topLineInfo = {
+          //       badnumber: res.data.badnumber,
+          //       fnumber: res.data.fnumber,
+          //       isback: res.data.isback,
+          //       // ischeck: res.data.ischeck,
+          //       jhnumber: res.data.jhnumber,
+          //       jhsnumber: res.data.jhsnumber,
+          //       kcnumber: res.data.kcnumber,
+          //       synumber: res.data.synumber,
+          //       fnote: res.data.fnote,
+          //       wcnumber: res.data.wcnumber,
+          //       bfnumber: res.data.bfnumber,
+          //       syjsnumber: res.data.syjsnumber,
+          //       ljfgnumber: res.data.ljfgnumber,
+          //       ljfgbfnumber: res.data.ljfgbfnumber,
+          //       fgnumber: res.data.fgnumber,
+          //       fgbfnumber: res.data.fgbfnumber,
+          //       wckcnumber: res.data.wckcnumber
+          //     }
+          //     this.reportList = res.data.list
+          //     this.sum = res.data.orderCount
+          //     this.listLoading = false
+          //     resolve(res.data.list)
+          //     // res.data.list.map(item => {
+          //     //   item.starttimeTxt = item.starttime ? (item.starttime).replace('-', '点') + '分' : ''
+          //     //   item.endtimeTxt = item.endtime ? (item.endtime).replace('-', '点') + '分' : ''
+          //     //   return item
+          //     // })
+          //     break
+          //   default:
+          //     this.listLoading = false
+          //     this.$message({
+          //       message: res.data.message + '!',
+          //       type: 'error'
+          //     })
+          // }
         }).catch((error) => {
           console.log(error)
           this.listLoading = false

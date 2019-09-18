@@ -1,28 +1,33 @@
 <template>
   <div class="Ljgz">
     <el-row>
-      <el-form :inline="true" class="demo-form-inline">
-        <el-form-item label="工序">
-          <el-select v-model="formSearch.gongxu" placeholder="请选择" @change="search">
-            <el-option
-              v-for="item in GXOptions"
-              :key="item"
-              :label="item"
-              :value="item">
-            </el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="零件名称">
-          <el-input v-model="formSearch.ljname" placeholder="请输入零件名称" size="small" clearable></el-input>
-        </el-form-item>
-        <el-form-item label="材料名称">
-          <el-input v-model="formSearch.clname" placeholder="请输入材料名称" size="small" clearable></el-input>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" icon="el-icon-search" size="small" @click="search">搜索</el-button>
-          <el-button size="small" icon="el-icon-refresh" @click="reset">重置</el-button>
-        </el-form-item>
-      </el-form>
+      <el-col :span="24">
+        <el-form :inline="true" class="demo-form-inline">
+          <el-form-item label="工序">
+            <el-select v-model="formSearch.gongxu" placeholder="请选择" @change="search">
+              <el-option
+                v-for="item in GXOptions"
+                :key="item"
+                :label="item"
+                :value="item">
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="零件名称">
+            <el-input v-model="formSearch.ljname" placeholder="请输入零件名称" size="small" clearable></el-input>
+          </el-form-item>
+          <el-form-item label="材料名称">
+            <el-input v-model="formSearch.clname" placeholder="请输入材料名称" size="small" clearable></el-input>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" icon="el-icon-search" size="small" @click="search">搜索</el-button>
+            <el-button size="small" icon="el-icon-refresh" @click="reset">重置</el-button>
+          </el-form-item>
+        </el-form>
+      </el-col>
+      <el-col :span="24" style="text-align: right;" v-if="userInfo.gongxu === 'CNC' && workOrderIdCNC">
+        <el-button size="small" type="warning" @click="showLJList">零件列表</el-button>
+      </el-col>
     </el-row>
     <el-table @row-dblclick="addReportThroughRow"
       :data="ljgzList"
@@ -32,6 +37,13 @@
         fixed
         type="index"
         width="50">
+      </el-table-column>
+      <el-table-column v-if="userInfo.gongxu === 'CNC' && workOrderIdCNC"
+        label="操作"
+        width="100">
+        <template slot-scope="scope">
+          <el-button size="mini" type="warning" @click="addToLJlIST(scope.$index, scope.row)">加入零件列表</el-button>
+        </template>
       </el-table-column>
       <el-table-column
         label="图纸"
@@ -122,11 +134,12 @@
         label="CNC"
         width="80">
         <template slot-scope="scope">
-          <el-button v-if="scope.row.fsk && ljgzFromType == 1"
+          <!-- <el-button v-if="scope.row.fsk && ljgzFromType == 1" -->
+          <el-button v-if="ljgzFromType == 1"
             size="mini"
             type="text"
             style="color:#606266;"
-            @click="addReport(scope.$index, scope.row, 'CNC')">{{scope.row.fsk}}</el-button>
+            @click="addReport(scope.$index, scope.row, 'CNC')">{{scope.row.fsk ? scope.row.fsk : '--'}}</el-button>
           <span v-else>{{scope.row.fsk}}</span>
         </template>
       </el-table-column>
@@ -252,6 +265,60 @@
       layout="total, prev, pager, next, jumper"
       :total="sum">
     </el-pagination>
+    <!-- 加入的零件list -->
+    <el-dialog title="零件列表" :visible.sync="dialogLJListVisible" :close-on-click-modal="false" width="850px">
+      <el-table
+        :data="LJListData"
+        show-summary
+        v-loading="listLoading"
+        style="width: 100%">
+        <el-table-column
+          type="index"
+          width="50">
+        </el-table-column>
+        <el-table-column
+          property="fnumber"
+          label="零件号"
+          width="150"
+          show-overflow-tooltip>
+        </el-table-column>
+        <el-table-column
+          property="fname"
+          label="零件名称"
+          width="150"
+          show-overflow-tooltip>
+        </el-table-column>
+        <el-table-column
+          property="clnumber"
+          label="材料代码"
+          width="150"
+          show-overflow-tooltip>
+        </el-table-column>
+        <el-table-column
+          property="clname"
+          label="材料名称"
+          width="150"
+          show-overflow-tooltip>
+        </el-table-column>
+        <el-table-column
+          property="jhsnumber"
+          label="数量"
+          width="70"
+          show-overflow-tooltip>
+        </el-table-column>
+        <el-table-column
+          fixed="right"
+          label="操作"
+          width="80">
+          <template slot-scope="scope">
+            <el-button size="mini" @click="removeFromList(scope.$index, scope.row, 0)">移除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogLJListVisible = false">关 闭</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -261,7 +328,10 @@ export default {
   name: 'Ljgz',
   data () {
     return {
-      ljgzFromType: 0, // 0 - WorkerOrder 1 - HBDetail
+      // ljgzFromType: 0, // 0 - WorkerOrder 1 - HBDetail
+      dialogLJListVisible: false,
+      listLoading: false,
+      LJListData: [],
       formSearch: {
         ljname: '',
         clname: '',
@@ -271,18 +341,12 @@ export default {
       curPage: 1,
       pageSize: 10,
       sum: 0,
-      listLoading: false,
       ljgzList: []
     }
   },
   created () {
-    this.formSearch.gongxu = this.userInfo.gongxu
+    this.formSearch.gongxu = this.userInfo.gongxu === 'CNC' ? '全部' : this.userInfo.gongxu
     this.getLjgzList()
-    if (this.curWorkId) {
-      this.ljgzFromType = 1
-    } else {
-      this.ljgzFromType = 0
-    }
   },
   computed: {
     ...mapState({
@@ -291,8 +355,17 @@ export default {
       workOrderFshortnumber: state => state.workOrderFshortnumber,
       workOrderFqty: state => state.workOrderFqty,
       curFbillno: state => state.curFbillno,
-      curReportInfo: state => state.curReportInfo
-    })
+      workOrderIdCNC: state => state.workOrderIdCNC,
+      curModuleInfo: state => state.curModuleInfo
+    }),
+    ljgzFromType: function () {
+      // 0 - WorkerOrder 1 - HBDetail
+      if (this.curWorkId) {
+        return 1
+      } else {
+        return 0
+      }
+    }
   },
   methods: {
     ...mapActions([
@@ -304,14 +377,42 @@ export default {
       if (this.ljgzFromType === 0) { // 非历史纪录过来的不可以点击
         return false
       } else {
-        row.gxName = this.userInfo.gongxu
-        this.updateCurReportInfo(row)
-        this.updateCurPage('Report')
-        this.$router.push({name: 'Report'})
+        this.addReport(null, row, this.userInfo.gongxu)
+        // row.gxName = this.userInfo.gongxu
+        // this.updateCurReportInfo(row)
+        // this.updateCurPage('Report')
+        // this.$router.push({name: 'Report'})
       }
     },
     // 通过点击工序数值跳转report页面
     addReport (idx, row, gxName) {
+      let forder = null
+      switch (gxName) {
+        case '切管':
+          forder = row.fqg
+          break
+        case 'CNC':
+          forder = row.fsk ? row.fsk : 1
+          break
+        case '激光':
+          forder = row.fjg
+          break
+        case '折弯':
+          forder = row.fzw
+          break
+        case '焊接':
+          forder = row.fhj
+          break
+        case '抛丸':
+          forder = row.fpw
+          break
+        case '喷涂':
+          forder = row.fpt
+          break
+        case '包装':
+          forder = row.fbz
+          break
+      }
       if (gxName !== this.userInfo.gongxu) {
         this.$message({
           message: '对不起，您没有操作此道工序的权限!',
@@ -319,10 +420,42 @@ export default {
         })
         return false
       }
-      row.gxName = gxName
-      this.updateCurReportInfo(row)
-      this.updateCurPage('Report')
-      this.$router.push({name: 'Report'})
+      // 确认是否汇报
+      this.Http.get('huibaolist2', {number: 10, page_num: 1, fidz: row.fidz, fidc: row.fidc, gongxu: gxName, department: this.curModuleInfo.departid, forder: forder, jhsnumber: row.jhsnumber, workid: this.curWorkId, fbillno: this.curFbillno}
+      ).then(res => {
+        switch (res.data.code) {
+          case 0:
+            this.$confirm(res.data.message + ', 是否继续汇报?', '提示', {
+              confirmButtonText: '确定',
+              cancelButtonText: '取消',
+              type: 'warning'
+            }).then(() => {
+              row.gxName = gxName
+              this.updateCurReportInfo(row)
+              this.updateCurPage('Report')
+              this.$router.push({name: 'Report'})
+            }).catch(() => {
+            })
+            break
+          case 1:
+            row.gxName = gxName
+            this.updateCurReportInfo(row)
+            this.updateCurPage('Report')
+            this.$router.push({name: 'Report'})
+            break
+          default:
+            this.$message({
+              message: res.data.message + '!',
+              type: 'error'
+            })
+        }
+      }).catch((error) => {
+        console.log(error)
+        this.$message({
+          message: '服务器繁忙!',
+          type: 'error'
+        })
+      })
     },
     // canNotAddReport () {
     //   this.$message({
@@ -330,6 +463,85 @@ export default {
     //     type: 'warning'
     //   })
     // },
+    showLJList () {
+      this.dialogLJListVisible = true
+      this.getLJList()
+    },
+    // CNC加入零件列表
+    addToLJlIST (idx, row) {
+      let Data = {
+        fidz: row.fidz,
+        fidc: row.fidc,
+        fnumber: row.fnumber,
+        fname: row.fname,
+        clnumber: row.clnumber,
+        clname: row.clname,
+        jhsfnumber: row.jhsnumber,
+        pid: this.workOrderIdCNC,
+        userno: this.userInfo.userno
+      }
+      this.Http.post('addljrecord', Data
+      ).then(res => {
+        switch (res.data.code) {
+          case '1':
+            this.$message({
+              message: '加入零件列表成功!',
+              type: 'success'
+            })
+            break
+          default:
+            this.$message({
+              message: res.data.message + '!',
+              type: 'error'
+            })
+        }
+      }).catch((error) => {
+        console.log(error)
+        this.$message({
+          message: '服务器繁忙!',
+          type: 'error'
+        })
+      })
+    },
+    // 从加入的零件列表中移除
+    removeFromList (idx, row) {
+      this.Http.get('delljrecord', {id: row.id}
+      ).then(res => {
+        switch (res.data.code) {
+          case '1':
+            this.$message({
+              message: '移除成功!',
+              type: 'success'
+            })
+            this.getLJList()
+            break
+          default:
+            this.$message({
+              message: res.data.message + '!',
+              type: 'error'
+            })
+        }
+      }).catch((error) => {
+        console.log(error)
+        this.$message({
+          message: '服务器繁忙!',
+          type: 'error'
+        })
+      })
+    },
+    // CNC获取零件列表
+    getLJList () {
+      this.Http.get('ljrecordlist', {id: this.workOrderIdCNC}
+      ).then(res => {
+        this.LJListData = res.data.list
+      }).catch((error) => {
+        console.log(error)
+        this.$message({
+          message: '服务器繁忙!',
+          type: 'error'
+        })
+      })
+    },
     // 查看图纸
     tuzhi (idx, row) {
       this.Http.get('sertuzhi', {fidz: row.fidz, fidc: row.fidc}
@@ -375,7 +587,8 @@ export default {
         page_num: this.curPage,
         fshortnumber: this.workOrderFshortnumber,
         fqty: this.workOrderFqty,
-        fbillno: this.curFbillno
+        fbillno: this.curFbillno,
+        workid: this.curWorkId
       }
       if (this.formSearch.gongxu !== '全部') {
         Data.gongxu = this.formSearch.gongxu
@@ -387,7 +600,8 @@ export default {
         Data.clname = this.formSearch.clname
       }
       this.listLoading = true
-      this.Http.get('serljgz', Data
+      this.Http.get(this.ljgzFromType === 1 && this.userInfo.gongxu === 'CNC' ? 'serljgzcnc' : 'serljgz', Data
+      // this.Http.get('serljgz', Data
       ).then(res => {
         switch (res.data.code) {
           case 1:
