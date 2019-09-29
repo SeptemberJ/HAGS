@@ -156,6 +156,20 @@
     </el-dialog>
     <!-- 当日汇报记录 汇报记录 -->
     <el-dialog :title="ifHistoryDay ? '当日汇报记录' : '汇报记录'" :visible.sync="dialogHBHistoryVisible" :close-on-click-modal="false" width="950px">
+      <el-row>
+        <el-form :inline="true" id="saerchNameForm" class="demo-form-inline" style="width: 100%;">
+          <el-col :span="16">
+            <el-form-item label="汇报单号">
+              <el-input v-model="huibaiWorkNo" placeholder="请输入汇报单号" size="small" clearable style="width:100%;"></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="2" style="text-align: left;">
+            <el-form-item>
+              <el-button type="primary" icon="el-icon-search" size="small" @click="searchHuibao">搜索</el-button>
+            </el-form-item>
+          </el-col>
+        </el-form>
+      </el-row>
       <el-table @row-dblclick="seeHistoryDetail"
         :data="hbHistory"
         v-loading="listLoading"
@@ -481,13 +495,23 @@
         </div>
       </el-dialog>
     </el-dialog>
+    <!-- 开机前预警 -->
+    <el-dialog
+      title="预警详情"
+      :visible.sync="dialogVisibleYJ"
+      fullscreen>
+      <WarnPrint :warnsInfo="warnsInfo"/>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisibleYJ = false">关 闭</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import { mapState, mapActions } from 'vuex'
 import {secondToFormat, dateToFormatAll, secondToFormatAll} from '../util/utils'
-
+import WarnPrint from '../components/WarnPrint'
 export default {
   name: 'WorkOrder',
   data () {
@@ -545,7 +569,10 @@ export default {
       equipmentList: [],
       jichuangList: [],
       curJCId: null, // 当前的选择的机床id
-      ifBootUpAgain: false
+      ifBootUpAgain: false,
+      huibaiWorkNo: '', // 汇报查询
+      dialogVisibleYJ: false,
+      warnsInfo: ''
     }
   },
   computed: {
@@ -569,6 +596,9 @@ export default {
         this.$store.state.HBList = newValue
       }
     }
+  },
+  components: {
+    WarnPrint
   },
   created () {
     this.getWorkOrderList()
@@ -696,6 +726,14 @@ export default {
         })
       })
     },
+    searchHuibao () {
+      this.curPageHB = 1
+      if (this.ifHistoryDay) {
+        this.getHBHistoryDay()
+      } else {
+        this.getHBHistory()
+      }
+    },
     // 显示当日汇报记录
     showHBHistoryDay () {
       this.curPageHB = 1
@@ -705,7 +743,13 @@ export default {
     },
     // 当日汇报记录
     getHBHistoryDay () {
-      this.Http.get('serhuibaoworknow', {number: this.pageSizeHB, page_num: this.curPageHB, fbiller: this.userInfo.fname, gongxu: this.userInfo.gongxu}
+      let Data = {}
+      if (this.huibaiWorkNo) {
+        Data = {number: this.pageSizeHB, page_num: this.curPageHB, fbiller: this.userInfo.fname, gongxu: this.userInfo.gongxu, workno: this.huibaiWorkNo}
+      } else {
+        Data = {number: this.pageSizeHB, page_num: this.curPageHB, fbiller: this.userInfo.fname, gongxu: this.userInfo.gongxu}
+      }
+      this.Http.get('serhuibaoworknow', Data
       ).then(res => {
         switch (res.data.code) {
           case '1':
@@ -740,7 +784,13 @@ export default {
     },
     // 汇报历史
     getHBHistory () {
-      this.Http.get('serhuibaowork', {number: this.pageSizeHB, page_num: this.curPageHB, fbiller: this.userInfo.fname, gongxu: this.userInfo.gongxu}
+      let Data = {}
+      if (this.huibaiWorkNo) {
+        Data = {number: this.pageSizeHB, page_num: this.curPageHB, fbiller: this.userInfo.fname, gongxu: this.userInfo.gongxu, workno: this.huibaiWorkNo}
+      } else {
+        Data = {number: this.pageSizeHB, page_num: this.curPageHB, fbiller: this.userInfo.fname, gongxu: this.userInfo.gongxu}
+      }
+      this.Http.get('serhuibaowork', Data
       ).then(res => {
         switch (res.data.code) {
           case '1':
@@ -800,6 +850,27 @@ export default {
     // 开关机
     async showTimeDialog (idx, row, type) {
       this.openOrClose = type
+      if (type === 1) {
+        let checkYJResult = await this.checkYuJing(row.id)
+        if (checkYJResult.code === '1') {
+          // 提示是否查看预警
+          this.$confirm('有预警是否查看?', '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }).then(() => {
+            // 显示预警
+            this.dialogVisibleYJ = true
+            this.warnsInfo = checkYJResult.list
+          }).catch(() => {
+            this.sureShowTime(idx, row, type)
+          })
+        } else {
+          this.sureShowTime(idx, row, type)
+        }
+      }
+    },
+    async sureShowTime (idx, row, type) {
       if (type === 1 && this.userInfo.gongxu === 'CNC') { // CNC开机需要验证
         let ifCanOpertionResult = await this.checkBootUp(row.id)
         if (ifCanOpertionResult.code === '1') { // CNC
@@ -828,6 +899,54 @@ export default {
         this.time = new Date()
         this.curWorkId = row.id
       }
+    },
+    async showTimeDialog2 (idx, row, type) {
+      this.openOrClose = type
+      if (type === 1) {
+        this.checkYuJing(row.id)
+      }
+      if (type === 1 && this.userInfo.gongxu === 'CNC') { // CNC开机需要验证
+        let ifCanOpertionResult = await this.checkBootUp(row.id)
+        if (ifCanOpertionResult.code === '1') { // CNC
+          this.$message({
+            message: ifCanOpertionResult.message + '!',
+            type: 'warning'
+          })
+          this.ShowaAddCNC(row.id)
+        } else {
+          this.dialogTimeVisible = true
+          this.time = new Date()
+          this.curWorkId = row.id
+        }
+      } else {
+        if (type === 0) {
+          if (!row.starttime) {
+            this.$message({
+              message: '还未开机，不能关机!',
+              type: 'warning'
+            })
+            return false
+          }
+          this.curStartTmie = row.starttime
+        }
+        this.dialogTimeVisible = true
+        this.time = new Date()
+        this.curWorkId = row.id
+      }
+    },
+    checkYuJing (Id) {
+      return new Promise((resolve, reject) => {
+        this.Http.get('kaijiyujing', {workid: Id}
+        ).then(res => {
+          resolve(res.data)
+        }).catch((error) => {
+          console.log(error)
+          this.$message({
+            message: '服务器繁忙!',
+            type: 'error'
+          })
+        })
+      })
     },
     // 重复开机
     bootUpAgain (row) {
@@ -1223,7 +1342,7 @@ export default {
         })
       })
     },
-    // 且换设备的select框选项
+    // 切换设备的select框选项
     changeEquipment (val, idx) {
       return new Promise((resolve, reject) => {
         this.Http.get('serjichuang', {shebeiid: val}
@@ -1524,7 +1643,7 @@ export default {
       if (this.ifBootUpAgain) { // 重复开机提交人员
         this.savePersonBootUpAagin()
       } else {
-        if (this.userInfo.gongxu === 'CNC') {
+        if (this.userInfo.gongxu === 'CNC' || this.userInfo.gongxu === '焊接') {
           this.savePersonCNC()
         } else {
           this.savePersonOthers()
@@ -1809,7 +1928,7 @@ export default {
     },
     // CNC
     cncToChooseLJ (row) {
-      if (this.userInfo.gongxu === 'CNC') {
+      if (this.userInfo.gongxu === 'CNC' || this.userInfo.gongxu === '焊接') {
         this.updateLjgzLjgzIdCNC(row.id)
         row.FShortNumber = row.fshortnumber
         row.fqty = row.jhsnumber

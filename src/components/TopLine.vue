@@ -4,8 +4,8 @@
       <span class="CursorPointer" @click="back"><i class="el-icon-arrow-left" title="返回"></i></span>
     </div>
     <div class="MainBlock" v-if="curPage == 'Home' || curPage == 'Modify'"><span>MES-SYSTEM</span></div>
-    <div class="MainBlock" v-if="curPage == 'WorkOrder'"><span>{{curModuleInfo.department + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + '汇报人: ' + userInfo.fname + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0工种: ' + userInfo.gongxu}}</span></div>
-    <div class="MainBlock" v-if="curPage != 'Home' && curPage != 'WorkOrder'"><span>{{curModuleInfo.department + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + '汇报人: ' + userInfo.fname + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0成品计划数：' + workOrderFqty + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0工种: ' + userInfo.gongxu}}</span></div>
+    <div class="MainBlock" v-if="curPage == 'WorkOrder' || curPage == 'SalesReport'"><span>{{curModuleInfo.department + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + '汇报人: ' + userInfo.fname + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0工种: ' + userInfo.gongxu}}</span></div>
+    <div class="MainBlock" v-if="curPage != 'Home' && curPage != 'WorkOrder' && curPage != 'SalesReport'"><span>{{curModuleInfo.department + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + '汇报人: ' + userInfo.fname + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0成品计划数：' + workOrderFqty + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0工种: ' + userInfo.gongxu}}</span></div>
     <div class="RightAccount">您好, {{userInfo.fname}}
       <span class="CursorPointer" style="margin-left: 10px;" @click="toMofify"><i class="el-icon-edit" title="修改密码"></i></span>
       <span class="CursorPointer" style="margin-left: 5px;" @click="logOut"><i class="fa fa-sign-out" title="退出"></i></span>
@@ -56,6 +56,10 @@ export default {
       if (this.$route.name === 'Home') {
         this.updateCurPage('Login')
         this.$router.push({name: 'Login'})
+      }
+      if (this.$route.name === 'SalesReport') {
+        this.updateCurPage('Home')
+        this.$router.push({name: 'Home'})
       }
       if (this.$route.name === 'WorkOrder') {
         this.updateCurPage('Home')

@@ -1,6 +1,14 @@
 <template>
   <div class="Home">
     <el-row>
+      <el-col class="ModuleItem" :span="6" v-if="userInfo.yujing == 1">
+        <div class="ItemInner" style="background: #A14F76;">预警消息</div>
+      </el-col>
+      <el-col class="ModuleItem" :span="6" v-if="userInfo.bigbaobiao == 1">
+        <div class="ItemInner" style="background: #A14F76;" @click="toSaleReport">销售报表</div>
+      </el-col>
+    </el-row>
+    <el-row>
       <el-col class="ModuleItem" :span="6" v-for="(item, idx) in moduleList" :key="idx">
         <div class="ItemInner" @click="toWorkerOrder(item)">{{item.department}}</div>
       </el-col>
@@ -37,6 +45,10 @@ export default {
       this.updateCurModule(item)
       this.updateCurPage('WorkOrder')
       this.$router.push({name: 'WorkOrder'})
+    },
+    toSaleReport () {
+      this.updateCurPage('SalesReport')
+      this.$router.push({name: 'SalesReport'})
     },
     // 获取工序模块
     getModuleList () {

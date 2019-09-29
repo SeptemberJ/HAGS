@@ -2,6 +2,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import store from '../vuex/store'
 import Login from '@/pages/Login'
+import SalesReport from '@/pages/SalesReport'
 import ModifyPSD from '@/pages/ModifyPSD'
 import Home from '@/pages/Home'
 import WorkOrder from '@/pages/WorkOrder'
@@ -20,6 +21,12 @@ const router = new VueRouter({
       name: 'Login',
       component: Login,
       meta: {requireAuth: false}
+    },
+    {
+      path: '/SalesReport',
+      name: 'SalesReport',
+      component: SalesReport,
+      meta: {requireAuth: true}
     },
     {
       path: '/ModifyPSD',

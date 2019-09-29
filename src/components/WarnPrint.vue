@@ -32,7 +32,7 @@
                 </tr>
                 <tr>
                   <td colspan="9">
-                    <img class="MarginR_10" v-for="(img, idx) in item.imgList" :key="idx" :src="imgPreUrl + img" style="margin-top: 10px;display:block;"/>
+                    <img class="MarginR_10" v-for="(img, idx) in item.newpic" :key="idx" :src="imgPreUrl + img" style="margin-top: 10px;display:block;"/>
                   </td>
                 </tr>
               </tbody>
@@ -42,7 +42,6 @@
       </tbody>
     </table>
     <section class="MarginT_20">
-      <el-button type="" size="mini" @click="back">返 回</el-button>
       <el-button type="primary" size="mini" @click="print">打 印</el-button>
     </section>
   </div>
@@ -52,7 +51,7 @@
 import { mapState } from 'vuex'
 export default {
   name: 'WarnPrint',
-  props: ['curFShortNumber', 'timestamp'],
+  props: ['warnsInfo'],
   data () {
     return {
       yjList: []
@@ -64,38 +63,18 @@ export default {
     })
   },
   created () {
-    this.getWarnList()
+    this.yjList = this.warnsInfo.map(item => {
+      if (item.newpic) {
+        item.newpic = item.newpic.split(',')
+      } else {
+        item.newpic = []
+      }
+      return item
+    })
   },
   watch: {
-    timestamp: function () {
-      this.getWarnList()
-    }
   },
   methods: {
-    getWarnList () {
-      this.Http.get('yujingList', {fshortnumber: this.curFShortNumber}
-      ).then(res => {
-        switch (res.data.code) {
-          case 1:
-            this.yjList = res.data.yujinglist.map(item => {
-              item.imgList = item.newpic.split(',')
-              return item
-            })
-            // this.yjList[1] = this.yjList[0]
-            break
-          default:
-            this.$message({
-              message: res.data.message + '!',
-              type: 'error'
-            })
-        }
-      }).catch((error) => {
-        console.log(error)
-      })
-    },
-    back () {
-      this.$emit('closePrint')
-    },
     print () {
       var tableToPrint = document.getElementById('table') // 要打印的表格
       var newWin = window.open('') // 打开新的窗口

@@ -25,7 +25,7 @@
           </el-form-item>
         </el-form>
       </el-col>
-      <el-col :span="24" style="text-align: right;" v-if="userInfo.gongxu === 'CNC' && workOrderIdCNC">
+      <el-col :span="24" style="text-align: right;" v-if="(userInfo.gongxu === 'CNC' || userInfo.gongxu === '焊接') && workOrderIdCNC">
         <el-button size="small" type="warning" @click="showLJList">零件列表</el-button>
       </el-col>
     </el-row>
@@ -38,7 +38,7 @@
         type="index"
         width="50">
       </el-table-column>
-      <el-table-column v-if="userInfo.gongxu === 'CNC' && workOrderIdCNC"
+      <el-table-column v-if="(userInfo.gongxu === 'CNC' || userInfo.gongxu === '焊接') && workOrderIdCNC"
         label="操作"
         width="100">
         <template slot-scope="scope">
@@ -420,6 +420,9 @@ export default {
         })
         return false
       }
+      if (!forder) {
+        return false
+      }
       // 确认是否汇报
       this.Http.get('huibaolist2', {number: 10, page_num: 1, fidz: row.fidz, fidc: row.fidc, gongxu: gxName, department: this.curModuleInfo.departid, forder: forder, jhsnumber: row.jhsnumber, workid: this.curWorkId, fbillno: this.curFbillno}
       ).then(res => {
@@ -600,7 +603,7 @@ export default {
         Data.clname = this.formSearch.clname
       }
       this.listLoading = true
-      this.Http.get(this.ljgzFromType === 1 && this.userInfo.gongxu === 'CNC' ? 'serljgzcnc' : 'serljgz', Data
+      this.Http.get(this.ljgzFromType === 1 && (this.userInfo.gongxu === 'CNC' || this.userInfo.gongxu === '焊接') ? 'serljgzcnc' : 'serljgz', Data
       // this.Http.get('serljgz', Data
       ).then(res => {
         switch (res.data.code) {

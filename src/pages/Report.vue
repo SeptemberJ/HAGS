@@ -29,10 +29,18 @@
       <el-row style="height:.5rem;line-height:.5rem;">
         <el-col :span="4" class="TextAlignL">本次返工完工产量: {{topLineInfo.fgnumber}}</el-col>
         <el-col :span="4" class="TextAlignL">本次返工完工报废数: {{topLineInfo.fgbfnumber}}</el-col>
+        <el-col :span="4" class="TextAlignL">单件克重: {{topLineInfo.djkz}}</el-col>
+        <el-col :span="4" class="TextAlignL">钢丸用量: {{topLineInfo.gwyl}}</el-col>
+        <el-col :span="4" class="TextAlignL">塑粉用量: {{topLineInfo.sfyl}}</el-col>
+        <el-col :span="4" class="TextAlignL">切割长度: {{topLineInfo.qgcd}}</el-col>
       </el-row>
       <el-row style="margin:10px 0;">
         <el-col :span="24" class="TextAlignR">
-          <el-button size="small" type="Info" v-if="userInfo.gongxu == '激光'" @click="getAppendProduction">附加产品列表</el-button>
+          <el-button size="small" @click="editAmount('单件克重')">单件克重</el-button>
+          <el-button size="small" @click="editAmount('钢丸用量')">钢丸用量</el-button>
+          <el-button size="small" @click="editAmount('塑粉用量')">塑粉用量</el-button>
+          <el-button size="small" @click="editAmount('切割长度')">切割长度</el-button>
+          <el-button size="small" type="primary" v-if="userInfo.gongxu == '激光'" @click="getAppendProduction">附加产品列表</el-button>
           <el-button size="small" type="success" v-if="userInfo.gongxu == '激光'" @click="addAppendProduction">附加产品新增</el-button>
           <el-button size="small" type="warning" @click="huizong">汇报</el-button>
         </el-col>
@@ -317,6 +325,14 @@
         <el-button type="danger" @click="submitAppendProduction('formAppendProduction')" :loading="btLoading">提 交</el-button>
       </div>
     </el-dialog>
+    <!-- 修改数量 -->
+    <el-dialog :title="'修改' + editType + '数量'" :visible.sync="dialogEditAmountVisible" :close-on-click-modal="false" width="450px">
+      <el-input v-model="editAmountNumber" placeholder="请输入数量"></el-input>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogEditAmountVisible = false">取 消</el-button>
+        <el-button type="danger" @click="submitEditAmount" :loading="btLoading">保 存</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -335,6 +351,9 @@ export default {
       dialogAppendListVisible: false,
       dialogAPPersonVisible: false,
       dialogAppendAddVisible: false,
+      dialogEditAmountVisible: false,
+      editType: '', // 修改类型
+      editAmountNumber: '', // 修改的数量
       ifCanAdd: true,
       ifHasTwoTime: true,
       curPage: 1,
@@ -1193,6 +1212,75 @@ export default {
     //     })
     //   })
     // },
+    // 修改数量
+    async editAmount (type) {
+      this.editType = type
+      let ifCanEditResult = await this.checkIfCanEdit(type === '单价克重' ? 1 : (type === '钢丸用量' ? 2 : (type === '塑粉用量' ? 3 : 4)))
+      if (ifCanEditResult.code === '1') {
+        this.dialogEditAmountVisible = true
+      } else {
+        this.$message({
+          message: ifCanEditResult.message + '!',
+          type: 'warning'
+        })
+      }
+    },
+    // 检查是否允许修改
+    checkIfCanEdit (typeIndex) {
+      return new Promise((resolve, reject) => {
+        this.Http.get('checkyl', {zhubiaoid: this.zhubiaoid, ftype: typeIndex}
+        ).then(res => {
+          resolve(res.data)
+        }).catch((error) => {
+          console.locheckIfCanEditg(error)
+          this.$message({
+            message: '服务器繁忙!',
+            type: 'error'
+          })
+        })
+      })
+    },
+    // 提交修改数量
+    submitEditAmount () {
+      this.btLoading = true
+      let url = this.editType === '单件克重' ? 'updatedjkz' : (this.editType === '钢丸用量' ? 'updategwyl' : (this.editType === '塑粉用量' ? 'updatesfyl' : 'updateqgcd'))
+      // let propertyName =  this.editType === '单价克重' ? 'djkz' : (this.editType === '钢丸用量' ? 'gwyl' : 'sfyl')
+      if (!this.editAmountNumber) {
+        this.$message({
+          message: '请输入数量!',
+          type: 'warning'
+        })
+      } else {
+        this.Http.post(url + '?zhubiaoid=' + this.zhubiaoid + '&djkz=' + this.editAmountNumber + '&gwyl=' + this.editAmountNumber + '&sfyl=' + this.editAmountNumber + '&qgcd=' + this.editAmountNumber
+        ).then(res => {
+          switch (res.data.code) {
+            case 1:
+              this.$message({
+                message: '修改成功!',
+                type: 'success'
+              })
+              this.btLoading = false
+              this.dialogEditAmountVisible = false
+              this.editAmountNumber = ''
+              this.getHBList()
+              break
+            default:
+              this.$message({
+                message: res.data.message,
+                type: 'warning'
+              })
+              this.btLoading = false
+          }
+        }).catch((error) => {
+          console.log(error)
+          this.$message({
+            message: '服务器繁忙!',
+            type: 'error'
+          })
+          this.btLoading = false
+        })
+      }
+    },
     // 跳转汇报详情
     historyDetail (row) {
       this.updateTopLineInfo(this.topLineInfo)
@@ -1224,7 +1312,11 @@ export default {
             ljfgbfnumber: res.data.ljfgbfnumber,
             fgnumber: res.data.fgnumber,
             fgbfnumber: res.data.fgbfnumber,
-            wckcnumber: res.data.wckcnumber
+            wckcnumber: res.data.wckcnumber,
+            djkz: res.data.djkz,
+            gwyl: res.data.gwyl,
+            sfyl: res.data.sfyl,
+            qgcd: res.data.qgcd
           }
           this.reportList = res.data.list
           this.sum = res.data.orderCount

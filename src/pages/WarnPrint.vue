@@ -82,7 +82,11 @@ export default {
         switch (res.data.code) {
           case 1:
             this.yjList = res.data.yujinglist.map(item => {
-              item.imgList = item.newpic.split(',')
+              if (item.imgList) {
+                item.imgList = item.newpic.split(',')
+              } else {
+                item.imgList = []
+              }
               return item
             })
             break
