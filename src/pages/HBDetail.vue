@@ -106,6 +106,7 @@ export default {
     ...mapActions([
       'updateLjgzOption',
       'updateCurPage',
+      'updateBeforePage',
       'updateCurWorkId',
       'updateCurFbillno'
     ]),
@@ -115,6 +116,7 @@ export default {
         this.updateCurWorkId(row.workid)
         this.updateCurFbillno(row.fbillno)
         this.updateLjgzOption({fshortnumber: row.FShortNumber, fqty: row.fqty})
+        this.updateBeforePage('HBDetail')
         this.updateCurPage('Ljgz')
         this.$router.push({name: 'Ljgz'})
       }

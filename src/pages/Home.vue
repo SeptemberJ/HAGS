@@ -47,6 +47,7 @@ export default {
       this.$router.push({name: 'WorkOrder'})
     },
     toSaleReport () {
+      this.updateCurModule({department: '销售报表', departid: null})
       this.updateCurPage('SalesReport')
       this.$router.push({name: 'SalesReport'})
     },

@@ -82,20 +82,24 @@ const router = new VueRouter({
 
 // 登录控制
 router.beforeEach((to, from, next) => {
+  // store.dispatch('updateBeforePage', router.currentRoute.name)
   if (to.name === 'WorkOrder') {
     store.dispatch('updateCurWorkId', null)
   }
   if (to.meta.requireAuth) {
     if (getCookie('gs_28a807940bba58c2c')) {
       next()
+      store.dispatch('updateCurPage', to.name)
     } else {
       localStorage.clear()
       next({
         path: '/Login'
       })
+      store.dispatch('updateCurPage', 'Login')
     }
   } else {
     next()
+    store.dispatch('updateCurPage', to.name)
   }
   // store.dispatch('changePath', to.name)
 })

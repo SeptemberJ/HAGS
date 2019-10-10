@@ -610,6 +610,7 @@ export default {
       'updateLjgzOption',
       'updateLjgzLjgzIdCNC',
       'updateCurPage',
+      'updateBeforePage',
       'updateCurWorkId',
       'updateIfJustSee',
       'updateSelectedAllList'
@@ -830,7 +831,8 @@ export default {
           this.ShowaAddCNC(this.workIdGDPerson)
         } else {
           this.dialogTimeGDVisible = true
-          this.time = new Date()
+          let CurTime = await this.getCurTime()
+          this.time = new Date(CurTime)// new Date()
         }
       } else {
         if (type === 0) {
@@ -844,7 +846,8 @@ export default {
           this.curStartTmie = row.starttime
         }
         this.dialogTimeGDVisible = true
-        this.time = new Date()
+        let CurTime = await this.getCurTime()
+        this.time = new Date(CurTime)// new Date()
       }
     },
     // 开关机
@@ -868,6 +871,8 @@ export default {
         } else {
           this.sureShowTime(idx, row, type)
         }
+      } else {
+        this.sureShowTime(idx, row, type)
       }
     },
     async sureShowTime (idx, row, type) {
@@ -881,7 +886,8 @@ export default {
           this.ShowaAddCNC(row.id)
         } else {
           this.dialogTimeVisible = true
-          this.time = new Date()
+          let CurTime = await this.getCurTime()
+          this.time = new Date(CurTime)// new Date()
           this.curWorkId = row.id
         }
       } else {
@@ -896,9 +902,24 @@ export default {
           this.curStartTmie = row.starttime
         }
         this.dialogTimeVisible = true
-        this.time = new Date()
+        let CurTime = await this.getCurTime()
+        this.time = new Date(CurTime)// new Date()
         this.curWorkId = row.id
       }
+    },
+    getCurTime () {
+      return new Promise((resolve, reject) => {
+        this.Http.get('sertime'
+        ).then(res => {
+          resolve(res.data.time)
+        }).catch((error) => {
+          console.log(error)
+          this.$message({
+            message: '服务器繁忙!',
+            type: 'error'
+          })
+        })
+      })
     },
     async showTimeDialog2 (idx, row, type) {
       this.openOrClose = type
@@ -1938,6 +1959,7 @@ export default {
     // 跳转零件管制
     goLjgz (row) {
       this.updateLjgzOption({fshortnumber: row.FShortNumber, fqty: row.fqty, fbillno: row.fbillno})
+      this.updateBeforePage('WorkOrder')
       this.updateCurPage('Ljgz')
       this.$router.push({name: 'Ljgz'})
     },

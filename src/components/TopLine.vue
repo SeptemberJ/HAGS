@@ -7,6 +7,7 @@
     <div class="MainBlock" v-if="curPage == 'WorkOrder' || curPage == 'SalesReport'"><span>{{curModuleInfo.department + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + '汇报人: ' + userInfo.fname + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0工种: ' + userInfo.gongxu}}</span></div>
     <div class="MainBlock" v-if="curPage != 'Home' && curPage != 'WorkOrder' && curPage != 'SalesReport'"><span>{{curModuleInfo.department + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + '汇报人: ' + userInfo.fname + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0成品计划数：' + workOrderFqty + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0工种: ' + userInfo.gongxu}}</span></div>
     <div class="RightAccount">您好, {{userInfo.fname}}
+      <!-- <span>{{beforePage}}--{{ljgzFromType}}--{{curPage}}</span> -->
       <span class="CursorPointer" style="margin-left: 10px;" @click="toMofify"><i class="el-icon-edit" title="修改密码"></i></span>
       <span class="CursorPointer" style="margin-left: 5px;" @click="logOut"><i class="fa fa-sign-out" title="退出"></i></span>
       </div>
@@ -20,7 +21,7 @@ export default {
   name: 'TopLineBlock',
   data () {
     return {
-      ljgzFromType: 0 // 0 WorkerOrder 1 HBDetail
+      // ljgzFromType: 0 // 0 WorkerOrder 1 HBDetail 2 salesReport
     }
   },
   computed: {
@@ -32,20 +33,34 @@ export default {
       workOrderIdCNC: state => state.workOrderIdCNC,
       ifKeepShow: state => state.ifKeepShow,
       workOrderFqty: state => state.workOrderFqty
-    })
-  },
-  created () {
-  },
-  watch: {
-    curPage: function (newVal, oldVal) {
-      if (oldVal === 'WorkOrder' && newVal === 'Ljgz') {
-        this.ljgzFromType = 0
+    }),
+    ljgzFromType: function () {
+      if (this.beforePage === 'WorkOrder') {
+        return 0
       }
-      if (oldVal === 'HBDetail' && newVal === 'Ljgz') {
-        this.ljgzFromType = 1
+      if (this.beforePage === 'HBDetail') {
+        return 1
+      }
+      if (this.beforePage === 'SalesReport') {
+        return 2
       }
     }
   },
+  created () {
+  },
+  // watch: {
+  //   curPage: function (newVal, oldVal) {
+  //     if (oldVal === 'WorkOrder' && newVal === 'Ljgz') {
+  //       this.ljgzFromType = 0
+  //     }
+  //     if (oldVal === 'HBDetail' && newVal === 'Ljgz') {
+  //       this.ljgzFromType = 1
+  //     }
+  //     if (oldVal === 'SalesReport' && newVal === 'Ljgz') {
+  //       this.ljgzFromType = 2
+  //     }
+  //   }
+  // },
   methods: {
     ...mapActions([
       'updateCurPage',
@@ -80,6 +95,10 @@ export default {
       if (this.$route.name === 'Ljgz' && this.ljgzFromType === 1) {
         this.updateCurPage('HBDetail')
         this.$router.push({name: 'HBDetail'})
+      }
+      if (this.$route.name === 'Ljgz' && this.ljgzFromType === 2) {
+        this.updateCurPage('SalesReport')
+        this.$router.push({name: 'SalesReport'})
       }
       if (this.$route.name === 'Report') {
         this.updateCurPage('Ljgz')

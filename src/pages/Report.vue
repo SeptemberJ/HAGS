@@ -34,8 +34,14 @@
         <el-col :span="4" class="TextAlignL">塑粉用量: {{topLineInfo.sfyl}}</el-col>
         <el-col :span="4" class="TextAlignL">切割长度: {{topLineInfo.qgcd}}</el-col>
       </el-row>
+      <el-row style="height:.5rem;line-height:.5rem;">
+        <el-col :span="4" class="TextAlignL">单件毛重(克): {{topLineInfo.djmz}}</el-col>
+        <el-col :span="4" class="TextAlignL">材质: {{topLineInfo.caizhi}}</el-col>
+      </el-row>
       <el-row style="margin:10px 0;">
         <el-col :span="24" class="TextAlignR">
+          <el-button size="small" @click="editAmount('单件毛重')" v-if="userInfo.gongxu == 'CNC'">单件毛重</el-button>
+          <el-button size="small" @click="editAmount('材质')" v-if="userInfo.gongxu == 'CNC'">材质</el-button>
           <el-button size="small" @click="editAmount('单件克重')">单件克重</el-button>
           <el-button size="small" @click="editAmount('钢丸用量')">钢丸用量</el-button>
           <el-button size="small" @click="editAmount('塑粉用量')">塑粉用量</el-button>
@@ -326,8 +332,16 @@
       </div>
     </el-dialog>
     <!-- 修改数量 -->
-    <el-dialog :title="'修改' + editType + '数量'" :visible.sync="dialogEditAmountVisible" :close-on-click-modal="false" width="450px">
-      <el-input v-model="editAmountNumber" placeholder="请输入数量"></el-input>
+    <el-dialog :title="'修改' + editType" :visible.sync="dialogEditAmountVisible" :close-on-click-modal="false" width="450px">
+      <el-input v-if="editType != '材质'" v-model="editAmountNumber" placeholder="请输入数量"></el-input>
+      <el-select v-else v-model="editAmountNumber" placeholder="请选择">
+        <el-option
+          v-for="item in CZoptions"
+          :key="item.id"
+          :label="item.caizhi"
+          :value="item.caizhi">
+        </el-option>
+      </el-select>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogEditAmountVisible = false">取 消</el-button>
         <el-button type="danger" @click="submitEditAmount" :loading="btLoading">保 存</el-button>
@@ -409,7 +423,9 @@ export default {
         ljfgbfnumber: '',
         fgnumber: '',
         fgbfnumber: '',
-        wckcnumber: ''
+        wckcnumber: '',
+        djmz: '',
+        caizhi: ''
       },
       form: {
         username: '',
@@ -443,7 +459,8 @@ export default {
         endtime: [
           { required: true, message: '请选择停机时间', trigger: 'change' }
         ]
-      }
+      },
+      CZoptions: []
     }
   },
   computed: {
@@ -558,6 +575,7 @@ export default {
         }
         break
     }
+    this.getCZ()
     this.getHBList()
     this.getPeopleList()
   },
@@ -1215,7 +1233,7 @@ export default {
     // 修改数量
     async editAmount (type) {
       this.editType = type
-      let ifCanEditResult = await this.checkIfCanEdit(type === '单价克重' ? 1 : (type === '钢丸用量' ? 2 : (type === '塑粉用量' ? 3 : 4)))
+      let ifCanEditResult = await this.checkIfCanEdit(type === '单件克重' ? 1 : (type === '钢丸用量' ? 2 : (type === '塑粉用量' ? 3 : (type === '切割长度' ? 4 : (type === '单件毛重' ? 5 : 6)))))
       if (ifCanEditResult.code === '1') {
         this.dialogEditAmountVisible = true
       } else {
@@ -1243,15 +1261,15 @@ export default {
     // 提交修改数量
     submitEditAmount () {
       this.btLoading = true
-      let url = this.editType === '单件克重' ? 'updatedjkz' : (this.editType === '钢丸用量' ? 'updategwyl' : (this.editType === '塑粉用量' ? 'updatesfyl' : 'updateqgcd'))
-      // let propertyName =  this.editType === '单价克重' ? 'djkz' : (this.editType === '钢丸用量' ? 'gwyl' : 'sfyl')
+      let url = this.editType === '单件克重' ? 'updatedjkz' : (this.editType === '钢丸用量' ? 'updategwyl' : (this.editType === '塑粉用量' ? 'updatesfyl' : (this.editType === '切割长度' ? 'updateqgcd' : (this.editType === '单件毛重' ? 'updatedjmz' : 'updatecz'))))
+      // let propertyName =  this.editType === '单件克重' ? 'djkz' : (this.editType === '钢丸用量' ? 'gwyl' : 'sfyl')
       if (!this.editAmountNumber) {
         this.$message({
           message: '请输入数量!',
           type: 'warning'
         })
       } else {
-        this.Http.post(url + '?zhubiaoid=' + this.zhubiaoid + '&djkz=' + this.editAmountNumber + '&gwyl=' + this.editAmountNumber + '&sfyl=' + this.editAmountNumber + '&qgcd=' + this.editAmountNumber
+        this.Http.post(url + '?zhubiaoid=' + this.zhubiaoid + '&djkz=' + this.editAmountNumber + '&gwyl=' + this.editAmountNumber + '&sfyl=' + this.editAmountNumber + '&qgcd=' + this.editAmountNumber + '&djmz=' + this.editAmountNumber + '&caizhi=' + this.editAmountNumber
         ).then(res => {
           switch (res.data.code) {
             case 1:
@@ -1316,7 +1334,9 @@ export default {
             djkz: res.data.djkz,
             gwyl: res.data.gwyl,
             sfyl: res.data.sfyl,
-            qgcd: res.data.qgcd
+            qgcd: res.data.qgcd,
+            djmz: res.data.djmz,
+            caizhi: res.data.caizhi
           }
           this.reportList = res.data.list
           this.sum = res.data.orderCount
@@ -1385,6 +1405,18 @@ export default {
       this.Http.get('departpeople', {department: this.curModuleInfo.departid}
       ).then(res => {
         this.peopleList = res.data.list
+      }).catch((error) => {
+        console.log(error)
+        this.$message({
+          message: '服务器繁忙!',
+          type: 'error'
+        })
+      })
+    },
+    getCZ () {
+      this.Http.get('sercaizhi'
+      ).then(res => {
+        this.CZoptions = res.data.list
       }).catch((error) => {
         console.log(error)
         this.$message({

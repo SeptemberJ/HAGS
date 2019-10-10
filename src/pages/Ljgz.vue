@@ -328,7 +328,7 @@ export default {
   name: 'Ljgz',
   data () {
     return {
-      // ljgzFromType: 0, // 0 - WorkerOrder 1 - HBDetail
+      // ljgzFromType: null, // 0 - WorkerOrder 1 - HBDetail 2 - salesReport
       dialogLJListVisible: false,
       listLoading: false,
       LJListData: [],
@@ -351,6 +351,8 @@ export default {
   computed: {
     ...mapState({
       userInfo: state => state.userInfo,
+      curPageStore: state => state.curPage,
+      beforePage: state => state.beforePage,
       curWorkId: state => state.curWorkId,
       workOrderFshortnumber: state => state.workOrderFshortnumber,
       workOrderFqty: state => state.workOrderFqty,
@@ -359,14 +361,50 @@ export default {
       curModuleInfo: state => state.curModuleInfo
     }),
     ljgzFromType: function () {
-      // 0 - WorkerOrder 1 - HBDetail
-      if (this.curWorkId) {
-        return 1
-      } else {
+      if (this.beforePage === 'WorkOrder') {
         return 0
       }
+      if (this.beforePage === 'HBDetail') {
+        return 1
+      }
+      if (this.beforePage === 'SalesReport') {
+        return 2
+      }
+      // 0 - WorkerOrder 1 - HBDetail 2 - SalesReport
+      // if (this.curWorkId && this.beforePage === 'HBDetail') {
+      //   return 1
+      // } else {
+      //   if (this.beforePage === 'WorkerOrder') {
+      //     return 0
+      //   } else {
+      //     return 2
+      //   }
+      // }
     }
   },
+  // watch: {
+  //   beforePage: function (newVal, oldVal) {
+  //     if (newVal === 'WorkOrder') {
+  //       this.ljgzFromType = 0
+  //     }
+  //     if (newVal === 'HBDetail') {
+  //       this.ljgzFromType = 1
+  //     }
+  //     if (newVal === 'SalesReport') {
+  //       this.ljgzFromType = 2
+  //     }
+  //     // if (oldVal === 'WorkOrder' && newVal === 'Ljgz') {
+  //     //   this.ljgzFromType = 0
+  //     // }
+  //     // if (oldVal === 'HBDetail' && newVal === 'Ljgz') {
+  //     //   debugger
+  //     //   this.ljgzFromType = 1
+  //     // }
+  //     // if (oldVal === 'SalesReport' && newVal === 'Ljgz') {
+  //     //   this.ljgzFromType = 2
+  //     // }
+  //   }
+  // },
   methods: {
     ...mapActions([
       'updateCurReportInfo',
@@ -374,7 +412,7 @@ export default {
     ]),
     // table双击事件 跳转report页面
     addReportThroughRow (row) {
-      if (this.ljgzFromType === 0) { // 非历史纪录过来的不可以点击
+      if (this.ljgzFromType !== 1) { // 非历史纪录过来的不可以点击
         return false
       } else {
         this.addReport(null, row, this.userInfo.gongxu)

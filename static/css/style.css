@@ -48,6 +48,23 @@ body{
   background-color: #fff;
   color: #000;
 }
+.bgWhite{
+  color: #fff;
+  background: #fff !important;
+  padding: 0 !important;
+}
+.bgGreen{
+  color: #fff;
+  background: #7fb80e !important;
+}
+.bgOrange{
+  color: #fff;
+  background: #fcaf17 !important;
+}
+.bgRed{
+  color: #fff;
+  background: #f05b72 !important;
+}
 /* .TopLineBlock{
   height: 1rem;
   line-height: 1rem;

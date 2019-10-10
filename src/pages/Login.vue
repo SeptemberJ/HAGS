@@ -119,6 +119,10 @@ export default {
             }
           }).catch((error) => {
             console.log(error)
+            this.$message({
+              message: 'interface error!',
+              type: 'error'
+            })
             this.btLoading = false
           })
         } else {
