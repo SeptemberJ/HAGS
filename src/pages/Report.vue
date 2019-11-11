@@ -47,8 +47,8 @@
           <el-button size="small" @click="editAmount('塑粉用量')">塑粉用量</el-button>
           <el-button size="small" @click="editAmount('切割长度')">切割长度</el-button>
           <el-button size="small" type="primary" v-if="userInfo.gongxu == '激光'" @click="getAppendProduction">附加产品列表</el-button>
-          <el-button size="small" type="success" v-if="userInfo.gongxu == '激光'" @click="addAppendProduction">附加产品新增</el-button>
-          <el-button size="small" type="warning" @click="huizong">汇报</el-button>
+          <el-button size="small" type="success" v-if="userInfo.gongxu == '激光' && reportBtIfShow" @click="addAppendProduction">附加产品新增</el-button>
+          <el-button size="small" type="warning" v-if="reportBtIfShow" @click="huizong">汇报</el-button>
         </el-col>
       </el-row>
     </div>
@@ -98,7 +98,7 @@
         label="停机原因"
         show-overflow-tooltip>
       </el-table-column>
-      <el-table-column
+      <!-- <el-table-column v-if="reportBtIfShow"
         fixed="right"
         label="操作"
         width="140">
@@ -114,7 +114,7 @@
             style="color: #F56C6C;"
             @click="dele(scope.$index, scope.row)">删除</el-button>
         </template>
-      </el-table-column>
+      </el-table-column> -->
     </el-table>
     <el-pagination v-if="reportList.length > 0" style="margin: .2rem 0;"
       @current-change="handleCurrentChangePerson"
@@ -200,6 +200,14 @@
         <el-form-item label="等待时间" prop="waittime" v-if="!ifAdd">
           <el-input v-model="form.waittime" placeholder="请输入等待时间">
             <template slot="append">分钟</template>
+          </el-input>
+        </el-form-item>
+        <el-form-item label="单件克重" prop="djkz" v-if="!ifAdd && userInfo.gongxu == '激光'">
+          <el-input v-model="form.djkz" placeholder="请输入单件克重" :disabled="form.fnumber === '0'">
+          </el-input>
+        </el-form-item>
+        <el-form-item label="切割长度" prop="qgcd" v-if="!ifAdd && userInfo.gongxu == '激光'">
+          <el-input v-model="form.qgcd" placeholder="请输入切割长度" :disabled="form.fnumber === '0'">
           </el-input>
         </el-form-item>
       </el-form>
@@ -444,7 +452,9 @@ export default {
         // ischeck: '',
         waittime: '',
         // tuntime: '',
-        freason: ''
+        freason: '',
+        djkz: '',
+        qgcd: ''
       },
       rules: {
         username: [
@@ -469,7 +479,8 @@ export default {
       curReportInfo: state => state.curReportInfo,
       userInfo: state => state.userInfo,
       curWorkId: state => state.curWorkId,
-      curFbillno: state => state.curFbillno
+      curFbillno: state => state.curFbillno,
+      reportBtIfShow: state => state.reportBtIfShow
     }),
     forder: function () {
       let forder = null
@@ -514,6 +525,12 @@ export default {
     },
     'form.ygbfbumber': function (newVal) {
       this.form.badnumber = Number(this.form.ylbfnumber) + Number(newVal)
+    },
+    'form.fnumber': function (newVal) {
+      if (newVal === '0') {
+        this.form.djkz = 0
+        this.form.qgcd = 0
+      }
     }
   },
   created () {
@@ -879,10 +896,10 @@ export default {
     },
     // 汇报按钮事件
     async huizong () {
-      let ifCanHB = await this.ifCanHB()
-      if (ifCanHB === '0') {
+      let ifCanHBResult = await this.ifCanHB()
+      if (ifCanHBResult.code === '0') {
         this.$message({
-          message: '已汇报，不可以多次汇报!',
+          message: ifCanHBResult.message + '!',
           type: 'warning'
         })
         return false
@@ -916,7 +933,9 @@ export default {
         ischeck: '',
         waittime: '',
         tuntime: '',
-        freason: ''
+        freason: '',
+        djkz: this.topLineInfo.djkz,
+        qgcd: this.topLineInfo.qgcd
       }
     },
     // 接口确认是否可以进行汇报
@@ -924,7 +943,7 @@ export default {
       return new Promise((resolve, reject) => {
         this.Http.get('checkhuibao', {zhubiaoid: this.zhubiaoid}
         ).then(res => {
-          resolve(res.data.code)
+          resolve(res.data)
         }).catch((error) => {
           console.log(error)
           this.$message({
@@ -1136,6 +1155,8 @@ export default {
       this.form.ygbfbumber = this.form.ygbfbumber ? this.form.ygbfbumber : 0
       this.form.badnumber = this.form.badnumber ? this.form.badnumber : 0
       this.form.kcnumber = this.form.kcnumber ? this.form.kcnumber : 0
+      this.form.djkz = this.form.djkz
+      this.form.qgcd = this.form.qgcd
       this.Http.post('pilianghuibao', {huibaolist: this.form}
       ).then(res => {
         switch (res.data.code) {
@@ -1305,7 +1326,7 @@ export default {
       this.updateCurPage('History')
       this.$router.push({name: 'History'})
     },
-    // 获取页面汇报列表(人员列表)
+    // 获取页面信息
     getHBList () {
       return new Promise((resolve, reject) => {
         this.listLoading = true

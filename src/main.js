@@ -8,13 +8,17 @@ import 'element-ui/lib/theme-chalk/index.css'
 import App from './App'
 import router from './router'
 import Http from './util/request'
+import Send from './util/send'
 import '../static/css/style.css'
 import 'lib-flexible'
 import moment from 'moment'
+import x2js from 'x2js' // xml数据处理插件
 // import '../static/js/common.js'
 
 Vue.prototype.Http = Http
+Vue.prototype.Send = Send
 Vue.prototype.$moment = moment
+Vue.prototype.$x2js = new x2js() // 创建x2js对象，挂到vue原型上
 
 Vue.use(Vuex)
 Vue.use(ElementUI)

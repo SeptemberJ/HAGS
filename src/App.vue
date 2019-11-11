@@ -1,7 +1,9 @@
 <template>
   <div id="app">
     <TopLineBlock v-if="curPage != 'Login'"/>
-    <router-view/>
+    <div style="margin-top: 0.9rem;">
+      <router-view/>
+    </div>
     <!-- <div style="display: block;"><router-view/></div> -->
   </div>
 </template>

@@ -11,6 +11,10 @@ import Report from '@/pages/Report'
 import History from '@/pages/History'
 import WarnPrint from '@/pages/WarnPrint'
 import HBDetail from '@/pages/HBDetail'
+
+import MRPList from '@/pages/MRP/OrderList'
+import AddMRP from '@/pages/MRP/AddOrder'
+import MRPDetail from '@/pages/MRP/OrderDetail'
 import {getCookie} from '@/util/utils'
 
 Vue.use(VueRouter)
@@ -74,6 +78,24 @@ const router = new VueRouter({
       path: '/WarnPrint',
       name: 'WarnPrint',
       component: WarnPrint,
+      meta: {requireAuth: true}
+    },
+    {
+      path: '/MRPList',
+      name: 'MRPList',
+      component: MRPList,
+      meta: {requireAuth: true}
+    },
+    {
+      path: '/AddMRP',
+      name: 'AddMRP',
+      component: AddMRP,
+      meta: {requireAuth: true}
+    },
+    {
+      path: '/MRPDetail',
+      name: 'MRPDetail',
+      component: MRPDetail,
       meta: {requireAuth: true}
     },
     {path: '*', redirect: '/Login'}

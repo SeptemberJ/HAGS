@@ -12,10 +12,13 @@ const state = {
   curPage: 'Login',
   beforePage: '',
   curModuleInfo: null,
+  curSalesGX: '全部',
+  reportBtIfShow: true,
   cpjhNumber: null,
   workOrderFshortnumber: null,
   workOrderFqty: null,
   workOrderFbillno: null,
+  workOrderDdfbillno: null,
   workOrderIdCNC: null,
   ifKeepShow: false,
   HBList: [],
@@ -26,6 +29,19 @@ const state = {
   ifJustSee: false,
   curFbillno: null,
   selectedAllList: [],
+  SR_filterOrderNo: '',
+  SR_filterUSATime: '',
+  SR_filterProductionKind: '',
+  SR_filterProductionName: '',
+  SR_filterStatus: '',
+  SR_filterbl: '',
+  SR_filterblnote: '',
+  // mrp
+  filterOrderNo_MRP: '',
+  filterPerson_MRP: '',
+  filterCode_MRP: '',
+  ifHasTF_MRP: false,
+  orderMRPId: '',
   urlPre: 'http://ep23767307.qicp.vip:31379/haianJK/',
   imgPreUrl: 'http://ep23767307.qicp.vip:31379/upload/'
 }
@@ -40,6 +56,12 @@ const actions = {
   },
   updateCurModule ({commit, state}, Info) {
     commit('setCurModule', Info)
+  },
+  updateCurSalesGX ({commit, state}, Gongxu) {
+    commit('setCurSalesGX', Gongxu)
+  },
+  updateReportBtIfShow ({commit, state}, STATUS) {
+    commit('setReportBtIfShow', STATUS)
   },
   updateCpjhNumber ({commit, state}, CpjhNumber) {
     commit('setCpjhNumber', CpjhNumber)
@@ -79,6 +101,10 @@ const actions = {
   },
   updateSelectedAllList ({commit, state}, Info) {
     commit('setSelectedAllList', Info)
+  },
+  // MRP
+  updateOrderMRPId ({commit, state}, OrderMRPId) {
+    commit('setOrderMRPId', OrderMRPId)
   }
 }
 
@@ -88,6 +114,12 @@ const mutations = {
   },
   setCurModule (state, Info) {
     state.curModuleInfo = Info
+  },
+  setCurSalesGX (state, Gongxu) {
+    state.curSalesGX = Gongxu
+  },
+  setReportBtIfShow (state, STATUS) {
+    state.reportBtIfShow = STATUS
   },
   setCpjhNumber (state, CpjhNumber) {
     state.cpjhNumber = CpjhNumber
@@ -114,6 +146,7 @@ const mutations = {
     state.workOrderFshortnumber = Option.fshortnumber
     state.workOrderFqty = Option.fqty
     state.workOrderFbillno = Option.fbillno
+    state.workOrderDdfbillno = Option.ddfbillno
   },
   setLjgzIdCNC (state, Id) {
     state.workOrderIdCNC = Id
@@ -129,6 +162,10 @@ const mutations = {
   },
   setSelectedAllList (state, List) {
     state.selectedAllList = List
+  },
+  // MRP
+  setOrderMRPId (state, OrderMRPId) {
+    state.orderMRPId = OrderMRPId
   }
 }
 

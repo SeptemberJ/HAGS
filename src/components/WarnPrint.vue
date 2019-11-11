@@ -42,7 +42,8 @@
       </tbody>
     </table>
     <section class="MarginT_20">
-      <el-button type="primary" size="mini" @click="print">打 印</el-button>
+      <el-button type="primary" size="mini" @click="backShowTimeBox">已阅读</el-button>
+      <!-- <el-button type="primary" size="mini" @click="print">打 印</el-button> -->
     </section>
   </div>
 </template>
@@ -75,6 +76,9 @@ export default {
   watch: {
   },
   methods: {
+    backShowTimeBox () {
+      this.$emit('showTimeBox')
+    },
     print () {
       var tableToPrint = document.getElementById('table') // 要打印的表格
       var newWin = window.open('') // 打开新的窗口

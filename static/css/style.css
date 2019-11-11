@@ -28,6 +28,9 @@ body{
 .CursorPointer{
   cursor: pointer;
 }
+.MarginT_20{
+  margin-top: 20px;
+}
 
 .TextAlignL{
   text-align: left;
@@ -48,23 +51,55 @@ body{
   background-color: #fff;
   color: #000;
 }
+.disabledWhite .el-input.is-disabled .el-input__inner{
+  background-color: #fff;
+  color: #000;
+}
+.el-dialog__body_NoPadding .el-dialog__body{
+  padding-bottom: 0;
+}
 .bgWhite{
   color: #fff;
   background: #fff !important;
   padding: 0 !important;
 }
 .bgGreen{
-  color: #fff;
+  color: #7fb80e;
   background: #7fb80e !important;
 }
 .bgOrange{
-  color: #fff;
+  color: #fcaf17;
   background: #fcaf17 !important;
 }
 .bgRed{
-  color: #fff;
+  color: #f05b72;
   background: #f05b72 !important;
 }
+.radioLabelNone .el-radio__label{
+  display: none;
+}
+.bgRedTd{
+  background: #F56C6C !important;
+  color: #fff !important;
+}
+.hasModifyed{
+  background: #187;
+}
+.hasModifyed .el-input__inner{
+  background: #187 !important;
+  border: 0 solid #DCDFE6 !important;
+  color: #fff;
+}
+/* .el-table .hasModifyed{
+  background: #187;
+  color: #187;
+} */
+/* .el-table tbody tr:hover{
+  background-color: red;
+} */
+/* .el-table__fixed, .el-table__fixed-right{
+  height: 200px !important;
+} */
 /* .TopLineBlock{
   height: 1rem;
   line-height: 1rem;

@@ -32,6 +32,7 @@
                 </tr>
                 <tr>
                   <td colspan="9">
+                    {{item.imgList.length}}
                     <img class="MarginR_10" v-for="(img, idx) in item.imgList" :key="idx" :src="imgPreUrl + img" style="margin-top: 10px;display:block;"/>
                   </td>
                 </tr>
@@ -60,6 +61,7 @@ export default {
   computed: {
     ...mapState({
       imgPreUrl: state => state.imgPreUrl,
+      userInfo: state => state.userInfo,
       curFShortNumber: state => state.workOrderFshortnumber
     })
   },
@@ -77,12 +79,12 @@ export default {
     ]),
     // 获取预警数据
     getWarnList () {
-      this.Http.get('yujingList', {fshortnumber: this.curFShortNumber}
+      this.Http.get('yujingList2', {fshortnumber: this.curFShortNumber, gongxu: this.userInfo.gongxu}
       ).then(res => {
         switch (res.data.code) {
           case 1:
             this.yjList = res.data.yujinglist.map(item => {
-              if (item.imgList) {
+              if (item.newpic) {
                 item.imgList = item.newpic.split(',')
               } else {
                 item.imgList = []

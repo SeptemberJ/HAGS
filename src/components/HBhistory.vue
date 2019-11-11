@@ -1,123 +1,5 @@
 <template>
   <div class="WorkOrder">
-    <!-- 查询 -->
-    <el-row style="margin-top:.3rem;">
-      <el-form :inline="true" id="saerchNameForm" class="demo-form-inline">
-        <el-col :span="8" :offset="2">
-          <el-form-item label="产品名称">
-            <el-input v-model="filterProductionName" placeholder="请输入产品名称" size="small" clearable style="width:100%;"></el-input>
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="订单号">
-            <el-input v-model="filterOrderNo" placeholder="请输入订单号" size="small" clearable style="width:100%;"></el-input>
-          </el-form-item>
-        </el-col>
-        <el-col :span="6" style="text-align: left;">
-          <el-form-item>
-            <el-button type="primary" icon="el-icon-search" size="small" @click="search">搜索</el-button>
-            <el-button size="small" icon="el-icon-refresh" @click="reset">重置</el-button>
-          </el-form-item>
-        </el-col>
-        <el-col :span="24" style="text-align: right;">
-          <el-form-item>
-            <!-- <el-button size="small" type="info" @click="showHBHistoryDay">当日汇报记录</el-button>
-            <el-button size="small" type="info" @click="showHBHistory">汇报记录</el-button>
-            <el-button size="small" type="info" @click="showHBList">汇报列表</el-button> -->
-            <el-button size="small" type="info" v-if="curModuleInfo.department != '外协'" @click="showHBHistoryDay">当日汇报记录</el-button>
-            <el-button size="small" type="info" v-if="curModuleInfo.department != '外协'" @click="showHBHistory">汇报记录</el-button>
-            <el-button size="small" type="info" v-if="curModuleInfo.department != '外协'" @click="showHBList">汇报列表</el-button>
-            <el-button size="small" type="info" v-if="curModuleInfo.department == '外协'" @click="showWXList">外协列表</el-button>
-            <el-button size="small" type="info" v-if="curModuleInfo.department == '外协'" @click="showSQDList">申请单</el-button>
-            <el-button size="small" type="info" v-if="curModuleInfo.department == '外协'" @click="showCGList">采购单</el-button>
-            <!-- <el-button size="small" type="warning" @click="huibao">汇报</el-button> -->
-          </el-form-item>
-        </el-col>
-      </el-form>
-    </el-row>
-    <!-- 工单列表 -->
-    <section>
-      <el-table @row-dblclick="goLjgz"
-        ref="selectedList"
-        :data="orderList"
-        v-loading="listLoading"
-        @selection-change="handleSelectionChange"
-        style="width: 100%">
-        <!-- <el-table-column
-          type="selection"
-          width="55">
-        </el-table-column> -->
-        <el-table-column
-          fixed
-          type="index"
-          width="50">
-        </el-table-column>
-        <el-table-column
-          property="fname"
-          label="生产车间"
-          width="150"
-          show-overflow-tooltip>
-        </el-table-column>
-        <el-table-column
-          property="FCheckDateTxt"
-          label="日期"
-          width="120">
-        </el-table-column>
-        <el-table-column
-          property="ddfbillno"
-          label="订单号"
-          width="80"
-          show-overflow-tooltip>
-        </el-table-column>
-        <el-table-column
-          property="fbillno"
-          label="工单号"
-          width="150"
-          show-overflow-tooltip>
-        </el-table-column>
-        <el-table-column
-          property="fnumber"
-          label="产品名称">
-        </el-table-column>
-        <el-table-column
-          property="fqty"
-          label="数量"
-          width="70">
-        </el-table-column>
-        <el-table-column
-          property="FPlanFinishDateTxt"
-          label="交期"
-          width="120">
-        </el-table-column>
-        <el-table-column
-          property="fshortTxt"
-          label="是否缺料"
-          width="100">
-        </el-table-column>
-        <el-table-column
-          fixed="right"
-          label="操作"
-          :width="curModuleInfo.department != '外协' ? 200 : 120">
-          <template slot-scope="scope">
-            <el-button v-if="curModuleInfo.department != '外协'"
-              size="mini"
-              type="warning"
-              @click="addToHBList(scope.$index, scope.row)">加入汇报</el-button>
-            <el-button
-              size="mini"
-              :type="scope.row.yjnum === 0 ? '' : 'danger'"
-              @click="warnDetail(scope.$index, scope.row)">预警</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-      <el-pagination v-if="orderList.length > 0" style="margin: .2rem 0;"
-        @current-change="handleCurrentChange"
-        :current-page.sync="curPage"
-        :page-size="pageSize"
-        layout="total, prev, pager, next, jumper"
-        :total="sum">
-      </el-pagination>
-    </section>
     <!-- 新增人员 -->
     <el-dialog id="addPerson" title="新增人员" :visible.sync="dialogAddFormVisible" :close-on-click-modal="false" width="500px">
       <div style="text-align: right;diplay: block;">
@@ -160,7 +42,7 @@
       </div>
     </el-dialog>
     <!-- 当日汇报记录 汇报记录 -->
-    <el-dialog :title="ifHistoryDay ? '当日汇报记录' : '汇报记录'" :visible.sync="dialogHBHistoryVisible" :close-on-click-modal="false" width="90%">
+    <el-dialog title="汇报记录" :visible.sync="dialogHBHistoryVisible" :close-on-click-modal="false" width="90%">
       <el-row>
         <el-form :inline="true" id="saerchNameForm" class="demo-form-inline" style="width: 100%;">
           <el-col :span="16">
@@ -181,24 +63,24 @@
         style="width: 100%">
         <el-table-column
           type="index"
-          width="42">
+          width="50">
         </el-table-column>
         <el-table-column
           property="workno"
           label="汇报单号"
-          width="150"
+          width="130"
           show-overflow-tooltip>
         </el-table-column>
         <el-table-column
           property="starttime"
           label="开机时间"
-          width="150"
+          width="125"
           show-overflow-tooltip>
         </el-table-column>
         <el-table-column
           property="endtime"
           label="关机时间"
-          width="150"
+          width="125"
           show-overflow-tooltip>
         </el-table-column>
         <el-table-column
@@ -210,7 +92,7 @@
         <el-table-column
           property="create_timeTxt"
           label="汇报时间"
-          width="150"
+          width="125"
           show-overflow-tooltip>
         </el-table-column>
         <el-table-column
@@ -348,7 +230,7 @@
         style="width: 100%">
         <el-table-column
           type="index"
-          width="60">
+          width="50">
         </el-table-column>
         <!-- <el-table-column
           type="selection"
@@ -497,31 +379,6 @@
       :showClose="false"
       fullscreen>
       <WarnPrint :warnsInfo="warnsInfo" @showTimeBox="showTimeBox"/>
-      <!-- <span slot="footer" class="dialog-footer">
-        <el-button @click="dialogVisibleYJ = false">关 闭</el-button>
-      </span> -->
-    </el-dialog>
-    <!-- 加入的外协list -->
-    <el-dialog title="外协工单列表" :visible.sync="dialogWXListVisible" :close-on-click-modal="false" width="80%">
-      <WxList ref="wxChild" @closeWXList="closeWXList"></WxList>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="danger" @click="sureToWX">确 认</el-button>
-        <el-button @click="dialogWXListVisible = false">取 消</el-button>
-      </div>
-    </el-dialog>
-    <!-- 申请单列表 -->
-    <el-dialog class="el-dialog__body_NoPadding" title="申请单列表" :visible.sync="dialogSqdListVisible" :close-on-click-modal="false" width="850px">
-      <SQDList ref="sqlChild"></SQDList>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogSqdListVisible = false">关 闭</el-button>
-      </div>
-    </el-dialog>
-    <!-- 采购单列表 -->
-    <el-dialog class="el-dialog__body_NoPadding" title="采购单列表" :visible.sync="dialogCgListVisible" :close-on-click-modal="false" width="950px">
-      <CgList ref="cgChild"></CgList>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogCgListVisible = false">关 闭</el-button>
-      </div>
     </el-dialog>
   </div>
 </template>
@@ -530,9 +387,6 @@
 import { mapState, mapActions } from 'vuex'
 import {secondToFormat, dateToFormatAll, secondToFormatAll} from '../util/utils'
 import WarnPrint from '../components/WarnPrint'
-import WxList from '../components/WaiXie/WxList'
-import SQDList from '../components/WaiXie/SqdList'
-import CgList from '../components/CaiGou/CgList'
 export default {
   name: 'WorkOrder',
   data () {
@@ -574,6 +428,7 @@ export default {
       selectedAllList: [], // 所有页的选中项集合
       // HBListData: [], // 汇报列表数据
       selectedHBList: [], // 勾选加入汇报列表的项
+      // dialogHBListVisible: false,
       dialogGDPersonVisible: false,
       dialogShutDownReasonVisible: false,
       shutDownReasonList: [
@@ -593,10 +448,7 @@ export default {
       huibaiWorkNo: '', // 汇报查询
       dialogVisibleYJ: false,
       warnsInfo: '',
-      OpenOrCloseRow: null, // 开关机的行数据
-      dialogWXListVisible: false,
-      dialogSqdListVisible: false,
-      dialogCgListVisible: false
+      OpenOrCloseRow: null // 开关机的行数据
     }
   },
   computed: {
@@ -622,13 +474,10 @@ export default {
     }
   },
   components: {
-    WarnPrint,
-    WxList,
-    SQDList,
-    CgList
+    WarnPrint
   },
   created () {
-    this.getWorkOrderList()
+    this.getHBHistory()
     this.getEquipmentList()
     this.updateLjgzLjgzIdCNC(null) // 初始化LjgzIdCNC 确保只有回报列表双击才会显示加入零件列表
   },
@@ -736,6 +585,10 @@ export default {
         jlruserno: this.userInfo.id,
         gongxu: this.userInfo.gongxu,
         worklist: this.HBListData
+        // worklist: this.huibaoOrderList.map(item => {
+        //   item.fshortnumber = item.FShortNumber
+        //   return item
+        // })
       }
       return new Promise((resolve, reject) => {
         this.Http.post('selectgongdan', Data
@@ -811,14 +664,15 @@ export default {
     getHBHistory () {
       let Data = {}
       if (this.huibaiWorkNo) {
-        Data = {number: this.pageSizeHB, page_num: this.curPageHB, fbiller: this.userInfo.fname, gongxu: this.userInfo.gongxu, workno: this.huibaiWorkNo}
+        Data = {number: this.pageSizeHB, page_num: this.curPageHB, userid: this.userInfo.id, workno: this.huibaiWorkNo}
       } else {
-        Data = {number: this.pageSizeHB, page_num: this.curPageHB, fbiller: this.userInfo.fname, gongxu: this.userInfo.gongxu}
+        Data = {number: this.pageSizeHB, page_num: this.curPageHB, userid: this.userInfo.id}
       }
-      this.Http.get('serhuibaowork', Data
+      this.Http.get('kjyjlist', Data
       ).then(res => {
         switch (res.data.code) {
           case '1':
+            this.dialogHBHistoryVisible = true
             this.hbHistory = res.data.list.map(item => {
               item.create_timeTxt = secondToFormatAll(item.create_time.time)
               item.ifCanOpen = !item.starttime
@@ -828,10 +682,7 @@ export default {
             this.sumHB = res.data.count
             break
           default:
-            this.$message({
-              message: res.data.message + '!',
-              type: 'error'
-            })
+            this.dialogHBHistoryVisible = false
         }
       }).catch((error) => {
         console.log(error)
@@ -901,7 +752,6 @@ export default {
             // this.sureShowTime(idx, row, type)
           })
         } else {
-          // 没有预警弹出时间提交框
           this.sureShowTime(idx, row, type)
         }
       } else {
@@ -1910,30 +1760,9 @@ export default {
       })
     },
     // 显示汇报列表
-    showHBList () {
+    showHBlList () {
       this.dialogHBListVisible = true
       this.getHBList()
-    },
-    // 显示外协列表
-    showWXList () {
-      this.dialogWXListVisible = true
-      setTimeout(() => {
-        this.$refs.wxChild.getWXList()
-      }, 10)
-    },
-    // 显示申请单列表
-    showSQDList () {
-      this.dialogSqdListVisible = true
-      setTimeout(() => {
-        this.$refs.sqlChild.getSQDList()
-      }, 10)
-    },
-    // 显示采购单列表
-    showCGList () {
-      this.dialogCgListVisible = true
-      setTimeout(() => {
-        this.$refs.cgChild.getCgList()
-      }, 10)
     },
     toggleHBList (status) {
       this.dialogHBListVisible = status
@@ -2001,15 +1830,6 @@ export default {
         })
       })
     },
-    // 外协确认袭击按钮事件
-    sureToWX () {
-      setTimeout(() => {
-        this.$refs.wxChild.sureOperate()
-      }, 10)
-    },
-    closeWXList () {
-      this.dialogWXListVisible = false
-    },
     // CNC
     cncToChooseLJ (row) {
       if (this.userInfo.gongxu === 'CNC' || this.userInfo.gongxu === '焊接') {
@@ -2022,7 +1842,7 @@ export default {
     // 跳转零件管制
     goLjgz (row) {
       this.updateCurFbillno(row.fbillno)
-      this.updateLjgzOption({fshortnumber: row.FShortNumber, fqty: row.fqty, fbillno: row.fbillno, ddfbillno: row.ddfbillno})
+      this.updateLjgzOption({fshortnumber: row.FShortNumber, fqty: row.fqty, fbillno: row.fbillno})
       this.updateBeforePage('WorkOrder')
       this.updateCurPage('Ljgz')
       this.$router.push({name: 'Ljgz'})
@@ -2048,7 +1868,7 @@ export default {
     getWorkOrderList () {
       return new Promise((resolve, reject) => {
         this.listLoading = true
-        this.Http.post('orderList', {number: this.pageSize, page_num: this.curPage, fnumber: this.filterProductionName, ddfbillno: this.filterOrderNo, gongxu: this.userInfo.gongxu}
+        this.Http.post('orderList', {number: this.pageSize, page_num: this.curPage, fnumber: this.filterProductionName, ddfbillno: this.filterOrderNo}
         ).then(res => {
           switch (res.data.code) {
             case 1:

@@ -280,13 +280,6 @@ export default {
               item.F2Txt = item.F2 === 1 ? '✓' : ''
               item.F3Txt = item.F3 === 1 ? '✓' : ''
               item.F4Txt = item.F4 === 1 ? '✓' : ''
-              // item.fqg = item.fqg ? item.fqg : '---'
-              // item.fjg = item.fjg ? item.fjg : '---'
-              // item.fzw = item.fzw ? item.fzw : '---'
-              // item.fhj = item.fhj ? item.fhj : '---'
-              // item.fpw = item.fpw ? item.fpw : '---'
-              // item.fpt = item.fpt ? item.fpt : '---'
-              // item.fbz = item.fbz ? item.fbz : '---'
               return item
             })
             this.sum = res.data.orderCount

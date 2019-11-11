@@ -101,6 +101,15 @@ function getzf (num) {
   return num
 }
 
+// 数组对象深度拷贝
+export function objDeepCopy (sourceArr) {
+  var sourceCopy = sourceArr instanceof Array ? [] : {}
+  for (var item in sourceArr) {
+    sourceCopy[item] = typeof sourceArr[item] === 'object' ? objDeepCopy(sourceArr[item]) : sourceArr[item]
+  }
+  return sourceCopy
+}
+
 // uuid
 export function getuuid () {
   var uid = []

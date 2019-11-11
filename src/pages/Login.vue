@@ -164,6 +164,7 @@ export default {
 .LoginWrap{
   width: 100%;
   height: 100%;
+  margin-top: -0.9rem;
   background-image: linear-gradient(to top, #a8edea 0%, #fed6e3 100%);
   position: absolute;
 }

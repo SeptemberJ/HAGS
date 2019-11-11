@@ -45,6 +45,13 @@
           <el-button size="mini" type="warning" @click="addToLJlIST(scope.$index, scope.row)">加入零件列表</el-button>
         </template>
       </el-table-column>
+      <el-table-column v-if="curModuleInfo.department == '外协'"
+        label="加入外协"
+        width="100">
+        <template slot-scope="scope">
+          <el-button size="mini" type="warning" @click="addWaiXie(scope.row)">加入外协</el-button>
+        </template>
+      </el-table-column>
       <el-table-column
         label="图纸"
         width="80">
@@ -117,10 +124,11 @@
         label="切管"
         width="80">
         <template slot-scope="scope">
-          <el-button v-if="scope.row.fqg && ljgzFromType == 1"
+          <el-button v-if="scope.row.fqg && ljgzFromType != 0"
             size="mini"
             type="text"
-            @click="addReport(scope.$index, scope.row, '切管')">{{scope.row.fqg}}</el-button>
+            style="color:#606266;"
+            @click="clickGongxu(scope.$index, scope.row, '切管')">{{scope.row.fqg}}</el-button>
           <span v-else>{{scope.row.fqg}}</span>
         </template>
       </el-table-column>
@@ -135,11 +143,11 @@
         width="80">
         <template slot-scope="scope">
           <!-- <el-button v-if="scope.row.fsk && ljgzFromType == 1" -->
-          <el-button v-if="ljgzFromType == 1"
+          <el-button v-if="scope.row.fsk && ljgzFromType != 0"
             size="mini"
             type="text"
             style="color:#606266;"
-            @click="addReport(scope.$index, scope.row, 'CNC')">{{scope.row.fsk ? scope.row.fsk : '--'}}</el-button>
+            @click="clickGongxu(scope.$index, scope.row, 'CNC')">{{scope.row.fsk ? scope.row.fsk : '--'}}</el-button>
           <span v-else>{{scope.row.fsk}}</span>
         </template>
       </el-table-column>
@@ -153,11 +161,11 @@
         label="激光"
         width="80">
         <template slot-scope="scope">
-          <el-button v-if="scope.row.fjg && ljgzFromType == 1"
+          <el-button v-if="scope.row.fjg && ljgzFromType != 0"
             size="mini"
             type="text"
             style="color:#606266;"
-            @click="addReport(scope.$index, scope.row, '激光')">{{scope.row.fjg}}</el-button>
+            @click="clickGongxu(scope.$index, scope.row, '激光')">{{scope.row.fjg}}</el-button>
           <span v-else>{{scope.row.fjg}}</span>
         </template>
       </el-table-column>
@@ -171,11 +179,11 @@
         label="折弯"
         width="80">
         <template slot-scope="scope">
-          <el-button v-if="scope.row.fzw && ljgzFromType == 1"
+          <el-button v-if="scope.row.fzw && ljgzFromType != 0"
             size="mini"
             type="text"
             style="color:#606266;"
-            @click="addReport(scope.$index, scope.row, '折弯')">{{scope.row.fzw}}</el-button>
+            @click="clickGongxu(scope.$index, scope.row, '折弯')">{{scope.row.fzw}}</el-button>
           <span v-else>{{scope.row.fzw}}</span>
         </template>
       </el-table-column>
@@ -189,11 +197,11 @@
         label="焊接"
         width="80">
         <template slot-scope="scope">
-          <el-button v-if="scope.row.fhj && ljgzFromType == 1"
+          <el-button v-if="scope.row.fhj && ljgzFromType != 0"
             size="mini"
             type="text"
             style="color:#606266;"
-            @click="addReport(scope.$index, scope.row, '焊接')">{{scope.row.fhj}}</el-button>
+            @click="clickGongxu(scope.$index, scope.row, '焊接')">{{scope.row.fhj}}</el-button>
           <span v-else>{{scope.row.fhj}}</span>
         </template>
       </el-table-column>
@@ -207,11 +215,11 @@
         label="抛丸"
         width="80">
         <template slot-scope="scope">
-          <el-button v-if="scope.row.fpw && ljgzFromType == 1"
+          <el-button v-if="scope.row.fpw && ljgzFromType != 0"
             size="mini"
             type="text"
             style="color:#606266;"
-            @click="addReport(scope.$index, scope.row, '抛丸')">{{scope.row.fpw}}</el-button>
+            @click="clickGongxu(scope.$index, scope.row, '抛丸')">{{scope.row.fpw}}</el-button>
           <span v-else>{{scope.row.fpw}}</span>
         </template>
       </el-table-column>
@@ -225,11 +233,11 @@
         label="喷涂"
         width="80">
         <template slot-scope="scope">
-          <el-button v-if="scope.row.fpt && ljgzFromType == 1"
+          <el-button v-if="scope.row.fpt && ljgzFromType != 0"
             size="mini"
             type="text"
             style="color:#606266;"
-            @click="addReport(scope.$index, scope.row, '喷涂')">{{scope.row.fpt}}</el-button>
+            @click="clickGongxu(scope.$index, scope.row, '喷涂')">{{scope.row.fpt}}</el-button>
           <span v-else>{{scope.row.fpt}}</span>
         </template>
       </el-table-column>
@@ -243,11 +251,11 @@
         label="包装"
         width="80">
         <template slot-scope="scope">
-          <el-button v-if="scope.row.fbz && ljgzFromType == 1"
+          <el-button v-if="scope.row.fbz && ljgzFromType != 0"
             size="mini"
             type="text"
             style="color:#606266;"
-            @click="addReport(scope.$index, scope.row, '包装')">{{scope.row.fbz}}</el-button>
+            @click="clickGongxu(scope.$index, scope.row, '包装')">{{scope.row.fbz}}</el-button>
           <span v-else>{{scope.row.fbz}}</span>
         </template>
       </el-table-column>
@@ -319,11 +327,90 @@
         <el-button @click="dialogLJListVisible = false">关 闭</el-button>
       </div>
     </el-dialog>
+    <!-- 历史汇报纪录 -->
+    <el-dialog title="汇报记录" :visible.sync="dialogHBHistoryVisible" :close-on-click-modal="false" width="700px">
+      <el-row>
+        <el-form :inline="true" id="saerchNameForm" class="demo-form-inline" style="width: 100%;">
+          <el-col :span="16">
+            <el-form-item label="汇报单号">
+              <el-input v-model="huibaiWorkNo" placeholder="请输入汇报单号" size="small" clearable style="width:100%;"></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="2" style="text-align: left;">
+            <el-form-item>
+              <el-button type="primary" icon="el-icon-search" size="small" @click="searchHuibao">搜索</el-button>
+            </el-form-item>
+          </el-col>
+        </el-form>
+      </el-row>
+      <el-table @row-dblclick="toReport"
+        :data="hbHistory"
+        v-loading="listLoading"
+        style="width: 100%">
+        <el-table-column
+          type="index"
+          width="50">
+        </el-table-column>
+        <el-table-column
+          property="workno"
+          label="汇报单号"
+          width="150"
+          show-overflow-tooltip>
+        </el-table-column>
+        <el-table-column
+          property="starttime"
+          label="开机时间"
+          width="125"
+          show-overflow-tooltip>
+        </el-table-column>
+        <el-table-column
+          property="endtime"
+          label="关机时间"
+          width="125"
+          show-overflow-tooltip>
+        </el-table-column>
+        <el-table-column
+          property="freason"
+          label="关机原因"
+          width="90"
+          show-overflow-tooltip>
+        </el-table-column>
+        <el-table-column
+          property="create_timeTxt"
+          label="汇报时间"
+          width="125"
+          show-overflow-tooltip>
+        </el-table-column>
+        <!-- <el-table-column
+          fixed="right"
+          label="操作">
+          <template slot-scope="scope">
+            <el-button type="success" size="mini" :disabled="!scope.row.ifCanOpen" @click="showTimeDialog(scope.$index, scope.row, 1)">开 机</el-button>
+            <el-button type="danger" size="mini" :disabled="!scope.row.ifCanClose" @click="showTimeDialog(scope.$index, scope.row, 0)">关 机</el-button>
+            <el-button type='primary' size="mini" @click="bootUpAgain(scope.row)">重复开机</el-button>
+            <el-button type='text' @click="seeHistoryDetail(scope.row)">详 情</el-button>
+            <el-button type='text' @click="seeWorkOrderPerson(scope.row)">人 员</el-button>
+            <el-button type='text' v-if="userInfo.gongxu == 'CNC'" @click="ShowaAddCNC(scope.row.id)">机器设备</el-button>
+          </template>
+        </el-table-column> -->
+      </el-table>
+      <el-pagination v-if="hbHistory.length > 0" style="margin: .2rem 0;"
+        @current-change="getHBHistory"
+        :current-page.sync="curPageHB"
+        :page-size="pageSizeHB"
+        layout="total, prev, pager, next, jumper"
+        :total="sumHB">
+      </el-pagination>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogHBHistoryVisible = false">关 闭</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import { mapState, mapActions } from 'vuex'
+import {secondToFormatAll} from '../util/utils'
 export default {
   name: 'Ljgz',
   data () {
@@ -341,21 +428,32 @@ export default {
       curPage: 1,
       pageSize: 10,
       sum: 0,
-      ljgzList: []
+      ljgzList: [],
+      dialogHBHistoryVisible: false, // 历史纪录
+      huibaiWorkNo: '',
+      hbHistory: [],
+      curPageHB: 1,
+      pageSizeHB: 5,
+      sumHB: 0,
+      curLjgzInfo: '',
+      curChoosedGX: ''
     }
   },
   created () {
-    this.formSearch.gongxu = this.userInfo.gongxu === 'CNC' ? '全部' : this.userInfo.gongxu
+    this.formSearch.gongxu = this.ljgzFromType === 2 ? this.curSalesGX : (this.userInfo.gongxu === 'CNC' ? '全部' : this.userInfo.gongxu)
+    // this.formSearch.gongxu = this.userInfo.gongxu === 'CNC' ? '全部' : this.userInfo.gongxu
     this.getLjgzList()
   },
   computed: {
     ...mapState({
       userInfo: state => state.userInfo,
       curPageStore: state => state.curPage,
+      curSalesGX: state => state.curSalesGX,
       beforePage: state => state.beforePage,
       curWorkId: state => state.curWorkId,
       workOrderFshortnumber: state => state.workOrderFshortnumber,
       workOrderFqty: state => state.workOrderFqty,
+      workOrderDdfbillno: state => state.workOrderDdfbillno,
       curFbillno: state => state.curFbillno,
       workOrderIdCNC: state => state.workOrderIdCNC,
       curModuleInfo: state => state.curModuleInfo
@@ -407,6 +505,9 @@ export default {
   // },
   methods: {
     ...mapActions([
+      'updateReportBtIfShow',
+      'updateCurFbillno',
+      'updateCurWorkId',
       'updateCurReportInfo',
       'updateCurPage'
     ]),
@@ -415,12 +516,107 @@ export default {
       if (this.ljgzFromType !== 1) { // 非历史纪录过来的不可以点击
         return false
       } else {
-        this.addReport(null, row, this.userInfo.gongxu)
+        this.clickGongxu(null, row, this.userInfo.gongxu)
         // row.gxName = this.userInfo.gongxu
         // this.updateCurReportInfo(row)
         // this.updateCurPage('Report')
         // this.$router.push({name: 'Report'})
       }
+    },
+    clickGongxu (idx, row, gxName) {
+      if (this.ljgzFromType === 2) {
+        this.showHBList(idx, row, gxName)
+      } else {
+        this.addReport(idx, row, gxName)
+      }
+    },
+    showHBList (idx, row, gxName) {
+      row.gxName = gxName
+      this.curChoosedGX = gxName
+      this.curLjgzInfo = row
+      this.dialogHBHistoryVisible = true
+      this.getHBHistory()
+    },
+    // 销售报表显示汇报历史记录
+    searchHuibao () {
+      this.curPageHB = 1
+      this.getHBHistory()
+    },
+    // 汇报历史进入report界面
+    toReport (row) {
+      // console.log(this.curLjgzInfo)
+      this.updateReportBtIfShow(false)
+      this.updateCurWorkId(row.workid)
+      this.updateCurFbillno(row.fbillno)
+      this.updateCurReportInfo(this.curLjgzInfo)
+      this.updateCurPage('Report')
+      this.$router.push({name: 'Report'})
+      // this.updateLjgzOption({fshortnumber: row.FShortNumber, fqty: row.fqty})
+      // console.log('row', row)
+      // console.log(this.curLjgzInfo)
+      // let forder = null
+      // switch (row.gongxu) {
+      //   case '切管':
+      //     forder = this.curLjgzInfo.fqg
+      //     break
+      //   case 'CNC':
+      //     forder = this.curLjgzInfo.fsk ? this.curLjgzInfo.fsk : 1
+      //     break
+      //   case '激光':
+      //     forder = this.curLjgzInfo.fjg
+      //     break
+      //   case '折弯':
+      //     forder = this.curLjgzInfo.fzw
+      //     break
+      //   case '焊接':
+      //     forder = this.curLjgzInfo.fhj
+      //     break
+      //   case '抛丸':
+      //     forder = this.curLjgzInfo.fpw
+      //     break
+      //   case '喷涂':
+      //     forder = this.curLjgzInfo.fpt
+      //     break
+      //   case '包装':
+      //     forder = this.curLjgzInfo.fbz
+      //     break
+      // }
+      // // 确认是否汇报
+      // this.Http.get('huibaolist2', {number: 10, page_num: 1, fidz: row.fidz, fidc: row.fidc, gongxu: row.gongxu, department: this.curModuleInfo.departid, forder: forder, jhsnumber: this.curLjgzInfo.jhsnumber, workid: row.workid, fbillno: row.fbillno}
+      // ).then(res => {
+      //   switch (res.data.code) {
+      //     case 0:
+      //       this.$confirm(res.data.message + ', 是否继续汇报?', '提示', {
+      //         confirmButtonText: '确定',
+      //         cancelButtonText: '取消',
+      //         type: 'warning'
+      //       }).then(() => {
+      //         row.gxName = row.gongxu
+      //         this.updateCurReportInfo(row)
+      //         this.updateCurPage('Report')
+      //         this.$router.push({name: 'Report'})
+      //       }).catch(() => {
+      //       })
+      //       break
+      //     case 1:
+      //       row.gxName = row.gongxu
+      //       this.updateCurReportInfo(row)
+      //       this.updateCurPage('Report')
+      //       this.$router.push({name: 'Report'})
+      //       break
+      //     default:
+      //       this.$message({
+      //         message: res.data.message + '!',
+      //         type: 'error'
+      //       })
+      //   }
+      // }).catch((error) => {
+      //   console.log(error)
+      //   this.$message({
+      //     message: '服务器繁忙!',
+      //     type: 'error'
+      //   })
+      // })
     },
     // 通过点击工序数值跳转report页面
     addReport (idx, row, gxName) {
@@ -465,21 +661,23 @@ export default {
       this.Http.get('huibaolist2', {number: 10, page_num: 1, fidz: row.fidz, fidc: row.fidc, gongxu: gxName, department: this.curModuleInfo.departid, forder: forder, jhsnumber: row.jhsnumber, workid: this.curWorkId, fbillno: this.curFbillno}
       ).then(res => {
         switch (res.data.code) {
-          case 0:
-            this.$confirm(res.data.message + ', 是否继续汇报?', '提示', {
-              confirmButtonText: '确定',
-              cancelButtonText: '取消',
-              type: 'warning'
-            }).then(() => {
-              row.gxName = gxName
-              this.updateCurReportInfo(row)
-              this.updateCurPage('Report')
-              this.$router.push({name: 'Report'})
-            }).catch(() => {
-            })
-            break
+          // case 0:
+          //   this.$confirm(res.data.message + ', 是否继续汇报?', '提示', {
+          //     confirmButtonText: '确定',
+          //     cancelButtonText: '取消',
+          //     type: 'warning'
+          //   }).then(() => {
+          //     row.gxName = gxName
+          //     this.updateReportBtIfShow(true)
+          //     this.updateCurReportInfo(row)
+          //     this.updateCurPage('Report')
+          //     this.$router.push({name: 'Report'})
+          //   }).catch(() => {
+          //   })
+          //   break
           case 1:
             row.gxName = gxName
+            this.updateReportBtIfShow(true)
             this.updateCurReportInfo(row)
             this.updateCurPage('Report')
             this.$router.push({name: 'Report'})
@@ -605,6 +803,44 @@ export default {
         })
       })
     },
+    // 加入外协
+    addWaiXie (row) {
+      let Data = {
+        ddfbillno: this.workOrderDdfbillno,
+        fbillno: this.curFbillno,
+        fidz: row.fidz,
+        fidc: row.fidc,
+        fnumber: row.fnumber,
+        fname: row.fname,
+        clnumber: row.clnumber,
+        clname: row.clname,
+        jhsfnumber: row.jhsnumber,
+        userno: this.userInfo.userno
+      }
+      this.Http.post('addwxlj', Data
+      ).then(res => {
+        switch (res.data.code) {
+          case '1':
+            this.$message.closeAll()
+            this.$message({
+              message: '加入成功!',
+              type: 'success'
+            })
+            break
+          default:
+            this.$message({
+              message: res.data.message + '!',
+              type: 'error'
+            })
+        }
+      }).catch((error) => {
+        console.log(error)
+        this.$message({
+          message: '服务器繁忙!',
+          type: 'error'
+        })
+      })
+    },
     // 条件查询
     search () {
       this.curPage = 1
@@ -659,6 +895,44 @@ export default {
             break
           default:
             this.listLoading = false
+            this.$message({
+              message: res.data.message + '!',
+              type: 'error'
+            })
+        }
+      }).catch((error) => {
+        console.log(error)
+        this.listLoading = false
+        this.$message({
+          message: '服务器繁忙!',
+          type: 'error'
+        })
+      })
+    },
+    // 获取汇报历史记录
+    getHBHistory () {
+      let Data = {
+        number: this.pageSize,
+        page_num: this.curPage,
+        gongxu: this.curChoosedGX,
+        gdfbillno: this.curFbillno,
+        fidz: this.curLjgzInfo.fidz,
+        fidc: this.curLjgzInfo.fidc,
+        workno: this.huibaiWorkNo
+      }
+      this.Http.get('serwork', Data
+      ).then(res => {
+        switch (res.data.code) {
+          case '1':
+            this.hbHistory = res.data.list.map(item => {
+              item.create_timeTxt = secondToFormatAll(item.create_time.time)
+              item.ifCanOpen = !item.starttime
+              item.ifCanClose = !item.endtime
+              return item
+            })
+            this.sumHB = res.data.count
+            break
+          default:
             this.$message({
               message: res.data.message + '!',
               type: 'error'

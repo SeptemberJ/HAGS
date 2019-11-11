@@ -3,9 +3,9 @@
     <div class="BackBlock">
       <span class="CursorPointer" @click="back"><i class="el-icon-arrow-left" title="返回"></i></span>
     </div>
-    <div class="MainBlock" v-if="curPage == 'Home' || curPage == 'Modify'"><span>MES-SYSTEM</span></div>
-    <div class="MainBlock" v-if="curPage == 'WorkOrder' || curPage == 'SalesReport'"><span>{{curModuleInfo.department + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + '汇报人: ' + userInfo.fname + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0工种: ' + userInfo.gongxu}}</span></div>
-    <div class="MainBlock" v-if="curPage != 'Home' && curPage != 'WorkOrder' && curPage != 'SalesReport'"><span>{{curModuleInfo.department + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + '汇报人: ' + userInfo.fname + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0成品计划数：' + workOrderFqty + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0工种: ' + userInfo.gongxu}}</span></div>
+    <div class="MainBlock" v-if="curPage == 'Home' || curPage == 'ModifyPSD'"><span>MES-SYSTEM</span></div>
+    <div class="MainBlock" v-if="curPage == 'WorkOrder' || curPage == 'SalesReport' || curPage == 'MRPList' || curPage == 'AddMRP' || curPage == 'MRPDetail'"><span>{{curModuleInfo.department + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + '汇报人: ' + userInfo.fname + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0工种: ' + userInfo.gongxu}}</span></div>
+    <div class="MainBlock" v-if="curPage != 'Home' && curPage != 'WorkOrder' && curPage != 'SalesReport' && curPage != 'MRPList' && curPage != 'AddMRP' && curPage != 'MRPDetail'"><span>{{curModuleInfo.department + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + '汇报人: ' + userInfo.fname + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0成品计划数：' + workOrderFqty + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0工种: ' + userInfo.gongxu}}</span></div>
     <div class="RightAccount">您好, {{userInfo.fname}}
       <!-- <span>{{beforePage}}--{{ljgzFromType}}--{{curPage}}</span> -->
       <span class="CursorPointer" style="margin-left: 10px;" @click="toMofify"><i class="el-icon-edit" title="修改密码"></i></span>
@@ -76,6 +76,18 @@ export default {
         this.updateCurPage('Home')
         this.$router.push({name: 'Home'})
       }
+      if (this.$route.name === 'MRPList') {
+        this.updateCurPage('Home')
+        this.$router.push({name: 'Home'})
+      }
+      if (this.$route.name === 'AddMRP') {
+        this.updateCurPage('MRPList')
+        this.$router.push({name: 'MRPList'})
+      }
+      if (this.$route.name === 'MRPDetail') {
+        this.updateCurPage('MRPList')
+        this.$router.push({name: 'MRPList'})
+      }
       if (this.$route.name === 'WorkOrder') {
         this.updateCurPage('Home')
         this.$router.push({name: 'Home'})
@@ -138,13 +150,17 @@ export default {
 
 <style lang="less" scoped>
 .TopLineBlock{
-  height: 1rem;
+  width: 100%;
+  height: 0.8rem;
   display: block;
-  line-height: 1rem;
+  line-height: 0.8rem;
   text-align: center;
   color: white;
   font-size: .3rem;
   background: #4A5F7A;
+  position: fixed;
+  top: 0;
+  z-index: 99;
   .BackBlock{
     width: 5%;
     float: left;
