@@ -18,21 +18,15 @@
       </el-table-column>
       <el-table-column
         type="index"
-        width="60">
+        width="50">
       </el-table-column>
-      <!-- <el-table-column
-        property="isck"
-        label="isck">
-      </el-table-column> -->
       <el-table-column
         property="wlnumber1"
-        label="零件管制表中的物料代码"
-        width="200">
+        label="零件管制表中的物料代码">
       </el-table-column>
       <el-table-column
         property="wlname1"
-        label="零件管制表中的物料名称"
-        width="200">
+        label="零件管制表中的物料名称">
       </el-table-column>
       <el-table-column
         label="实际应出库物料代码"
@@ -64,12 +58,12 @@
       <el-table-column
         property="cktime"
         label="出库日期"
-        width="120">
+        width="90">
       </el-table-column>
       <el-table-column
         property="ckr"
         label="出库人"
-        width="100">
+        width="90">
       </el-table-column>
       <el-table-column
         property="danwei"
@@ -98,18 +92,15 @@
       </el-table-column>
       <el-table-column
         property="price"
-        label="加工不含税单价"
-        width="110">
+        label="加工不含税单价">
       </el-table-column>
       <el-table-column
         property="sqcode"
-        label="申请单号"
-        width="200">
+        label="申请单号">
       </el-table-column>
       <el-table-column
         property="fbillno"
-        label="工单号"
-        width="150">
+        label="工单号">
       </el-table-column>
     </el-table>
     <!-- 内层 全部出库 -->
@@ -139,7 +130,7 @@
       </div>
     </el-dialog>
     <div slot="footer" class="dialog-footer">
-      <el-button type="warning" @click="fckAll" :loading="btLoadingF">反出库</el-button>
+      <el-button type="warning" @click="fckAll">反出库</el-button>
       <el-button type="danger" @click="ckAll">全部出库</el-button>
       <el-button @click="innerCgDetailVisible = false">关 闭</el-button>
     </div>
@@ -148,14 +139,13 @@
 
 <script>
 import { mapState } from 'vuex'
-// import { Message } from 'element-ui'
+import { Message } from 'element-ui'
 import {dateToFormat} from '../../util/utils'
 export default {
   name: 'CgDetail',
   data () {
     return {
       btLoading: false,
-      btLoadingF: false,
       innerCgDetailVisible: false,
       innerCgCkVisible: false,
       cgcode: '',
@@ -182,17 +172,16 @@ export default {
     },
     // 单独勾选
     selectSingle (selection, row) {
-      // if (!row.checked && row.isck !== '1') {
-      if (!row.checked) {
+      if (!row.checked && row.isck !== '1') {
         row.checked = true
         this.selectList.push(row)
       } else {
-        // if (row.isck === '1') {
-        //   Message.closeAll()
-        //   Message.warning({
-        //     message: '该单已出库，不可勾选!'
-        //   })
-        // }
+        if (row.isck === '1') {
+          Message.closeAll()
+          Message.warning({
+            message: '该单已出库，不可勾选!'
+          })
+        }
         this.$refs.selectList.toggleRowSelection(row, false)
         this.selectList.map((item, idx) => {
           if (item.id === row.id) {
@@ -217,32 +206,14 @@ export default {
         })
       }
     },
-    async ckAll () {
+    ckAll () {
       if (this.selectList.length === 0) {
         this.$message({
           message: '请先勾选需要出库的单子!',
           type: 'warning'
         })
       } else {
-        let cannotChooseCodes = await this.checkCHoose('ck')
-        if (cannotChooseCodes.ckCodes === '' && cannotChooseCodes.rkCodes === '') {
-          this.innerCgCkVisible = true
-        } else if (cannotChooseCodes.ckCodes === '' && cannotChooseCodes.rkCodes !== '') {
-          this.$message({
-            message: '下列记录不能进行出库操作，物料代码如下：已入库:' + cannotChooseCodes.rkCodes,
-            type: 'warning'
-          })
-        } else if (cannotChooseCodes.ckCodes !== '' && cannotChooseCodes.rkCodes === '') {
-          this.$message({
-            message: '下列记录不能进行出库操作，物料代码如下：已出库：' + cannotChooseCodes.ckCodes,
-            type: 'warning'
-          })
-        } else {
-          this.$message({
-            message: '下列记录不能进行出库操作，物料代码如下：已出库：' + cannotChooseCodes.ckCodes + '，已入库：' + cannotChooseCodes.rkCodes,
-            type: 'warning'
-          })
-        }
+        this.innerCgCkVisible = true
       }
     },
     sureCk () {
@@ -286,108 +257,29 @@ export default {
       })
     },
     // 反出库
-    async fckAll () {
+    fckAll () {
       if (this.selectList.length === 0) {
         this.$message({
           message: '请先勾选需要反出库的单子!',
           type: 'warning'
         })
       } else {
-        let cannotChooseCodes = await this.checkCHoose('ck')
-        if (cannotChooseCodes.ckCodes === '' && cannotChooseCodes.rkCodes === '') {
-          this.innerCgCkVisible = true
-        } else if (cannotChooseCodes.ckCodes === '' && cannotChooseCodes.rkCodes !== '') {
-          this.$message({
-            message: '下列记录不能进行反出库操作，物料代码如下：已入库：' + cannotChooseCodes.rkCodes,
-            type: 'warning'
-          })
-        } else if (cannotChooseCodes.ckCodes !== '' && cannotChooseCodes.rkCodes === '') {
-          this.$message({
-            message: '下列记录不能进行反出库操作，物料代码如下：未出库：' + cannotChooseCodes.ckCodes,
-            type: 'warning'
-          })
-        } else {
-          this.$message({
-            message: '下列记录不能进行反出库操作，物料代码如下：未出库：' + cannotChooseCodes.ckCodes + '，已入库：' + cannotChooseCodes.rkCodes,
-            type: 'warning'
-          })
+        // 反出库需判断是否有不可勾选的
+        for (let i = 0; i < this.selectList.length; i++) {
+          if (this.selectList[i].isck === '0') {
+            this.$message({
+              message: '零件管制表中的物料代码为' + "'" + this.selectList[i].wlnumber1 + "'" + '的记录不能进行反出库操作!',
+              type: 'warning'
+            })
+            return false
+          }
         }
       }
-    },
-    sureFck () {
-      let Data = {
-        'cgcode': this.cgcode,
-        'entrylist': this.selectList
-      }
-      this.btLoadingF = true
-      this.Http.post('updatewxcgfck', Data
-      ).then(res => {
-        switch (res.data.code) {
-          case '1':
-            this.$message({
-              message: '反出库成功!',
-              type: 'success'
-            })
-            this.selectList = []
-            this.innerCgCkVisible = false
-            this.innerCgDetailVisible = false
-            this.btLoadingF = false
-            break
-          default:
-            this.$message({
-              message: res.data.message + '!',
-              type: 'error'
-            })
-            this.btLoadingF = false
-        }
-      }).catch((error) => {
-        console.log(error)
-        this.btLoadingF = false
-        this.$message({
-          message: '服务器繁忙!',
-          type: 'error'
-        })
-      })
-    },
-    // 判断是否有不可勾选的记录
-    checkCHoose (type) {
-      return new Promise((resolve, reject) => {
-        if (type === 'fck') {
-          // 反出库isck = 1可以勾选反出库 0提示未出库 isck=2,3提示已入库
-          let cannotChooseCodes = {ckCodes: '', rkCodes: ''}
-          this.selectList.map((item, idx) => {
-            if (item.isck === '0') {
-              cannotChooseCodes.ckCodes = cannotChooseCodes.ckCodes + item.wlnumber1 + ','
-            }
-            if (item.isck === '2' || item.isck === '3') {
-              cannotChooseCodes.rkCodes = cannotChooseCodes.rkCodes + item.wlnumber1 + ','
-            }
-            if (idx === this.selectList.length - 1) {
-              resolve(cannotChooseCodes)
-            }
-          })
-        } else {
-          // 出库isck = 0 可以勾选出库 1提示已出库 isck=2,3提示已入库
-          let cannotChooseCodes = {ckCodes: '', rkCodes: ''}
-          this.selectList.map((item, idx) => {
-            if (item.isck === '1') {
-              cannotChooseCodes.ckCodes = cannotChooseCodes.ckCodes + item.wlnumber1 + ','
-            }
-            if (item.isck === '2' || item.isck === '3') {
-              cannotChooseCodes.rkCodes = cannotChooseCodes.rkCodes + item.wlnumber1 + ','
-            }
-            if (idx === this.selectList.length - 1) {
-              resolve(cannotChooseCodes)
-            }
-          })
-        }
-      })
     },
     getCgDetailList (cgId) {
       this.Http.get('wxcgdetaillist', {id: cgId}
       ).then(res => {
         this.cgcode = res.data.list.cgcode
-        this.selectList = []
         this.CgDetailListData = res.data.entrylist.map(item => {
           item.CkwuliaoOptions = []
           item.checked = false

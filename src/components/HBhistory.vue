@@ -68,31 +68,31 @@
         <el-table-column
           property="workno"
           label="汇报单号"
-          width="130"
+          width="150"
           show-overflow-tooltip>
         </el-table-column>
         <el-table-column
           property="starttime"
           label="开机时间"
-          width="125"
+          width="150"
           show-overflow-tooltip>
         </el-table-column>
         <el-table-column
           property="endtime"
           label="关机时间"
-          width="125"
+          width="150"
           show-overflow-tooltip>
         </el-table-column>
         <el-table-column
           property="freason"
           label="关机原因"
-          width="90"
+          width="150"
           show-overflow-tooltip>
         </el-table-column>
         <el-table-column
           property="create_timeTxt"
           label="汇报时间"
-          width="125"
+          width="150"
           show-overflow-tooltip>
         </el-table-column>
         <el-table-column

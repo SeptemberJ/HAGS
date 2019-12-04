@@ -337,6 +337,12 @@ export default {
           this.btLoading = false
           this.updateOrderMRPId(Info.ID)
           this.$router.push({name: 'MRPDetail'})
+        } else if (Info.code === '2') {
+          this.$message({
+            message: '保存失败，有未投放完的单据!',
+            type: 'warning'
+          })
+          this.btLoading = false
         } else {
           this.$message({
             message: '新增失败!',

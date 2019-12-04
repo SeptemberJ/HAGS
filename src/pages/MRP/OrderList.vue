@@ -120,6 +120,7 @@ export default {
       pageSize: 50,
       sum: 0,
       personOptions: [
+        {lable: '全部', value: '全部'},
         {lable: '张东琴', value: '张东琴'},
         {lable: '王璐', value: '王璐'},
         {lable: '储开琴', value: '储开琴'},
@@ -186,7 +187,7 @@ export default {
       tmpData += '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"> '
       tmpData += '<soap:Body> '
       tmpData += '<JA_LIST xmlns="http://tempuri.org/">'
-      tmpData += "<FSQL><![CDATA[exec [Z_MRPList]'" + this.filterOrderNo + "','" + this.filterPerson + "','" + this.filterCode + "','" + (this.ifHasTF ? '投放' : '') + "'," + Number((this.curPage - 1) * this.pageSize + 1) + ',' + this.curPage * this.pageSize + ']]></FSQL>'
+      tmpData += "<FSQL><![CDATA[exec [Z_MRPList]'" + this.filterOrderNo + "','" + (this.filterPerson === '全部' ? '' : this.filterPerson) + "','" + this.filterCode + "','" + (this.ifHasTF ? '投放' : '') + "'," + Number((this.curPage - 1) * this.pageSize + 1) + ',' + this.curPage * this.pageSize + ']]></FSQL>'
       tmpData += '</JA_LIST>'
       tmpData += '</soap:Body>'
       tmpData += '</soap:Envelope>'

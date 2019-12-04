@@ -96,18 +96,21 @@
           width="200">
         </el-table-column>
         <el-table-column
+          property="wlnumber2"
           label="实际应出库物料代码"
           width="200">
-          <template slot-scope="scope">
+          <!-- <template slot-scope="scope">
             <el-select v-model="scope.row.wlnumber2" placeholder="请输入关键字" filterable remote :filter-method="(value) => filterMethodWLCode(value, scope.$index)" @change="(value) => changeWLCode(value, scope.$index)">
               <el-option
                 v-for="(item, idx) in scope.row.CkwuliaoOptions"
                 :key="idx"
                 :label="item.fnumber"
                 :value="item.fnumber">
+                <span style="float: left">{{ item.fnumber }}</span>
+                <span style="float: right; color: #8492a6; font-size: 13px">{{ item.fmodel }}</span>
               </el-option>
             </el-select>
-          </template>
+          </template> -->
         </el-table-column>
         <el-table-column
           property="wlname2"

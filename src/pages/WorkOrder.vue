@@ -24,12 +24,14 @@
             <!-- <el-button size="small" type="info" @click="showHBHistoryDay">当日汇报记录</el-button>
             <el-button size="small" type="info" @click="showHBHistory">汇报记录</el-button>
             <el-button size="small" type="info" @click="showHBList">汇报列表</el-button> -->
+            <el-button size="small" type="info" @click="showActivity">活动列表</el-button>
             <el-button size="small" type="info" v-if="curModuleInfo.department != '外协'" @click="showHBHistoryDay">当日汇报记录</el-button>
             <el-button size="small" type="info" v-if="curModuleInfo.department != '外协'" @click="showHBHistory">汇报记录</el-button>
             <el-button size="small" type="info" v-if="curModuleInfo.department != '外协'" @click="showHBList">汇报列表</el-button>
             <el-button size="small" type="info" v-if="curModuleInfo.department == '外协'" @click="showWXList">外协列表</el-button>
             <el-button size="small" type="info" v-if="curModuleInfo.department == '外协'" @click="showSQDList">申请单</el-button>
             <el-button size="small" type="info" v-if="curModuleInfo.department == '外协'" @click="showCGList">采购单</el-button>
+            <el-button size="small" type="info" v-if="curModuleInfo.department == '外协'" @click="showRKList">入库单</el-button>
             <!-- <el-button size="small" type="warning" @click="huibao">汇报</el-button> -->
           </el-form-item>
         </el-col>
@@ -204,7 +206,6 @@
         <el-table-column
           property="freason"
           label="关机原因"
-          width="90"
           show-overflow-tooltip>
         </el-table-column>
         <el-table-column
@@ -523,6 +524,20 @@
         <el-button @click="dialogCgListVisible = false">关 闭</el-button>
       </div>
     </el-dialog>
+    <!-- 入库单列表 -->
+    <el-dialog class="el-dialog__body_NoPadding" title="入库单列表" :visible.sync="dialogRkListVisible" :close-on-click-modal="false" width="950px">
+      <RkList ref="rkChild"></RkList>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogRkListVisible = false">关 闭</el-button>
+      </div>
+    </el-dialog>
+    <!-- 活动列表 -->
+    <el-dialog class="el-dialog__body_NoPadding" title="活动列表" :visible.sync="dialogActivityListVisible" :close-on-click-modal="false" width="90%">
+      <Activity ref="hdChild"></Activity>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogActivityListVisible = false">关 闭</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -533,6 +548,9 @@ import WarnPrint from '../components/WarnPrint'
 import WxList from '../components/WaiXie/WxList'
 import SQDList from '../components/WaiXie/SqdList'
 import CgList from '../components/CaiGou/CgList'
+import RkList from '../components/RuKu/RkList'
+import Activity from '../components/Activity/Activity'
+
 export default {
   name: 'WorkOrder',
   data () {
@@ -596,7 +614,9 @@ export default {
       OpenOrCloseRow: null, // 开关机的行数据
       dialogWXListVisible: false,
       dialogSqdListVisible: false,
-      dialogCgListVisible: false
+      dialogCgListVisible: false,
+      dialogRkListVisible: false,
+      dialogActivityListVisible: false
     }
   },
   computed: {
@@ -625,7 +645,9 @@ export default {
     WarnPrint,
     WxList,
     SQDList,
-    CgList
+    CgList,
+    RkList,
+    Activity
   },
   created () {
     this.getWorkOrderList()
@@ -806,6 +828,13 @@ export default {
       this.dialogHBHistoryVisible = true
       this.ifHistoryDay = false
       this.getHBHistory()
+    },
+    // 活动列表
+    showActivity () {
+      this.dialogActivityListVisible = true
+      setTimeout(() => {
+        this.$refs.hdChild.getHDList()
+      }, 10)
     },
     // 汇报历史
     getHBHistory () {
@@ -1933,6 +1962,13 @@ export default {
       this.dialogCgListVisible = true
       setTimeout(() => {
         this.$refs.cgChild.getCgList()
+      }, 10)
+    },
+    // 显示入库单列表
+    showRKList () {
+      this.dialogRkListVisible = true
+      setTimeout(() => {
+        this.$refs.rkChild.getRkList()
       }, 10)
     },
     toggleHBList (status) {

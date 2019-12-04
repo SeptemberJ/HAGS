@@ -367,6 +367,12 @@ export default {
           })
           this.getDetail()
           this.btLoading = false
+        } else if (Info.code === '2') {
+          this.$message({
+            message: '保存失败，有未投放完的单据!',
+            type: 'warning'
+          })
+          this.btLoading = false
         } else {
           this.$message({
             message: '修改失败!',

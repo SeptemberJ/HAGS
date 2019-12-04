@@ -129,8 +129,8 @@ export default {
         switch (res.data.code) {
           case '1':
             this.detailList = res.data.list.map((item) => {
-              item.FCheckDateTxt = item.FCheckDate.slice(0, 9)
-              item.FPlanFinishDateTxt = item.FPlanFinishDate.slice(0, 9)
+              item.FCheckDateTxt = item.FCheckDate.slice(0, 10)
+              item.FPlanFinishDateTxt = item.FPlanFinishDate.slice(0, 10)
               item.fshortTxt = item.fshort === 0 ? '否' : '是' // 1  缺料
               return item
             })

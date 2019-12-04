@@ -90,6 +90,15 @@ body{
   border: 0 solid #DCDFE6 !important;
   color: #fff;
 }
+.el-table__header{
+  display: block;
+}
+.el-table__fixed-body-wrapper{
+  display: block;
+}
+/* .el-table__fixed-body-wrapper{
+  top: 0px !important;
+} */
 /* .el-table .hasModifyed{
   background: #187;
   color: #187;

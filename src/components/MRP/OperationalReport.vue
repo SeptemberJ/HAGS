@@ -39,8 +39,8 @@
       </el-table-column>
       <el-table-column
         prop="FNumber"
-        label="原料"
-        width="60">
+        label="替代单号"
+        width="130">
       </el-table-column>
       <el-table-column
         prop="毛需求"
@@ -355,7 +355,7 @@ export default {
       let DataAll = await this.getReportListAll()
       require.ensure([], () => {
         const { exportJsonToExcel } = require('../../vendor/Export2Excel.js')
-        const tHeader = ['物料代码', '物料名称', '规格型号', '单位', '原料', '毛需求', '已分配', '销售订单占用', '申请中', '采购中', '安全库存', '现有库存', '净需求', '最小订货量', '是否补充安全库存', '是否替代料', '本次申请', '订单执行', '未收料']
+        const tHeader = ['物料代码', '物料名称', '规格型号', '单位', '替代单号', '毛需求', '已分配', '销售订单占用', '申请中', '采购中', '安全库存', '现有库存', '净需求', '最小订货量', '是否补充安全库存', '是否替代料', '本次申请', '订单执行', '未收料']
         const filterVal = ['物料代码', '物料名称', '规格型号', '单位', 'FNumber', '毛需求', '已分配', '销售订单占用', '申请中', '采购中', '安全库存', '现有库存', '净需求', '最小订货量', 'FType', '是否替代料', '本次申请', '订单执行', '未收料']
         const data = this.formatJson(filterVal, DataAll)
         exportJsonToExcel(tHeader, data, '运算报告')
@@ -399,7 +399,7 @@ export default {
             '物料名称': '',
             '规格型号': '',
             '单位': '',
-            '原料': '',
+            '替代单号': '',
             '毛需求': 0,
             '已分配': '',
             '销售订单占用': '',
@@ -461,6 +461,7 @@ export default {
           let xmlData = this.$x2js.xml2js(res.data)
           let Result = xmlData.Envelope.Body.JA_LISTResponse.JA_LISTResult
           let Info = JSON.parse(Result)
+          console.log('report', Info)
           if (Info.length > 0) {
             document.getElementsByClassName('el-table__fixed')[0].style.setProperty('height', this.tableHieght - 16 + 'px', 'important')
             let sumLine = {
@@ -468,7 +469,7 @@ export default {
               '物料名称': '',
               '规格型号': '',
               '单位': '',
-              '原料': '',
+              '替代单号': '',
               '毛需求': 0,
               '已分配': '',
               '销售订单占用': '',

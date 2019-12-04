@@ -4,8 +4,8 @@
       <span class="CursorPointer" @click="back"><i class="el-icon-arrow-left" title="返回"></i></span>
     </div>
     <div class="MainBlock" v-if="curPage == 'Home' || curPage == 'ModifyPSD'"><span>MES-SYSTEM</span></div>
-    <div class="MainBlock" v-if="curPage == 'WorkOrder' || curPage == 'SalesReport' || curPage == 'MRPList' || curPage == 'AddMRP' || curPage == 'MRPDetail'"><span>{{curModuleInfo.department + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + '汇报人: ' + userInfo.fname + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0工种: ' + userInfo.gongxu}}</span></div>
-    <div class="MainBlock" v-if="curPage != 'Home' && curPage != 'WorkOrder' && curPage != 'SalesReport' && curPage != 'MRPList' && curPage != 'AddMRP' && curPage != 'MRPDetail'"><span>{{curModuleInfo.department + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + '汇报人: ' + userInfo.fname + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0成品计划数：' + workOrderFqty + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0工种: ' + userInfo.gongxu}}</span></div>
+    <div class="MainBlock" v-if="curPage == 'WorkOrder' || curPage == 'SalesReport' || curPage == 'MRPList' || curPage == 'AddMRP' || curPage == 'MRPDetail' || curPage == 'HBDetail'"><span>{{curModuleInfo.department + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + '汇报人: ' + userInfo.fname + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0工种: ' + userInfo.gongxu}}</span></div>
+    <div class="MainBlock" v-if="curPage != 'Home' && curPage != 'WorkOrder' && curPage != 'SalesReport' && curPage != 'MRPList' && curPage != 'AddMRP' && curPage != 'MRPDetail' && curPage != 'HBDetail'"><span>{{curModuleInfo.department + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + '汇报人: ' + userInfo.fname + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0成品计划数：' + workOrderFqty + '\xa0\xa0\xa0\xa0\xa0\xa0\xa0工种: ' + userInfo.gongxu}}</span></div>
     <div class="RightAccount">您好, {{userInfo.fname}}
       <!-- <span>{{beforePage}}--{{ljgzFromType}}--{{curPage}}</span> -->
       <span class="CursorPointer" style="margin-left: 10px;" @click="toMofify"><i class="el-icon-edit" title="修改密码"></i></span>

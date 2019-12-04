@@ -246,9 +246,9 @@ export default {
       this.filterSqdSqtime = ''
       this.curChoosedSqdId = ''
       this.curChoosedSqdCode = ''
-      this.cgrq = ''
-      this.supplyCode = ''
-      this.supplyName = ''
+      this.form.cgrq = ''
+      this.form.supplyCode = ''
+      this.form.supplyName = ''
       this.innerCgAddVisible = true
     },
     // 单选申请单

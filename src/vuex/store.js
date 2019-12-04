@@ -36,6 +36,7 @@ const state = {
   SR_filterStatus: '',
   SR_filterbl: '',
   SR_filterblnote: '',
+  SR_filterisopen: false,
   // mrp
   filterOrderNo_MRP: '',
   filterPerson_MRP: '',

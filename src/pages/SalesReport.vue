@@ -49,6 +49,9 @@
             <el-form-item label="焊接/喷塑/包装内容" size="small">
               <el-input v-model="filterblnote" placeholder="请输入" size="small" clearable style="width:90%;"></el-input>
             </el-form-item>
+            <el-form-item label="" size="small">
+              <el-checkbox v-model="filterisopen">是否展开</el-checkbox>
+            </el-form-item>
             <!-- <el-form-item label="喷塑备料">
               <el-select v-model="filterpsbl" size="small" placeholder="请选择" style="width: 100px;">
                 <el-option label="Yes" value="Yes"></el-option>
@@ -71,7 +74,8 @@
         </el-form>
       </el-row>
     </section>
-    <el-table :cell-class-name="cellStyle" id="salesReportTable"
+    <!-- 无颜色 -->
+    <el-table class="salesReportTable" v-show="!backisopen" id="salesReportTable"
       :data="reportList"
       :height="tableHieght"
       border
@@ -94,6 +98,183 @@
         fixed
         prop="fbillno"
         label="订单号"
+        width="120">
+      </el-table-column>
+      <el-table-column
+        fixed
+        prop="ftime"
+        label="美国下单时间"
+        width="120">
+      </el-table-column>
+      <el-table-column
+        fixed
+        prop="fname"
+        label="产品名称"
+        width="160">
+      </el-table-column>
+      <el-table-column
+        fixed
+        prop="ftype"
+        label="产品类别"
+        width="100">
+      </el-table-column>
+      <el-table-column
+        fixed
+        prop="fmodel"
+        label="颜色"
+        width="110">
+      </el-table-column>
+      <el-table-column
+        fixed
+        prop="fnumber"
+        label="数量"
+        width="70">
+      </el-table-column>
+      <el-table-column
+        fixed
+        prop="gdfbillno"
+        label="生产工单号"
+        width="140">
+      </el-table-column>
+      <el-table-column
+        prop="fstatus"
+        label="状态"
+        width="80">
+      </el-table-column>
+      <el-table-column
+        prop="fplanfinishdateTxt"
+        label="交期"
+        width="120">
+      </el-table-column>
+      <el-table-column
+        label="初始预计完成日期"
+        width="150">
+        <template slot-scope="scope">
+          <span class="CursorPointer" @click="edit(scope.row.csyjtimeTxt, scope.row, '初始预计完成日期')">{{scope.row.csyjtimeTxt}}</span>
+          <i class="el-icon-edit CursorPointer" @click="edit(scope.row.csyjtimeTxt, scope.row, '初始预计完成日期')"></i>
+        </template>
+      </el-table-column>
+      <el-table-column
+        label="修改预计完成日期"
+        width="150">
+        <template slot-scope="scope">
+          <span class="CursorPointer" @click="edit(scope.row.xgyjtimeTxt, scope.row, '修改预计完成日期')">{{scope.row.xgyjtimeTxt}}</span>
+          <i class="el-icon-edit CursorPointer" @click="edit(scope.row.xgyjtimeTxt, scope.row, '修改预计完成日期')"></i>
+        </template>
+      </el-table-column>
+      <el-table-column
+        prop="cknumber"
+        label="出货数量"
+        width="100">
+      </el-table-column>
+      <el-table-column
+        prop="cktime"
+        label="实际完成日期"
+        width="120">
+      </el-table-column>
+      <el-table-column
+        prop="fnote"
+        label="备注"
+        width="200">
+      </el-table-column>
+      <el-table-column
+        label="焊接备料"
+        width="90">
+        <template slot-scope="scope">
+          <span class="CursorPointer" @click="edit(scope.row.hjbeiliao, scope.row, '焊接备料', 'hjnote')">{{scope.row.hjbeiliao}}</span>
+          <i class="el-icon-edit CursorPointer" @click="edit(scope.row.hjbeiliao, scope.row, '焊接备料', 'hjnote')"></i>
+        </template>
+      </el-table-column>
+      <el-table-column
+        prop="hjnote"
+        label="焊接备注"
+        width="200">
+      </el-table-column>
+      <el-table-column
+        label="喷塑备料"
+        width="90">
+        <template slot-scope="scope">
+          <span class="CursorPointer" @click="edit(scope.row.psbeiliao, scope.row, '喷塑备料', 'psnote')">{{scope.row.psbeiliao}}</span>
+          <i class="el-icon-edit CursorPointer" @click="edit(scope.row.psbeiliao, scope.row, '喷塑备料', 'psnote')"></i>
+        </template>
+      </el-table-column>
+      <el-table-column
+        prop="psnote"
+        label="喷塑备注"
+        width="200">
+      </el-table-column>
+      <el-table-column
+        label="包装备料"
+        width="90">
+        <template slot-scope="scope">
+          <span class="CursorPointer" @click="edit(scope.row.bzbeiliao, scope.row, '包装备料', 'bznote')">{{scope.row.bzbeiliao}}</span>
+          <i class="el-icon-edit CursorPointer" @click="edit(scope.row.bzbeiliao, scope.row, '包装备料', 'bznote')"></i>
+        </template>
+      </el-table-column>
+      <el-table-column
+        prop="bznote"
+        label="包装备注"
+        width="200">
+      </el-table-column>
+      <el-table-column
+        label="外协"
+        width="150">
+        <template slot-scope="scope">
+          <span class="CursorPointer" @click="edit(scope.row.waixie, scope.row, '外协')">{{scope.row.waixie}}</span>
+          <i class="el-icon-edit CursorPointer" @click="edit(scope.row.waixie, scope.row, '外协')"></i>
+        </template>
+      </el-table-column>
+      <el-table-column
+        prop="zhixiang"
+        label="纸箱1"
+        width="250">
+      </el-table-column>
+      <el-table-column
+        prop="zhixiang2"
+        label="纸箱2"
+        width="250">
+      </el-table-column>
+      <el-table-column
+        prop="tuopan"
+        label="托盘"
+        width="150">
+      </el-table-column>
+       <el-table-column
+        label="工程变更"
+        width="150">
+        <template slot-scope="scope">
+          <span class="CursorPointer" @click="edit(scope.row.gcbiangeng, scope.row, '工程变更')">{{scope.row.gcbiangeng}}</span>
+          <i class="el-icon-edit CursorPointer" @click="edit(scope.row.gcbiangeng, scope.row, '工程变更')"></i>
+        </template>
+      </el-table-column>
+      <el-table-column
+        label="质检"
+        width="150">
+        <template slot-scope="scope">
+          <span class="CursorPointer" @click="edit(scope.row.zhijian, scope.row, '质检')">{{scope.row.zhijian}}</span>
+          <i class="el-icon-edit CursorPointer" @click="edit(scope.row.zhijian, scope.row, '质检')"></i>
+        </template>
+      </el-table-column>
+    </el-table>
+    <!-- 有颜色 -->
+    <el-table :cell-class-name="cellStyle" class="salesReportTable" v-show="backisopen"
+      :data="reportList"
+      :height="tableHieght"
+      border
+      v-loading="listLoading"
+      style="width: 100%;">
+      <el-table-column
+        fixed
+        label="#"
+        width="70">
+        <template slot-scope="scope">
+          <el-radio v-model="filterGdfbillno" :label="scope.row.gdfbillno2" @change="changeRadio">{{scope.row.index + 1}}</el-radio>
+        </template>
+      </el-table-column>
+      <el-table-column
+        fixed
+        prop="fbillno"
+        label="订单号1"
         width="120">
       </el-table-column>
       <el-table-column
@@ -494,6 +675,7 @@ export default {
       btLoading: false,
       dialogEditVisible: false,
       dialogHistoryVisible: false,
+      backisopen: false,
       tableHieght: 300,
       // filterpsbl: '',
       // filterbzbl: '',
@@ -584,6 +766,14 @@ export default {
       },
       set: function (newValue) {
         this.$store.state.SR_filterblnote = newValue
+      }
+    },
+    filterisopen: {
+      get: function () {
+        return this.$store.state.SR_filterisopen
+      },
+      set: function (newValue) {
+        this.$store.state.SR_filterisopen = newValue
       }
     }
   },
@@ -681,10 +871,11 @@ export default {
     },
     getSalesReportList () {
       this.listLoading = true
-      this.Http.post('baobiaolist', {number: this.pageSize, page_num: this.curPage, fbillno: this.filterOrderNo, ftime: this.filterUSATime, ftype: this.filterProductionKind, fname: this.filterProductionName, fstatus: this.filterStatus, beiliao: this.filterbl, beiliaonote: this.filterblnote}
+      this.Http.post('baobiaolist', {isopen: this.filterisopen ? 1 : 0, number: this.pageSize, page_num: this.curPage, fbillno: this.filterOrderNo, ftime: this.filterUSATime, ftype: this.filterProductionKind, fname: this.filterProductionName, fstatus: this.filterStatus, beiliao: this.filterbl, beiliaonote: this.filterblnote}
       ).then(res => {
         switch (res.data.code) {
           case '1':
+            this.backisopen = (res.data.isopen === '1')
             document.getElementsByClassName('el-table__fixed')[0].style.setProperty('height', this.tableHieght - 20 + 'px', 'important')
             this.reportList = res.data.list.map((item, idx) => {
               item.index = idx
@@ -869,7 +1060,7 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="less">
-#salesReportTable thead th{
+.salesReportTable thead th{
   background: #ddd;
 }
 .el-table__fixed-right{}
