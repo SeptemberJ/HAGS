@@ -15,6 +15,12 @@ import HBDetail from '@/pages/HBDetail'
 import MRPList from '@/pages/MRP/OrderList'
 import AddMRP from '@/pages/MRP/AddOrder'
 import MRPDetail from '@/pages/MRP/OrderDetail'
+
+import MaintenanceIndex from '@/pages/Maintenance/Index'
+import MaintenanceList from '@/pages/Maintenance/List'
+import MaintenanceAdd from '@/pages/Maintenance/Add'
+import MaintenanceDetail from '@/pages/Maintenance/Detail'
+
 import {getCookie} from '@/util/utils'
 
 Vue.use(VueRouter)
@@ -30,6 +36,30 @@ const router = new VueRouter({
       path: '/SalesReport',
       name: 'SalesReport',
       component: SalesReport,
+      meta: {requireAuth: true}
+    },
+    {
+      path: '/MaintenanceIndex',
+      name: 'MaintenanceIndex',
+      component: MaintenanceIndex,
+      meta: {requireAuth: true}
+    },
+    {
+      path: '/MaintenanceList',
+      name: 'MaintenanceList',
+      component: MaintenanceList,
+      meta: {requireAuth: true}
+    },
+    {
+      path: '/MaintenanceAdd',
+      name: 'MaintenanceAdd',
+      component: MaintenanceAdd,
+      meta: {requireAuth: true}
+    },
+    {
+      path: '/MaintenanceDetail',
+      name: 'MaintenanceDetail',
+      component: MaintenanceDetail,
       meta: {requireAuth: true}
     },
     {

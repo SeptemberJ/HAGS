@@ -13,6 +13,10 @@
       <el-col class="ModuleItem" :span="6">
         <div class="ItemInner" style="background: #A14F76;" @click="toWaiXie">外协</div>
       </el-col>
+      <!-- 激光，折弯，焊接，cnc,喷涂，抛丸，包装 -->
+      <el-col class="ModuleItem" :span="6" v-if="userInfo.gongxu != '管理' && userInfo.gongxu != '仓库' && userInfo.gongxu != '计划'">
+        <div class="ItemInner" style="background: #A14F76;" @click="toEMaintenance">设备保养</div>
+      </el-col>
     </el-row>
     <el-row>
       <el-col class="ModuleItem" :span="6" v-for="(item, idx) in moduleList" :key="idx">
@@ -94,6 +98,12 @@ export default {
       this.updateCurModule({departid: '', department: '外协'})
       this.updateCurPage('WorkOrder')
       this.$router.push({name: 'WorkOrder'})
+    },
+    // 设备保养
+    toEMaintenance () {
+      this.updateCurModule({departid: '', department: '设备保养'})
+      this.updateCurPage('MaintenanceIndex')
+      this.$router.push({name: 'MaintenanceIndex'})
     },
     toSaleReport () {
       this.updateCurModule({department: '订单看板', departid: ''})

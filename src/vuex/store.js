@@ -43,8 +43,11 @@ const state = {
   filterCode_MRP: '',
   ifHasTF_MRP: false,
   orderMRPId: '',
-  urlPre: 'http://ep23767307.qicp.vip:31379/haianJK/',
-  imgPreUrl: 'http://ep23767307.qicp.vip:31379/upload/'
+  maintenanceId: '',
+  urlPre: 'http://10.0.0.13:31379/haianJK/',
+  imgPreUrl: 'http://10.0.0.13:31379/upload/'
+  // urlPre: 'http://ep23767307.qicp.vip:31379/haianJK/',
+  // imgPreUrl: 'http://ep23767307.qicp.vip:31379/upload/'
 }
 const vuexLocal = new VuexPersistence({
   storage: window.localStorage
@@ -106,6 +109,9 @@ const actions = {
   // MRP
   updateOrderMRPId ({commit, state}, OrderMRPId) {
     commit('setOrderMRPId', OrderMRPId)
+  },
+  updateMaintenanceId ({commit, state}, MaintenanceId) {
+    commit('setMaintenanceId', MaintenanceId)
   }
 }
 
@@ -167,6 +173,9 @@ const mutations = {
   // MRP
   setOrderMRPId (state, OrderMRPId) {
     state.orderMRPId = OrderMRPId
+  },
+  setMaintenanceId (state, MaintenanceId) {
+    state.maintenanceId = MaintenanceId
   }
 }
 

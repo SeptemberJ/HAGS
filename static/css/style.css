@@ -41,12 +41,12 @@ body{
 #addCnc .el-dialog__body, #addPerson .el-dialog__body, #appendProduction .el-dialog__body{
   padding-top: 0 !important;
 }
-#saerchNameForm .el-form-item{
+/* #saerchNameForm .el-form-item{
   width: 95% !important;
 }
 #saerchNameForm .el-form-item__content{
   width: 80% !important;
-}
+} */
 .time .el-input.is-disabled .el-input__inner{
   background-color: #fff;
   color: #000;
@@ -95,6 +95,10 @@ body{
 }
 .el-table__fixed-body-wrapper{
   display: block;
+}
+
+#hoverNoLight tbody tr:hover>td { 
+  background-color: inherit !important;
 }
 /* .el-table__fixed-body-wrapper{
   top: 0px !important;

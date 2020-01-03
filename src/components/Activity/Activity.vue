@@ -89,6 +89,9 @@
               <el-option v-for="Activity in activityNameList" :key="Activity.id" :label="Activity.fname" :value="Activity.id"></el-option>
             </el-select>
           </el-form-item>
+          <el-form-item label="备注" prop="fnote">
+            <el-input v-model="form.fnote" style="width: 200px;"></el-input>
+          </el-form-item>
         </el-form>
         <!-- person list -->
         <el-button type="danger" icon="el-icon-plus" size="small" @click="addPerson" style="float:right;margin-bottom:20px;">添加人员</el-button>
@@ -233,7 +236,8 @@ export default {
       form: {
         fnumber: 1,
         activityid: '',
-        activityname: ''
+        activityname: '',
+        fnote: ''
       },
       rules: {
         fnumber: [
@@ -592,6 +596,11 @@ export default {
               message: '请至少选择一个人员!',
               type: 'warning'
             })
+          } else if (this.form.activityname === '其他' && !this.form.fnote) {
+            this.$message({
+              message: '由于活动名称选择的其他，故请填写备注!',
+              type: 'warning'
+            })
           } else {
             this.sureSubmit()
           }
@@ -611,6 +620,7 @@ export default {
         fbiller: this.userInfo.fname,
         activityid: this.form.activityid,
         activityname: this.form.activityname,
+        fnote: this.form.fnote,
         fnumber: this.form.fnumber,
         peoplelist: this.personList.map(item => {
           item.userno = item.id
