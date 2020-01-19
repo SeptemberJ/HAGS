@@ -10,6 +10,7 @@ import Ljgz from '@/pages/Ljgz'
 import Report from '@/pages/Report'
 import History from '@/pages/History'
 import WarnPrint from '@/pages/WarnPrint'
+import CheckedWarnPrint from '@/pages/CheckedWarnPrint'
 import HBDetail from '@/pages/HBDetail'
 
 import MRPList from '@/pages/MRP/OrderList'
@@ -108,6 +109,12 @@ const router = new VueRouter({
       path: '/WarnPrint',
       name: 'WarnPrint',
       component: WarnPrint,
+      meta: {requireAuth: true}
+    },
+    {
+      path: '/CheckedWarnPrint',
+      name: 'CheckedWarnPrint',
+      component: CheckedWarnPrint,
       meta: {requireAuth: true}
     },
     {

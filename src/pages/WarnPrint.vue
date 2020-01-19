@@ -32,7 +32,6 @@
                 </tr>
                 <tr>
                   <td colspan="9">
-                    {{item.imgList.length}}
                     <img class="MarginR_10" v-for="(img, idx) in item.imgList" :key="idx" :src="imgPreUrl + img" style="margin-top: 10px;display:block;"/>
                   </td>
                 </tr>

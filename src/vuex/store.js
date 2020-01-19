@@ -36,7 +36,11 @@ const state = {
   SR_filterStatus: '',
   SR_filterbl: '',
   SR_filterblnote: '',
+  SR_fcheckdate: ['', ''],
   SR_filterisopen: false,
+  SR_filterisrkwwc: false,
+  SR_filterisyj: false,
+  checkedWarnPrint: [], // 勾选的打印订单
   // mrp
   filterOrderNo_MRP: '',
   filterPerson_MRP: '',
@@ -90,6 +94,9 @@ const actions = {
   },
   updateLjgzOption ({commit, state}, Option) {
     commit('setLjgzOption', Option)
+  },
+  updateCheckedWarnPrint ({commit, state}, List) {
+    commit('setCheckedWarnPrint', List)
   },
   updateLjgzLjgzIdCNC ({commit, state}, Id) {
     commit('setLjgzIdCNC', Id)
@@ -154,6 +161,9 @@ const mutations = {
     state.workOrderFqty = Option.fqty
     state.workOrderFbillno = Option.fbillno
     state.workOrderDdfbillno = Option.ddfbillno
+  },
+  setCheckedWarnPrint (state, List) {
+    state.checkedWarnPrint = List
   },
   setLjgzIdCNC (state, Id) {
     state.workOrderIdCNC = Id

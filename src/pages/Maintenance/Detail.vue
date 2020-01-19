@@ -4,39 +4,51 @@
       <el-row>
         <el-col :span="6">
           <el-form-item label="使用部门" prop="department">
-            <el-input v-model="form.department" disabled></el-input>
+            <el-input v-model="form.department" disabled style="width:100%;"></el-input>
           </el-form-item>
         </el-col>
         <el-col :span="6">
           <el-form-item label="设备编号" prop="fdeviceid">
-            <el-input v-model="form.fdeviceid" disabled></el-input>
+            <el-input v-model="form.fdeviceid" disabled style="width:100%;"></el-input>
           </el-form-item>
         </el-col>
         <el-col :span="6">
           <el-form-item label="规格型号">
-            <el-input v-model="form.fmodel" disabled></el-input>
+            <el-input v-model="form.fmodel" disabled style="width:100%;"></el-input>
           </el-form-item>
         </el-col>
         <el-col :span="6">
-          <el-form-item label="日期" prop="ftime">
-            <el-input v-model="form.ftime" disabled></el-input>
+          <el-form-item label="设备名称" prop="devicename">
+            <el-input v-model="form.devicename" disabled style="width:100%;"></el-input>
           </el-form-item>
         </el-col>
       </el-row>
       <el-row>
         <el-col :span="6">
+          <el-form-item label="日期" prop="ftime">
+            <el-input v-model="form.ftime" disabled style="width:100%;"></el-input>
+          </el-form-item>
+        </el-col>
+        <el-col :span="6">
           <el-form-item label="班组长">
-            <el-input v-model="form.zdr" disabled></el-input>
+            <el-input v-model="form.zdr" disabled style="width:100%;"></el-input>
           </el-form-item>
         </el-col>
         <el-col :span="6">
           <el-form-item label="是否保修" prop="isrepair">
-            <el-input v-model="form.isrepair" disabled></el-input>
+            <el-input v-model="form.isrepair" disabled style="width:100%;"></el-input>
           </el-form-item>
         </el-col>
         <el-col :span="6">
           <el-form-item label="保修状态">
-            <el-input v-model="form.bxfstatus" disabled></el-input>
+            <el-input v-model="form.bxfstatus" disabled style="width:100%;"></el-input>
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row class="TextAlignL">
+        <el-col :span="12">
+          <el-form-item label="故障现象" prop="faultreason">
+            <el-input v-model="form.faultreason" disabled  style="width: 400px;">></el-input>
           </el-form-item>
         </el-col>
       </el-row>
@@ -75,6 +87,7 @@ export default {
       // fdeviceid: '', // 设备id
       form: {
         department: '',
+        faultreason: '',
         fdeviceid: '',
         devicename: '',
         fmodel: '',
@@ -84,9 +97,9 @@ export default {
         bxfstatus: ''
       },
       rules: {
-        department: [
-          { required: true, message: '请选择使用部门', trigger: 'change' }
-        ],
+        // department: [
+        //   { required: true, message: '请选择使用部门', trigger: 'change' }
+        // ],
         fdeviceid: [
           { required: true, message: '请选择使用部门', trigger: 'change' }
         ],
@@ -119,6 +132,7 @@ export default {
           case '1':
             this.form = {
               department: res.data.list.department,
+              faultreason: res.data.list.faultreason,
               fdeviceid: res.data.list.fdeviceid,
               devicename: res.data.list.devicename,
               fmodel: res.data.list.fmodel,
@@ -149,4 +163,7 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="less" scoped>
+.MaintenanceDetail{
+  padding: 20px;
+}
 </style>

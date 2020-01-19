@@ -3,10 +3,11 @@
     <el-form :inline="true" :rules="rules" ref="form" :model="form" label-position="left" label-width="80px" class="demo-form-inline disabledWhite">
       <el-row>
         <el-col :span="6">
-          <el-form-item label="使用部门" prop="department">
-            <el-select v-model="form.department" placeholder="请选择">
+          <el-form-item label="使用部门">
+            <el-input v-model="form.department" disabled></el-input>
+            <!-- <el-select v-model="form.department" placeholder="请选择">
               <el-option v-for="item in departmentOptions" :key="item.id" :label="item.fname" :value="item.fname"></el-option>
-            </el-select>
+            </el-select> -->
           </el-form-item>
         </el-col>
         <el-col :span="6">
@@ -30,13 +31,8 @@
           </el-form-item>
         </el-col>
         <el-col :span="6">
-          <el-form-item label="日期" prop="ftime">
-            <el-date-picker
-              v-model="form.ftime"
-              type="date"
-              placeholder="选择日期"
-              value-format="yyyy-MM-dd">
-            </el-date-picker>
+          <el-form-item label="设备名称">
+            <el-input v-model="form.devicename" disabled></el-input>
           </el-form-item>
         </el-col>
       </el-row>
@@ -47,15 +43,32 @@
           </el-form-item>
         </el-col>
         <el-col :span="6">
-          <el-form-item label="是否保修" prop="isrepair">
+          <el-form-item label="日期" prop="ftime" label-width="60px">
+            <el-date-picker style="width:85%;"
+              v-model="form.ftime"
+              type="date"
+              placeholder="选择日期"
+              value-format="yyyy-MM-dd">
+            </el-date-picker>
+          </el-form-item>
+        </el-col>
+        <el-col :span="6">
+          <el-form-item label="是否报修" prop="isrepair">
             <el-select v-model="form.isrepair" placeholder="请选择">
               <el-option v-for="item in repairOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
             </el-select>
           </el-form-item>
         </el-col>
         <el-col :span="6">
-          <el-form-item label="保修状态">
-            <el-input v-model="form.bxfstatus" placeholder="保修状态"></el-input>
+          <el-form-item label="报修状态">
+            <el-input v-model="form.bxfstatus" placeholder="报修状态"></el-input>
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="24" class="TextAlignL">
+          <el-form-item label="故障现象" prop="faultreason" style="width: 100%;">
+            <el-input v-model="form.faultreason" placeholder="故障现象" style="width: 400px;"></el-input>
           </el-form-item>
         </el-col>
       </el-row>
@@ -95,6 +108,7 @@ export default {
       fdeviceid: '', // 设备id
       form: {
         department: '',
+        faultreason: '',
         fdeviceid: '',
         devicename: '',
         fmodel: '',
@@ -104,9 +118,9 @@ export default {
         bxfstatus: ''
       },
       rules: {
-        department: [
-          { required: true, message: '请选择使用部门', trigger: 'change' }
-        ],
+        // department: [
+        //   { required: true, message: '请选择使用部门', trigger: 'change' }
+        // ],
         fdeviceid: [
           { required: true, message: '请选择使用部门', trigger: 'change' }
         ],
@@ -114,7 +128,7 @@ export default {
           { required: true, message: '请选择日期', trigger: 'change' }
         ],
         isrepair: [
-          { required: true, message: '请选择是否保修', trigger: 'change' }
+          { required: true, message: '请选择是否报修', trigger: 'change' }
         ]
       },
       requirementList: [],
@@ -128,6 +142,15 @@ export default {
       userInfo: state => state.userInfo
     })
   },
+  watch: {
+    'form.isrepair': function (value) {
+      if (value === 1) {
+        this.form.bxfstatus = '报修中'
+      } else {
+        this.form.bxfstatus = ''
+      }
+    }
+  },
   created () {
     this.form.ftime = dateToFormat(new Date())
     if (!this.$route.params.fdeviceid) {
@@ -136,9 +159,10 @@ export default {
       this.form.fdeviceid = this.$route.params.fdeviceid
       this.form.devicename = this.$route.params.devicename
       this.form.fmodel = this.$route.params.fmodel
+      this.form.department = this.$route.params.department
       this.getMRequirement(this.$route.params.id)
     }
-    this.getOptions()
+    // this.getOptions()
   },
   methods: {
     remoteMethod (query) {
@@ -171,48 +195,56 @@ export default {
         if (valid) {
           if (this.form.isrepair === 1 && this.form.bxfstatus === '') {
             this.$message({
-              message: '请将填写保修状态!',
+              message: '请将填写报修状态!',
               type: 'warning'
             })
-          } else {
-            let Data = {
-              userid: this.userInfo.id,
-              zdr: this.userInfo.fname,
-              ftime: this.form.ftime,
-              department: this.form.department,
-              fdeviceid: this.form.fdeviceid,
-              devicename: this.form.devicename,
-              fmodel: this.form.fmodel,
-              isrepair: this.form.isrepair,
-              bxfstatus: this.form.bxfstatus,
-              entrylist: this.requirementList
-            }
-            this.btLoading = true
-            this.Http.post('adddevicerecord', Data
-            ).then(res => {
-              switch (res.data.code) {
-                case '1':
-                  this.$message({
-                    message: '录入成功!',
-                    type: 'success'
-                  })
-                  this.$router.push({name: 'MaintenanceList'})
-                  break
-                default:
-                  this.btLoading = false
-                  this.$message({
-                    message: res.data.message + '!',
-                    type: 'error'
-                  })
-              }
-            }).catch((error) => {
-              console.log(error)
-              this.$message({
-                message: '服务器繁忙!',
-                type: 'error'
-              })
-            })
+            return false
           }
+          if (this.form.isrepair === 1 && this.form.faultreason === '') {
+            this.$message({
+              message: '请将填写故障现象!',
+              type: 'warning'
+            })
+            return false
+          }
+          let Data = {
+            userid: this.userInfo.id,
+            zdr: this.userInfo.fname,
+            ftime: this.form.ftime,
+            department: this.form.department,
+            faultreason: this.form.faultreason,
+            fdeviceid: this.form.fdeviceid,
+            devicename: this.form.devicename,
+            fmodel: this.form.fmodel,
+            isrepair: this.form.isrepair,
+            bxfstatus: this.form.bxfstatus,
+            entrylist: this.requirementList
+          }
+          this.btLoading = true
+          this.Http.post('adddevicerecord', Data
+          ).then(res => {
+            switch (res.data.code) {
+              case '1':
+                this.$message({
+                  message: '录入成功!',
+                  type: 'success'
+                })
+                this.$router.push({name: 'MaintenanceList'})
+                break
+              default:
+                this.btLoading = false
+                this.$message({
+                  message: res.data.message + '!',
+                  type: 'error'
+                })
+            }
+          }).catch((error) => {
+            console.log(error)
+            this.$message({
+              message: '服务器繁忙!',
+              type: 'error'
+            })
+          })
         } else {
           this.$message({
             message: '请将信息填写完整!',

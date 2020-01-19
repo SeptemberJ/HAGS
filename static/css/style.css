@@ -25,6 +25,10 @@ body{
   min-width: 1024px;
 }
 
+body .el-table th.gutter{
+  display: table-cell!important;
+}
+
 .CursorPointer{
   cursor: pointer;
 }

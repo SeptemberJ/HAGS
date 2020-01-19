@@ -376,7 +376,7 @@
     <el-dialog
       title="预警详情"
       :visible.sync="dialogVisibleYJ"
-      :showClose="false"
+      :showClose="true"
       fullscreen>
       <WarnPrint :warnsInfo="warnsInfo" @showTimeBox="showTimeBox"/>
     </el-dialog>
@@ -480,6 +480,13 @@ export default {
     this.getHBHistory()
     this.getEquipmentList()
     this.updateLjgzLjgzIdCNC(null) // 初始化LjgzIdCNC 确保只有回报列表双击才会显示加入零件列表
+  },
+  watch: {
+    dialogVisibleYJ: function (value) {
+      if (!value) {
+        this.showTimeBox()
+      }
+    }
   },
   methods: {
     ...mapActions([

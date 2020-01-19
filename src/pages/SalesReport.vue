@@ -30,8 +30,14 @@
             <el-form-item label="产品名称" size="small">
               <el-input v-model="filterProductionName" placeholder="请输入产品名称" size="small" clearable style="width:90%;"></el-input>
             </el-form-item>
+            <el-form-item label="焊接/喷塑/包装备料" size="small">
+              <el-select v-model="filterbl" size="small" placeholder="请选择" style="width: 100px;">
+                <el-option label="Yes" value="Yes"></el-option>
+                <el-option label="No" value="No"></el-option>
+              </el-select>
+            </el-form-item>
             <el-form-item label="状态" size="small">
-              <el-select v-model="filterStatus" size="small" placeholder="请选择状态" style="width: 100px;">
+              <el-select v-model="filterStatus" size="small" placeholder="请选择状态" style="width: 80px;">
                 <el-option
                   v-for="item in statusOptions"
                   :key="item"
@@ -40,17 +46,27 @@
                 </el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="焊接/喷塑/包装备料" size="small">
-              <el-select v-model="filterbl" size="small" placeholder="请选择" style="width: 100px;">
-                <el-option label="Yes" value="Yes"></el-option>
-                <el-option label="No" value="No"></el-option>
-              </el-select>
-            </el-form-item>
             <el-form-item label="焊接/喷塑/包装内容" size="small">
-              <el-input v-model="filterblnote" placeholder="请输入" size="small" clearable style="width:90%;"></el-input>
+              <el-input v-model="filterblnote" placeholder="请输入" size="small" clearable style="width:100px;"></el-input>
+            </el-form-item>
+            <el-form-item label="工单日期" size="small">
+              <el-date-picker style="width: 230px;" @change="changeDate"
+                v-model="filterfcheckdate"
+                type="daterange"
+                value-format="yyyy-MM-dd"
+                range-separator="-"
+                start-placeholder="开始日期"
+                end-placeholder="结束日期">
+              </el-date-picker>
             </el-form-item>
             <el-form-item label="" size="small">
               <el-checkbox v-model="filterisopen">是否展开</el-checkbox>
+            </el-form-item>
+            <el-form-item label="" size="small">
+              <el-checkbox v-model="filterisrkwwc">入库未完成</el-checkbox>
+            </el-form-item>
+            <el-form-item label="" size="small">
+              <el-checkbox v-model="filterisyj">质量预警</el-checkbox>
             </el-form-item>
             <!-- <el-form-item label="喷塑备料">
               <el-select v-model="filterpsbl" size="small" placeholder="请选择" style="width: 100px;">
@@ -65,27 +81,30 @@
               </el-select>
             </el-form-item> -->
             <el-form-item style="margin-top: -4px;">
-              <el-button type="primary" icon="el-icon-search" size="small" @click="search">搜索</el-button>
-              <el-button icon="el-icon-refresh" size="small" @click="reset">重置</el-button>
-            </el-form-item>
+              <el-button type="primary" size="small" @click="search">搜索</el-button>
+              <el-button size="small" @click="reset">重置</el-button>
               <el-button type="warning" size="small" @click="getHistorySales">历史纪录</el-button>
-            <el-form-item>
+              <el-button type="success" size="small" @click="exportExcell">导出</el-button>
+              <el-button type="danger" size="small" @click="checkedPrint">打印</el-button>
             </el-form-item>
+            <!-- <el-form-item>
+            </el-form-item> -->
         </el-form>
       </el-row>
     </section>
     <!-- 无颜色 -->
-    <el-table class="salesReportTable" v-show="!backisopen" id="salesReportTable"
+    <el-table ref="configurationTable" class="salesReportTable" v-show="!backisopen" id="salesReportTable"
       :data="reportList"
       :height="tableHieght"
       border
       v-loading="listLoading"
+      @select="selectSingle"
+      @select-all="selectAll"
       style="width: 100%;">
-      <!-- <el-table-column
-        fixed
-        type="index"
-        width="50">
-      </el-table-column> -->
+      <el-table-column
+        type="selection"
+        width="55">
+      </el-table-column>
       <el-table-column
         fixed
         label="#"
@@ -142,6 +161,11 @@
         width="80">
       </el-table-column>
       <el-table-column
+        prop="FIN"
+        label="入库状态"
+        width="80">
+      </el-table-column>
+      <el-table-column
         prop="fplanfinishdateTxt"
         label="交期"
         width="120">
@@ -170,6 +194,11 @@
       <el-table-column
         prop="cktime"
         label="实际完成日期"
+        width="120">
+      </el-table-column>
+      <el-table-column
+        prop="fcheckdateTxt"
+        label="工单日期"
         width="120">
       </el-table-column>
       <el-table-column
@@ -257,12 +286,18 @@
       </el-table-column>
     </el-table>
     <!-- 有颜色 -->
-    <el-table :cell-class-name="cellStyle" class="salesReportTable" v-show="backisopen"
+    <el-table ref="configurationTable" :cell-class-name="cellStyle" class="salesReportTable" v-show="backisopen"
       :data="reportList"
       :height="tableHieght"
       border
       v-loading="listLoading"
+      @select="selectSingle"
+      @select-all="selectAll"
       style="width: 100%;">
+      <el-table-column
+        type="selection"
+        width="55">
+      </el-table-column>
       <el-table-column
         fixed
         label="#"
@@ -274,7 +309,7 @@
       <el-table-column
         fixed
         prop="fbillno"
-        label="订单号1"
+        label="订单号"
         width="120">
       </el-table-column>
       <el-table-column
@@ -319,6 +354,11 @@
         width="80">
       </el-table-column>
       <el-table-column
+        prop="FIN"
+        label="入库状态"
+        width="80">
+      </el-table-column>
+      <el-table-column
         prop="fplanfinishdateTxt"
         label="交期"
         width="120">
@@ -347,6 +387,11 @@
       <el-table-column
         prop="cktime"
         label="实际完成日期"
+        width="120">
+      </el-table-column>
+      <el-table-column
+        prop="fcheckdateTxt"
+        label="工单日期"
         width="120">
       </el-table-column>
       <el-table-column
@@ -498,7 +543,7 @@
       </el-table-column>
     </el-table>
     <el-pagination v-if="reportList.length > 0" style="margin: .2rem 0;"
-      @current-change="getSalesReportList"
+      @current-change="handleCurrentChange"
       :current-page.sync="curPage"
       :page-size="pageSize"
       layout="total, prev, pager, next, jumper"
@@ -666,11 +711,12 @@
 
 <script>
 import { mapState, mapActions } from 'vuex'
-import {secondToFormat} from '../util/utils'
+import {secondToFormat, objDeepCopy} from '../util/utils'
 export default {
   name: 'SalesReport',
   data () {
     return {
+      value1: '',
       listLoading: false,
       btLoading: false,
       dialogEditVisible: false,
@@ -680,7 +726,7 @@ export default {
       // filterpsbl: '',
       // filterbzbl: '',
       reportList: [],
-      columnIndex: [{idx: 27, pro: 'jgcolor'}, {idx: 28, pro: 'zwcolor'}, {idx: 29, pro: 'cnccolor'}, {idx: 30, pro: 'qgcolor'}, {idx: 31, pro: 'hjcolor'}, {idx: 32, pro: 'pwcolor'}, {idx: 33, pro: 'ptcolor'}, {idx: 34, pro: 'bzcolor'}],
+      columnIndex: [{idx: 29, pro: 'jgcolor'}, {idx: 30, pro: 'zwcolor'}, {idx: 31, pro: 'cnccolor'}, {idx: 32, pro: 'qgcolor'}, {idx: 33, pro: 'hjcolor'}, {idx: 34, pro: 'pwcolor'}, {idx: 35, pro: 'ptcolor'}, {idx: 36, pro: 'bzcolor'}],
       curPage: 1,
       pageSize: 10,
       sum: 0,
@@ -699,6 +745,8 @@ export default {
       },
       curgdfbillno: '',
       curentryid: '',
+      selectedAllList: [],
+      selectedUniqueSignList: [],
       productionKindOptions: [],
       statusOptions: ['结案', '确认', '下达', '计划'],
       filterGdfbillno: '',
@@ -768,12 +816,36 @@ export default {
         this.$store.state.SR_filterblnote = newValue
       }
     },
+    filterfcheckdate: {
+      get: function () {
+        return this.$store.state.SR_fcheckdate
+      },
+      set: function (newValue) {
+        this.$store.state.SR_fcheckdate = newValue
+      }
+    },
     filterisopen: {
       get: function () {
         return this.$store.state.SR_filterisopen
       },
       set: function (newValue) {
         this.$store.state.SR_filterisopen = newValue
+      }
+    },
+    filterisrkwwc: {
+      get: function () {
+        return this.$store.state.SR_filterisrkwwc
+      },
+      set: function (newValue) {
+        this.$store.state.SR_filterisrkwwc = newValue
+      }
+    },
+    filterisyj: {
+      get: function () {
+        return this.$store.state.SR_filterisyj
+      },
+      set: function (newValue) {
+        this.$store.state.SR_filterisyj = newValue
       }
     }
   },
@@ -792,7 +864,8 @@ export default {
       'updateCurFbillno',
       'updateLjgzOption',
       'updateCurPage',
-      'updateBeforePage'
+      'updateBeforePage',
+      'updateCheckedWarnPrint'
     ]),
     cellStyle ({ row, column, rowIndex, columnIndex }) {
       let curColumn = (this.columnIndex.filter((item) => { return item.idx === columnIndex }))[0]
@@ -811,9 +884,15 @@ export default {
         }
       }
     },
+    changeDate (value) {
+      if (!value) {
+        this.filterfcheckdate = ['', '']
+      }
+    },
     search () {
       this.curPage = 1
-      this.getSalesReportList()
+      this.handleCurrentChange()
+      // this.getSalesReportList()
     },
     reset () {
       this.filterOrderNo = ''
@@ -824,8 +903,78 @@ export default {
       this.filterbl = ''
       this.filterblnote = ''
       this.curPage = 1
-      this.getSalesReportList()
+      this.filterfcheckdate = ['', '']
+      this.selectedAllList = []
+      this.selectedUniqueSignList = []
+      this.handleCurrentChange()
+      // this.getSalesReportList()
     },
+    // 复选
+    selectAll (selection) {
+      if (selection.length === 0) { // 本页全部取消勾选
+        this.reportList.map(order => {
+          this.selectSingle([], order)
+        })
+      } else { // 本页全部加入勾选
+        this.reportList.map(order => {
+          if (!order.checked) {
+            this.selectSingle([], order)
+          }
+        })
+      }
+    },
+    // 单独勾选切换
+    selectSingle (selection, row) {
+      // console.log('selectSingle', row)
+      if (row.checked) { // 取消勾选
+        let temp = objDeepCopy(this.selectedAllList)
+        temp.map((item, idx) => {
+          if (item.gdfbillno === row.gdfbillno) {
+            this.reportList[row.idx].checked = false
+            this.selectedAllList.splice(idx, 1)
+            let index = this.selectedUniqueSignList.indexOf(row.gdfbillno)
+            if (index > -1) {
+              this.selectedUniqueSignList.splice(index, 1)
+            }
+          }
+        })
+      } else { // 加入勾选
+        // 再次检查重复
+        let index = this.selectedUniqueSignList.indexOf(row.gdfbillno)
+        if (index === -1) {
+          row.checked = true
+          this.selectedUniqueSignList.push(row.gdfbillno)
+          this.selectedAllList.push(row)
+        }
+      }
+    },
+    async handleCurrentChange () {
+      let curList = await this.getSalesReportList()
+      if (this.selectedAllList.length > 0) {
+        this.selectedAllList.map((itemS) => {
+          curList.map((item, idx) => {
+            if (item.gdfbillno === itemS.gdfbillno) {
+              this.$refs.configurationTable.toggleRowSelection(curList[idx], true)
+              this.reportList[idx].checked = true
+            }
+          })
+        })
+      }
+    },
+    checkedPrint () {
+      console.log(this.selectedAllList)
+      if (this.selectedAllList.length === 0) {
+        this.$message({
+          message: '请先选择需要打印的订单!',
+          type: 'warning'
+        })
+        return false
+      }
+      this.updateCheckedWarnPrint(this.selectedAllList)
+      this.updateCurPage('CheckedWarnPrint')
+      this.$router.push({name: 'CheckedWarnPrint'})
+    },
+    // 单选
     changeRadio (gdh) {
       this.filterGdfbillno = gdh
     },
@@ -869,45 +1018,111 @@ export default {
         })
       })
     },
+    // 导出
+    async exportExcell () {
+      let exportData = await this.getExportData()
+      require.ensure([], () => {
+        const { exportJsonToExcel } = require('../vendor/Export2Excel.js')
+        const tHeader = ['订单号', '美国下单时间', '产品名称', '产品类别', '颜色', '数量', '生产工单号', '状态', '入库状态', '交期', '初始预计完成日期', '修改预计完成日期', '工单日期', '出货数量', '实际完成日期', '备注', '焊接备料', '焊接备注', '喷塑备料', '喷塑备注', '包装备料', '包装备注', '外协', '纸箱1', '纸箱2', '托盘', '工程变更', '质检', '激光', '折弯', 'CNC', '切管', '焊接', '抛丸', '喷涂', '包装']
+        const filterVal = ['fbillno', 'ftime', 'fname', 'ftype', 'fmodel', 'fnumber', 'gdfbillno', 'fstatus', 'FIN', 'fplanfinishdateTxt', 'csyjtimeTxt', 'xgyjtimeTxt', 'fcheckdateTxt', 'cknumber', 'cktime', 'fnote', 'hjbeiliao', 'hjnote', 'psbeiliao', 'psnote', 'bzbeiliao', 'bznote', 'waixie', 'zhixiang', 'zhixiang2', 'tuopan', 'gcbiangeng', 'zhijian', 'jgcolorTxt', 'zwcolorTxt', 'cnccolorTxt', 'qgcolorTxt', 'hjcolorTxt', 'pwcolorTxt', 'ptcolorTxt', 'bzcolorTxt']
+        const data = this.formatJson(filterVal, exportData)
+        exportJsonToExcel(tHeader, data, '订单看板导出')
+      })
+    },
+    formatJson (filterVal, jsonData) {
+      return jsonData.map(v => filterVal.map(j => v[j]))
+    },
+    // 获取导出数据
+    getExportData () {
+      return new Promise((resolve, reject) => {
+        this.listLoading = true
+        this.Http.post('exportbaobiaolist', {isyj: this.filterisyj, isopen: this.filterisopen ? 1 : 0, isrkwwc: this.filterisrkwwc ? 1 : 0, fbillno: this.filterOrderNo, ftime: this.filterUSATime, ftype: this.filterProductionKind, fname: this.filterProductionName, fstatus: this.filterStatus, beiliao: this.filterbl, beiliaonote: this.filterblnote, fcheckdate1: this.filterfcheckdate[0], fcheckdate2: this.filterfcheckdate[1]}
+        ).then(res => {
+          switch (res.data.code) {
+            case '1':
+              // 1显示√  2显示○ 3显示×
+              let tmp = res.data.list.map(item => {
+                item.fplanfinishdateTxt = secondToFormat(item.fplanfinishdate.time)
+                item.csyjtimeTxt = item.csyjtime ? secondToFormat(item.csyjtime.time) : ''
+                item.xgyjtimeTxt = item.xgyjtime ? secondToFormat(item.xgyjtime.time) : ''
+                item.fcheckdateTxt = item.fcheckdate ? secondToFormat(item.fcheckdate.time) : ''
+                item.jgcolorTxt = item.jgcolor === 1 ? '√' : (item.jgcolor === 2 ? '○' : (item.jgcolor === 3 ? '×' : ''))
+                item.zwcolorTxt = item.zwcolor === 1 ? '√' : (item.zwcolor === 2 ? '○' : (item.zwcolor === 3 ? '×' : ''))
+                item.cnccolorTxt = item.cnccolor === 1 ? '√' : (item.cnccolor === 2 ? '○' : (item.cnccolor === 3 ? '×' : ''))
+                item.qgcolorTxt = item.qgcolor === 1 ? '√' : (item.qgcolor === 2 ? '○' : (item.qgcolor === 3 ? '×' : ''))
+                item.hjcolorTxt = item.hjcolor === 1 ? '√' : (item.hjcolor === 2 ? '○' : (item.hjcolor === 3 ? '×' : ''))
+                item.pwcolorTxt = item.pwcolor === 1 ? '√' : (item.pwcolor === 2 ? '○' : (item.pwcolor === 3 ? '×' : ''))
+                item.ptcolorTxt = item.ptcolor === 1 ? '√' : (item.ptcolor === 2 ? '○' : (item.ptcolor === 3 ? '×' : ''))
+                item.bzcolorTxt = item.bzcolor === 1 ? '√' : (item.bzcolor === 2 ? '○' : (item.bzcolor === 3 ? '×' : ''))
+                return item
+              })
+              resolve(tmp)
+              this.listLoading = false
+              break
+            default:
+              this.$message({
+                message: 'Interface error !',
+                type: 'warning'
+              })
+              resolve([])
+              this.listLoading = false
+          }
+        }).catch((error) => {
+          console.log(error)
+          this.$message({
+            message: '服务器繁忙!',
+            type: 'error'
+          })
+        })
+      })
+    },
     getSalesReportList () {
-      this.listLoading = true
-      this.Http.post('baobiaolist', {isopen: this.filterisopen ? 1 : 0, number: this.pageSize, page_num: this.curPage, fbillno: this.filterOrderNo, ftime: this.filterUSATime, ftype: this.filterProductionKind, fname: this.filterProductionName, fstatus: this.filterStatus, beiliao: this.filterbl, beiliaonote: this.filterblnote}
-      ).then(res => {
-        switch (res.data.code) {
-          case '1':
-            this.backisopen = (res.data.isopen === '1')
-            document.getElementsByClassName('el-table__fixed')[0].style.setProperty('height', this.tableHieght - 20 + 'px', 'important')
-            this.reportList = res.data.list.map((item, idx) => {
-              item.index = idx
-              item.fplanfinishdateTxt = secondToFormat(item.fplanfinishdate.time)
-              item.csyjtimeTxt = item.csyjtime ? secondToFormat(item.csyjtime.time) : ''
-              item.xgyjtimeTxt = item.xgyjtime ? secondToFormat(item.xgyjtime.time) : ''
-              item.hjbeiliao = item.hjbeiliao
-              item.psbeiliao = item.psbeiliao ? item.psbeiliao : ''
-              item.bzbeiliao = item.bzbeiliao ? item.bzbeiliao : ''
-              item.waixie = item.waixie ? item.waixie : ''
-              item.zhijian = item.zhijian ? item.zhijian : ''
-              item.tuopan = item.tuopan ? item.tuopan : ''
-              item.gcbiangeng = item.gcbiangeng ? item.gcbiangeng : ''
-              return item
-            })
-            this.sum = res.data.count
-            this.listLoading = false
-            break
-          default:
-            this.$message({
-              message: 'Interface error !',
-              type: 'warning'
-            })
-            this.reportList = []
-            this.sum = 0
-            this.listLoading = false
-        }
-      }).catch((error) => {
-        console.log(error)
-        this.$message({
-          message: '服务器繁忙!',
-          type: 'error'
+      return new Promise((resolve, reject) => {
+        this.listLoading = true
+        this.Http.post('baobiaolist', {isyj: this.filterisyj ? 1 : 0, isopen: this.filterisopen ? 1 : 0, isrkwwc: this.filterisrkwwc ? 1 : 0, number: this.pageSize, page_num: this.curPage, fbillno: this.filterOrderNo, ftime: this.filterUSATime, ftype: this.filterProductionKind, fname: this.filterProductionName, fstatus: this.filterStatus, beiliao: this.filterbl, beiliaonote: this.filterblnote, fcheckdate1: this.filterfcheckdate[0], fcheckdate2: this.filterfcheckdate[1]}
+        ).then(res => {
+          switch (res.data.code) {
+            case '1':
+              this.backisopen = (res.data.isopen === '1')
+              document.getElementsByClassName('el-table__fixed')[0].style.setProperty('height', this.tableHieght - 20 + 'px', 'important')
+              this.reportList = res.data.list.map((item, idx) => {
+                item.index = idx
+                item.fplanfinishdateTxt = secondToFormat(item.fplanfinishdate.time)
+                item.csyjtimeTxt = item.csyjtime ? secondToFormat(item.csyjtime.time) : ''
+                item.xgyjtimeTxt = item.xgyjtime ? secondToFormat(item.xgyjtime.time) : ''
+                item.fcheckdateTxt = item.fcheckdate ? secondToFormat(item.fcheckdate.time) : ''
+                item.hjbeiliao = item.hjbeiliao
+                item.psbeiliao = item.psbeiliao ? item.psbeiliao : ''
+                item.bzbeiliao = item.bzbeiliao ? item.bzbeiliao : ''
+                item.waixie = item.waixie ? item.waixie : ''
+                item.zhijian = item.zhijian ? item.zhijian : ''
+                item.tuopan = item.tuopan ? item.tuopan : ''
+                item.gcbiangeng = item.gcbiangeng ? item.gcbiangeng : ''
+                item.idx = idx
+                item.checked = false
+                return item
+              })
+              resolve(res.data.list)
+              this.sum = res.data.count
+              this.listLoading = false
+              this.$refs.configurationTable.$el.style.width = '102%'
+              break
+            default:
+              this.$message({
+                message: 'Interface error !',
+                type: 'warning'
+              })
+              this.reportList = []
+              resolve([])
+              this.sum = 0
+              this.listLoading = false
+          }
+        }).catch((error) => {
+          console.log(error)
+          this.$message({
+            message: '服务器繁忙!',
+            type: 'error'
+          })
         })
       })
     },
@@ -1000,7 +1215,8 @@ export default {
                 })
                 this.dialogEditVisible = false
                 this.btLoading = false
-                this.getSalesReportList()
+                this.handleCurrentChange()
+                // this.getSalesReportList()
                 break
               default:
                 this.$message({
@@ -1063,7 +1279,6 @@ export default {
 .salesReportTable thead th{
   background: #ddd;
 }
-.el-table__fixed-right{}
 .inputPreSpan{
   width: 100px;
   text-align: right;

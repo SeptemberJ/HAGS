@@ -24,8 +24,12 @@
           </template>
         </el-table-column>
         <el-table-column
-          property="devicename"
-          label="设备名称">
+          property="fstatus"
+          label="设备状态">
+        </el-table-column>
+        <el-table-column
+          property="waitdays"
+          label="配件等待天数">
         </el-table-column>
         <el-table-column
           property="fdeviceid"
@@ -98,7 +102,7 @@ export default {
     addMaintenance () {
       if (this.curEq >= 0) {
         let CurEq = this.equipmentList[this.curEq]
-        this.$router.push({name: 'MaintenanceAdd', params: {id: CurEq.id, fdeviceid: CurEq.fdeviceid, devicename: CurEq.devicename, fmodel: CurEq.fmodel}})
+        this.$router.push({name: 'MaintenanceAdd', params: {id: CurEq.id, department: CurEq.department, fdeviceid: CurEq.fdeviceid, devicename: CurEq.devicename, fmodel: CurEq.fmodel}})
       } else {
         this.$message({
           message: '请先选择要点检的设备!',
@@ -114,6 +118,25 @@ export default {
       this.Http.get('serdevice', {userid: this.userInfo.id}
       ).then(res => {
         this.equipmentList = res.data.list
+        // res.data.list.map(item => {
+        //   switch (item.fstatus) {
+        //     case '0':
+        //       item.fstatusTxt = '使用中'
+        //       break
+        //     case '1':
+        //       item.fstatusTxt = '报修中'
+        //       break
+        //     case '2':
+        //       item.fstatusTxt = '停机中'
+        //       break
+        //     case '3':
+        //       item.fstatusTxt = '其他'
+        //       break
+        //     default:
+        //       item.fstatusTxt = ''
+        //   }
+        //   return item
+        // })
       }).catch((error) => {
         console.log(error)
         this.$message({

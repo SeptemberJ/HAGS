@@ -87,6 +87,7 @@ export default {
       newWin.focus() // 在IE浏览器中必须加这一句
       newWin.print() // 打印
       newWin.close() // 关闭窗口
+      this.backShowTimeBox()
     }
   }
 }
