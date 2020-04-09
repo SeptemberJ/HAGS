@@ -1,95 +1,84 @@
 <template>
   <div class="SalesReport">
     <!-- 查询 -->
-    <section id="searchBlock" style="height: 110px;background: #fff;z-index: 999;">
+    <section id="searchBlock" style="background: #fff;z-index: 999;">
     <!-- <section style="position: fixed;top:0.8rem;background: #fff;z-index: 999;"> -->
       <el-row style="margin-top:10px;">
         <el-form :inline="true" class="demo-form-inline">
-            <el-form-item label="订单号" size="small">
-              <el-input v-model="filterOrderNo" placeholder="请输入订单号" size="small" clearable style="width:90%;"></el-input>
-            </el-form-item>
-            <el-form-item label="美国下单时间" size="small">
-              <el-date-picker clearable style="width: 120px;"
-                v-model="filterUSATime"
-                size="small"
-                value-format="yyyy-MM-dd"
-                type="date"
-                placeholder="请选择日期">
-              </el-date-picker>
-            </el-form-item>
-            <el-form-item label="产品类别" size="small">
-              <el-select v-model="filterProductionKind" size="small" placeholder="请选择产品类别">
-                <el-option
-                  v-for="item in productionKindOptions"
-                  :key="item.ftype"
-                  :label="item.ftype"
-                  :value="item.ftype">
-                </el-option>
-              </el-select>
-            </el-form-item>
-            <el-form-item label="产品名称" size="small">
-              <el-input v-model="filterProductionName" placeholder="请输入产品名称" size="small" clearable style="width:90%;"></el-input>
-            </el-form-item>
-            <el-form-item label="焊接/喷塑/包装备料" size="small">
-              <el-select v-model="filterbl" size="small" placeholder="请选择" style="width: 100px;">
-                <el-option label="Yes" value="Yes"></el-option>
-                <el-option label="No" value="No"></el-option>
-              </el-select>
-            </el-form-item>
-            <el-form-item label="状态" size="small">
-              <el-select v-model="filterStatus" size="small" placeholder="请选择状态" style="width: 80px;">
-                <el-option
-                  v-for="item in statusOptions"
-                  :key="item"
-                  :label="item"
-                  :value="item">
-                </el-option>
-              </el-select>
-            </el-form-item>
-            <el-form-item label="焊接/喷塑/包装内容" size="small">
-              <el-input v-model="filterblnote" placeholder="请输入" size="small" clearable style="width:100px;"></el-input>
-            </el-form-item>
-            <el-form-item label="工单日期" size="small">
-              <el-date-picker style="width: 230px;" @change="changeDate"
-                v-model="filterfcheckdate"
-                type="daterange"
-                value-format="yyyy-MM-dd"
-                range-separator="-"
-                start-placeholder="开始日期"
-                end-placeholder="结束日期">
-              </el-date-picker>
-            </el-form-item>
-            <el-form-item label="" size="small">
-              <el-checkbox v-model="filterisopen">是否展开</el-checkbox>
-            </el-form-item>
-            <el-form-item label="" size="small">
-              <el-checkbox v-model="filterisrkwwc">入库未完成</el-checkbox>
-            </el-form-item>
-            <el-form-item label="" size="small">
-              <el-checkbox v-model="filterisyj">质量预警</el-checkbox>
-            </el-form-item>
-            <!-- <el-form-item label="喷塑备料">
-              <el-select v-model="filterpsbl" size="small" placeholder="请选择" style="width: 100px;">
-                <el-option label="Yes" value="Yes"></el-option>
-                <el-option label="No" value="No"></el-option>
-              </el-select>
-            </el-form-item>
-            <el-form-item label="包装备料">
-              <el-select v-model="filterbzbl" size="small" placeholder="请选择" style="width: 100px;">
-                <el-option label="Yes" value="Yes"></el-option>
-                <el-option label="No" value="No"></el-option>
-              </el-select>
-            </el-form-item> -->
-            <el-form-item style="margin-top: -4px;">
-              <el-button type="primary" size="small" @click="search">搜索</el-button>
-              <el-button size="small" @click="reset">重置</el-button>
-              <el-button type="warning" size="small" @click="getHistorySales">历史纪录</el-button>
-              <el-button type="success" size="small" @click="exportExcell">导出</el-button>
-              <el-button type="danger" size="small" @click="checkedPrint">打印</el-button>
-            </el-form-item>
-            <!-- <el-form-item>
-            </el-form-item> -->
+          <el-form-item label="订单号" size="small">
+            <el-input v-model="filterOrderNo" placeholder="请输入订单号" size="small" clearable style="width:90%;"></el-input>
+          </el-form-item>
+          <el-form-item label="美国下单时间" size="small">
+            <el-date-picker clearable style="width: 120px;"
+              v-model="filterUSATime"
+              size="small"
+              value-format="yyyy-MM-dd"
+              type="date"
+              placeholder="请选择日期">
+            </el-date-picker>
+          </el-form-item>
+          <el-form-item label="产品类别" size="small">
+            <el-select v-model="filterProductionKind" size="small" placeholder="请选择产品类别">
+              <el-option
+                v-for="item in productionKindOptions"
+                :key="item.ftype"
+                :label="item.ftype"
+                :value="item.ftype">
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="产品名称" size="small">
+            <el-input v-model="filterProductionName" placeholder="请输入产品名称" size="small" clearable style="width:90%;"></el-input>
+          </el-form-item>
+          <el-form-item label="焊接/喷塑/包装备料" size="small">
+            <el-select v-model="filterbl" size="small" placeholder="请选择" style="width: 100px;">
+              <el-option label="Yes" value="Yes"></el-option>
+              <el-option label="No" value="No"></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="状态" size="small">
+            <el-select v-model="filterStatus" size="small" placeholder="请选择状态" style="width: 80px;">
+              <el-option
+                v-for="item in statusOptions"
+                :key="item"
+                :label="item"
+                :value="item">
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="焊接/喷塑/包装内容" size="small">
+            <el-input v-model="filterblnote" placeholder="请输入" size="small" clearable style="width:100px;"></el-input>
+          </el-form-item>
+          <el-form-item label="工单日期" size="small">
+            <el-date-picker style="width: 230px;" @change="changeDate"
+              v-model="filterfcheckdate"
+              type="daterange"
+              value-format="yyyy-MM-dd"
+              range-separator="-"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期">
+            </el-date-picker>
+          </el-form-item>
+          <el-form-item label="" size="small">
+            <el-checkbox v-model="filterisopen">是否展开</el-checkbox>
+          </el-form-item>
+          <el-form-item label="" size="small">
+            <el-checkbox v-model="filterisrkwwc">入库未完成</el-checkbox>
+          </el-form-item>
+          <el-form-item label="" size="small">
+            <el-checkbox v-model="filterisyj">质量预警</el-checkbox>
+          </el-form-item>
+          <el-form-item label="" size="small">
+            <el-checkbox v-model="filterisdy">打印状态</el-checkbox>
+          </el-form-item>
         </el-form>
+        <div style="float:right;margin-top:-0.2rem;margin-bottom:0.1rem;">
+          <el-button type="primary" size="small" @click="search">搜索</el-button>
+          <el-button size="small" @click="reset">重置</el-button>
+          <el-button type="warning" size="small" @click="getHistorySales">历史纪录</el-button>
+          <el-button type="success" size="small" @click="exportExcell">导出</el-button>
+          <el-button type="danger" size="small" @click="checkedPrint">打印</el-button>
+        </div>
       </el-row>
     </section>
     <!-- 无颜色 -->
@@ -115,9 +104,15 @@
       </el-table-column>
       <el-table-column
         fixed
+        prop="dynumber"
+        label="打印次数"
+        min-width="100">
+      </el-table-column>
+      <el-table-column
+        fixed
         prop="fbillno"
         label="订单号"
-        width="120">
+        width="110">
       </el-table-column>
       <el-table-column
         fixed
@@ -135,13 +130,13 @@
         fixed
         prop="ftype"
         label="产品类别"
-        width="100">
+        width="130">
       </el-table-column>
       <el-table-column
         fixed
         prop="fmodel"
         label="颜色"
-        width="110">
+        width="100">
       </el-table-column>
       <el-table-column
         fixed
@@ -153,7 +148,7 @@
         fixed
         prop="gdfbillno"
         label="生产工单号"
-        width="140">
+        width="130">
       </el-table-column>
       <el-table-column
         prop="fstatus"
@@ -163,7 +158,7 @@
       <el-table-column
         prop="FIN"
         label="入库状态"
-        width="80">
+        width="100">
       </el-table-column>
       <el-table-column
         prop="fplanfinishdateTxt"
@@ -308,9 +303,15 @@
       </el-table-column>
       <el-table-column
         fixed
+        prop="dynumber"
+        label="打印次数"
+        min-width="100">
+      </el-table-column>
+      <el-table-column
+        fixed
         prop="fbillno"
         label="订单号"
-        width="120">
+        width="110">
       </el-table-column>
       <el-table-column
         fixed
@@ -328,13 +329,13 @@
         fixed
         prop="ftype"
         label="产品类别"
-        width="100">
+        width="130">
       </el-table-column>
       <el-table-column
         fixed
         prop="fmodel"
         label="颜色"
-        width="110">
+        width="100">
       </el-table-column>
       <el-table-column
         fixed
@@ -346,7 +347,7 @@
         fixed
         prop="gdfbillno"
         label="生产工单号"
-        width="140">
+        width="130">
       </el-table-column>
       <el-table-column
         prop="fstatus"
@@ -356,7 +357,7 @@
       <el-table-column
         prop="FIN"
         label="入库状态"
-        width="80">
+        width="100">
       </el-table-column>
       <el-table-column
         prop="fplanfinishdateTxt"
@@ -478,64 +479,64 @@
         </template>
       </el-table-column>
       <el-table-column
-        label="激光"
-        width="60"
+        label="激光" header-align="right"
+        width="80"
         show-overflow-tooltip>
         <template slot-scope="scope">
           <span @click="goLjgz(scope.row, '激光')" class="templateSpan">{{scope.row.jgcolor}}</span>
         </template>
       </el-table-column>
       <el-table-column
-        label="折弯"
-        width="60"
+        label="折弯" header-align="right"
+        width="80"
         show-overflow-tooltip>
         <template slot-scope="scope">
           <span @click="goLjgz(scope.row, '折弯')" class="templateSpan">{{scope.row.zwcolor}}</span>
         </template>
       </el-table-column>
       <el-table-column
-        label="CNC"
-        width="60"
+        label="CNC" header-align="right"
+        width="80"
         show-overflow-tooltip>
         <template slot-scope="scope">
           <span @click="goLjgz(scope.row, 'CNC')" class="templateSpan">{{scope.row.cnccolor}}</span>
         </template>
       </el-table-column>
       <el-table-column
-        label="切管"
-        width="60"
+        label="切管" header-align="right"
+        width="80"
         show-overflow-tooltip>
         <template slot-scope="scope">
           <span @click="goLjgz(scope.row, '切管')" class="templateSpan">{{scope.row.qgcolor}}</span>
         </template>
       </el-table-column>
       <el-table-column
-        label="焊接"
-        width="60"
+        label="焊接" header-align="right"
+        width="80"
         show-overflow-tooltip>
         <template slot-scope="scope">
           <span @click="goLjgz(scope.row, '焊接')" class="templateSpan">{{scope.row.hjcolor}}</span>
         </template>
       </el-table-column>
       <el-table-column
-        label="抛丸"
-        width="60"
+        label="抛丸" header-align="right"
+        width="80"
         show-overflow-tooltip>
         <template slot-scope="scope">
           <span @click="goLjgz(scope.row, '抛丸')" class="templateSpan">{{scope.row.pwcolor}}</span>
         </template>
       </el-table-column>
       <el-table-column
-        label="喷涂"
-        width="60"
+        label="喷涂" header-align="right"
+        width="80"
         show-overflow-tooltip>
         <template slot-scope="scope">
           <span @click="goLjgz(scope.row, '喷涂')" class="templateSpan">{{scope.row.ptcolor}}</span>
         </template>
       </el-table-column>
-      <el-table-column
+      <el-table-column header-align="right"
         label="包装"
-        width="60"
+        width="80"
         show-overflow-tooltip>
         <template slot-scope="scope">
           <span @click="goLjgz(scope.row, '包装')" class="templateSpan">{{scope.row.bzcolor}}</span>
@@ -716,6 +717,7 @@ export default {
   name: 'SalesReport',
   data () {
     return {
+      timer: '',
       value1: '',
       listLoading: false,
       btLoading: false,
@@ -726,7 +728,7 @@ export default {
       // filterpsbl: '',
       // filterbzbl: '',
       reportList: [],
-      columnIndex: [{idx: 29, pro: 'jgcolor'}, {idx: 30, pro: 'zwcolor'}, {idx: 31, pro: 'cnccolor'}, {idx: 32, pro: 'qgcolor'}, {idx: 33, pro: 'hjcolor'}, {idx: 34, pro: 'pwcolor'}, {idx: 35, pro: 'ptcolor'}, {idx: 36, pro: 'bzcolor'}],
+      columnIndex: [{idx: 31, pro: 'jgcolor'}, {idx: 32, pro: 'zwcolor'}, {idx: 33, pro: 'cnccolor'}, {idx: 34, pro: 'qgcolor'}, {idx: 35, pro: 'hjcolor'}, {idx: 36, pro: 'pwcolor'}, {idx: 37, pro: 'ptcolor'}, {idx: 38, pro: 'bzcolor'}],
       curPage: 1,
       pageSize: 10,
       sum: 0,
@@ -847,6 +849,14 @@ export default {
       set: function (newValue) {
         this.$store.state.SR_filterisyj = newValue
       }
+    },
+    filterisdy: {
+      get: function () {
+        return this.$store.state.SR_filterisdy
+      },
+      set: function (newValue) {
+        this.$store.state.SR_filterisdy = newValue
+      }
     }
   },
   created () {
@@ -857,6 +867,16 @@ export default {
     }, 0)
     this.search()
     this.getKindOptions()
+  },
+  mounted () {
+    // 创建并执行定时器
+    this.timer = setInterval(() => {
+      this.handleCurrentChange()
+    }, 5 * 60 * 1000)
+  },
+  beforeDestroy () {
+    // 清除定时器
+    clearInterval(this.timer)
   },
   methods: {
     ...mapActions([
@@ -962,7 +982,7 @@ export default {
       }
     },
     checkedPrint () {
-      console.log(this.selectedAllList)
+      // console.log(this.selectedAllList)
       if (this.selectedAllList.length === 0) {
         this.$message({
           message: '请先选择需要打印的订单!',
@@ -1023,8 +1043,8 @@ export default {
       let exportData = await this.getExportData()
       require.ensure([], () => {
         const { exportJsonToExcel } = require('../vendor/Export2Excel.js')
-        const tHeader = ['订单号', '美国下单时间', '产品名称', '产品类别', '颜色', '数量', '生产工单号', '状态', '入库状态', '交期', '初始预计完成日期', '修改预计完成日期', '工单日期', '出货数量', '实际完成日期', '备注', '焊接备料', '焊接备注', '喷塑备料', '喷塑备注', '包装备料', '包装备注', '外协', '纸箱1', '纸箱2', '托盘', '工程变更', '质检', '激光', '折弯', 'CNC', '切管', '焊接', '抛丸', '喷涂', '包装']
-        const filterVal = ['fbillno', 'ftime', 'fname', 'ftype', 'fmodel', 'fnumber', 'gdfbillno', 'fstatus', 'FIN', 'fplanfinishdateTxt', 'csyjtimeTxt', 'xgyjtimeTxt', 'fcheckdateTxt', 'cknumber', 'cktime', 'fnote', 'hjbeiliao', 'hjnote', 'psbeiliao', 'psnote', 'bzbeiliao', 'bznote', 'waixie', 'zhixiang', 'zhixiang2', 'tuopan', 'gcbiangeng', 'zhijian', 'jgcolorTxt', 'zwcolorTxt', 'cnccolorTxt', 'qgcolorTxt', 'hjcolorTxt', 'pwcolorTxt', 'ptcolorTxt', 'bzcolorTxt']
+        const tHeader = ['打印次数', '订单号', '美国下单时间', '产品名称', '产品类别', '颜色', '数量', '生产工单号', '状态', '入库状态', '交期', '初始预计完成日期', '修改预计完成日期', '工单日期', '出货数量', '实际完成日期', '备注', '焊接备料', '焊接备注', '喷塑备料', '喷塑备注', '包装备料', '包装备注', '外协', '纸箱1', '纸箱2', '托盘', '工程变更', '质检', '激光', '折弯', 'CNC', '切管', '焊接', '抛丸', '喷涂', '包装']
+        const filterVal = ['dynumber', 'fbillno', 'ftime', 'fname', 'ftype', 'fmodel', 'fnumber', 'gdfbillno', 'fstatus', 'FIN', 'fplanfinishdateTxt', 'csyjtimeTxt', 'xgyjtimeTxt', 'fcheckdateTxt', 'cknumber', 'cktime', 'fnote', 'hjbeiliao', 'hjnote', 'psbeiliao', 'psnote', 'bzbeiliao', 'bznote', 'waixie', 'zhixiang', 'zhixiang2', 'tuopan', 'gcbiangeng', 'zhijian', 'jgcolorTxt', 'zwcolorTxt', 'cnccolorTxt', 'qgcolorTxt', 'hjcolorTxt', 'pwcolorTxt', 'ptcolorTxt', 'bzcolorTxt']
         const data = this.formatJson(filterVal, exportData)
         exportJsonToExcel(tHeader, data, '订单看板导出')
       })
@@ -1036,7 +1056,7 @@ export default {
     getExportData () {
       return new Promise((resolve, reject) => {
         this.listLoading = true
-        this.Http.post('exportbaobiaolist', {isyj: this.filterisyj, isopen: this.filterisopen ? 1 : 0, isrkwwc: this.filterisrkwwc ? 1 : 0, fbillno: this.filterOrderNo, ftime: this.filterUSATime, ftype: this.filterProductionKind, fname: this.filterProductionName, fstatus: this.filterStatus, beiliao: this.filterbl, beiliaonote: this.filterblnote, fcheckdate1: this.filterfcheckdate[0], fcheckdate2: this.filterfcheckdate[1]}
+        this.Http.post('exportbaobiaolist', {isdy: this.filterisdy ? 1 : 0, isyj: this.filterisyj, isopen: this.filterisopen ? 1 : 0, isrkwwc: this.filterisrkwwc ? 1 : 0, fbillno: this.filterOrderNo, ftime: this.filterUSATime, ftype: this.filterProductionKind, fname: this.filterProductionName, fstatus: this.filterStatus, beiliao: this.filterbl, beiliaonote: this.filterblnote, fcheckdate1: this.filterfcheckdate[0], fcheckdate2: this.filterfcheckdate[1]}
         ).then(res => {
           switch (res.data.code) {
             case '1':
@@ -1079,7 +1099,7 @@ export default {
     getSalesReportList () {
       return new Promise((resolve, reject) => {
         this.listLoading = true
-        this.Http.post('baobiaolist', {isyj: this.filterisyj ? 1 : 0, isopen: this.filterisopen ? 1 : 0, isrkwwc: this.filterisrkwwc ? 1 : 0, number: this.pageSize, page_num: this.curPage, fbillno: this.filterOrderNo, ftime: this.filterUSATime, ftype: this.filterProductionKind, fname: this.filterProductionName, fstatus: this.filterStatus, beiliao: this.filterbl, beiliaonote: this.filterblnote, fcheckdate1: this.filterfcheckdate[0], fcheckdate2: this.filterfcheckdate[1]}
+        this.Http.post('baobiaolist', {isdy: this.filterisdy ? 1 : 0, isyj: this.filterisyj ? 1 : 0, isopen: this.filterisopen ? 1 : 0, isrkwwc: this.filterisrkwwc ? 1 : 0, number: this.pageSize, page_num: this.curPage, fbillno: this.filterOrderNo, ftime: this.filterUSATime, ftype: this.filterProductionKind, fname: this.filterProductionName, fstatus: this.filterStatus, beiliao: this.filterbl, beiliaonote: this.filterblnote, fcheckdate1: this.filterfcheckdate[0], fcheckdate2: this.filterfcheckdate[1]}
         ).then(res => {
           switch (res.data.code) {
             case '1':

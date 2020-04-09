@@ -104,6 +104,13 @@ body .el-table th.gutter{
 #hoverNoLight tbody tr:hover>td { 
   background-color: inherit !important;
 }
+.salesReportTable .el-table--border td, .el-table--border th{
+  border-right: 0px !important;
+  text-align: center;
+}
+.salesReportTable .el-table__body, .el-table__footer, .el-table__header{
+  background: #ddd;
+}
 /* .el-table__fixed-body-wrapper{
   top: 0px !important;
 } */

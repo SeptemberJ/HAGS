@@ -37,6 +37,9 @@
       <el-row style="height:.5rem;line-height:.5rem;">
         <el-col :span="4" class="TextAlignL">单件毛重(克): {{topLineInfo.djmz}}</el-col>
         <el-col :span="4" class="TextAlignL">材质: {{topLineInfo.caizhi}}</el-col>
+        <el-col :span="4" class="TextAlignL" v-if="userInfo.gongxu == '包装'">单箱净重: {{topLineInfo.netweight}}</el-col>
+        <el-col :span="4" class="TextAlignL" v-if="userInfo.gongxu == '包装'">单箱毛重: {{topLineInfo.grossweight}}</el-col>
+        <el-col :span="4" class="TextAlignL" v-if="userInfo.gongxu == '包装'">箱数: {{topLineInfo.boxesnum}}</el-col>
       </el-row>
       <el-row style="margin:10px 0;">
         <el-col :span="24" class="TextAlignR">
@@ -201,6 +204,15 @@
           <el-input v-model="form.waittime" placeholder="请输入等待时间">
             <template slot="append">分钟</template>
           </el-input>
+        </el-form-item>
+        <el-form-item label="单箱净重" prop="netweight" v-if="!ifAdd && userInfo.gongxu == '包装'">
+          <el-input v-model="form.netweight" placeholder="请输入单箱净重" />
+        </el-form-item>
+        <el-form-item label="单箱毛重" prop="grossweight" v-if="!ifAdd  && userInfo.gongxu == '包装'">
+          <el-input v-model="form.grossweight" placeholder="请输入单箱毛重" />
+        </el-form-item>
+        <el-form-item label="箱数" prop="boxesnum" v-if="!ifAdd  && userInfo.gongxu == '包装'">
+          <el-input v-model="form.boxesnum" placeholder="请输入箱数" />
         </el-form-item>
         <el-form-item label="单件克重" prop="djkz" v-if="!ifAdd && userInfo.gongxu == '激光'">
           <el-input v-model="form.djkz" placeholder="请输入单件克重" :disabled="form.fnumber === '0'">
@@ -433,7 +445,10 @@ export default {
         fgbfnumber: '',
         wckcnumber: '',
         djmz: '',
-        caizhi: ''
+        caizhi: '',
+        netweight: '',
+        grossweight: '',
+        boxesnum: ''
       },
       form: {
         username: '',
@@ -451,6 +466,9 @@ export default {
         fnote: '',
         // ischeck: '',
         waittime: '',
+        netweight: '',
+        grossweight: '',
+        boxesnum: '',
         // tuntime: '',
         freason: '',
         djkz: '',
@@ -928,6 +946,9 @@ export default {
         badnumber: '',
         kcnumber: '',
         worktime: '',
+        netweight: '',
+        grossweight: '',
+        boxesnum: '',
         isback: '',
         fnote: '',
         ischeck: '',
@@ -989,6 +1010,30 @@ export default {
           } else if (this.ifAdd) {
             this.sureAdd()
           } else {
+            // 完工产量大于0 单箱净重 毛重必填
+            if (this.userInfo.gongxu === '包装') {
+              if (this.form.fnumber && !this.form.netweight) {
+                this.$message({
+                  message: '请填写单箱净重!',
+                  type: 'warning'
+                })
+                return false
+              }
+              if (this.form.fnumber && !this.form.grossweight) {
+                this.$message({
+                  message: '请填写单箱毛重!',
+                  type: 'warning'
+                })
+                return false
+              }
+              if (this.form.fnumber && !this.form.boxesnum) {
+                this.$message({
+                  message: '请填写箱数!',
+                  type: 'warning'
+                })
+                return false
+              }
+            }
             // 有等待时间 必填停机原因
             if (this.form.waittime && !this.form.freason) {
               this.$message({
@@ -1357,7 +1402,10 @@ export default {
             sfyl: res.data.sfyl,
             qgcd: res.data.qgcd,
             djmz: res.data.djmz,
-            caizhi: res.data.caizhi
+            caizhi: res.data.caizhi,
+            netweight: res.data.netweight,
+            grossweight: res.data.grossweight,
+            boxesnum: res.data.boxesnum
           }
           this.reportList = res.data.list
           this.sum = res.data.orderCount

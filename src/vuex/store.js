@@ -37,9 +37,10 @@ const state = {
   SR_filterbl: '',
   SR_filterblnote: '',
   SR_fcheckdate: ['', ''],
-  SR_filterisopen: false,
+  SR_filterisopen: true,
   SR_filterisrkwwc: false,
   SR_filterisyj: false,
+  SR_filterisdy: false,
   checkedWarnPrint: [], // 勾选的打印订单
   // mrp
   filterOrderNo_MRP: '',
@@ -48,10 +49,10 @@ const state = {
   ifHasTF_MRP: false,
   orderMRPId: '',
   maintenanceId: '',
-  urlPre: 'http://10.0.0.13:31379/haianJK/',
-  imgPreUrl: 'http://10.0.0.13:31379/upload/'
-  // urlPre: 'http://ep23767307.qicp.vip:31379/haianJK/',
-  // imgPreUrl: 'http://ep23767307.qicp.vip:31379/upload/'
+  // urlPre: 'http://10.0.0.13:31379/haianJK/',
+  // imgPreUrl: 'http://10.0.0.13:31379/upload/'
+  urlPre: 'http://ep23767307.qicp.vip:31379/haianJK/',
+  imgPreUrl: 'http://ep23767307.qicp.vip:31379/upload/'
 }
 const vuexLocal = new VuexPersistence({
   storage: window.localStorage

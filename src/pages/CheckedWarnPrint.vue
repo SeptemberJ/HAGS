@@ -61,6 +61,27 @@
             </table>
           </td>
         </tr>
+        <tr style="width:100%;height:30px;"></tr>
+        <tr style="width:100%;height:50px;">
+          <td width="100%" colspan="2" style="text-align:center;">
+            <h2>我已经确认我清楚的明白上述质量警示</h2>
+            <h2>I confirm that I have been briefed on the above quality alert.</h2>
+          </td>
+        </tr>
+        <tr style="width:100%;">
+          <td colspan="9">
+            <table border="0" cellspacing="0" width="100%">
+              <tr style="width:100%;height: 30px;">
+                <td style="width: 180px;text-align:left;height: 30px;line-height:30px;border:1px solid #000;padding-left:10px;">质量部Quality Dept.</td>
+                <td style="height: 30px;line-height:30px;border:1px solid #000;border-left:0px;"></td>
+              </tr>
+              <tr style="width:100%;height: 30px;">
+                <td style="width: 180px;text-align:left;height: 30px;line-height:30px;border:1px solid #000;border-top:0px;padding-left:10px;">生产部productive Debt.</td>
+                <td style="height: 30px;line-height:30px;border:1px solid #000;border-left:0px;border-top:0px;"></td>
+              </tr>
+            </table>
+          </td>
+        </tr>
       </tbody>
     </table>
     <section class="Bts">

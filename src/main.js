@@ -18,7 +18,7 @@ import x2js from 'x2js' // xml数据处理插件
 Vue.prototype.Http = Http
 Vue.prototype.Send = Send
 Vue.prototype.$moment = moment
-Vue.prototype.$x2js = new x2js() // 创建x2js对象，挂到vue原型上
+Vue.prototype.$x2js = new x2js() // eslint-disable-line
 
 Vue.use(Vuex)
 Vue.use(ElementUI)
