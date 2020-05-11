@@ -34,6 +34,12 @@
           show-overflow-tooltip>
         </el-table-column>
         <el-table-column
+          property="fbillno"
+          label="订单号"
+          width="150"
+          show-overflow-tooltip>
+        </el-table-column>
+        <el-table-column
           property="activityname"
           label="活动名称"
           show-overflow-tooltip>
@@ -84,8 +90,15 @@
           <el-form-item label="数量" prop="fnumber">
             <el-input v-model="form.fnumber" style="width: 200px;"></el-input>
           </el-form-item>
+          <el-form-item label="订单号" prop="orderNum">
+            <el-select v-model="form.orderNum" placeholder="请选择订单号" style="width: 200px;" @change="changeOrdernum">
+              <el-option key="活动订单111" label="活动订单111" value="活动订单111"></el-option>
+              <el-option key="样品订单AAA" label="样品订单AAA" value="样品订单AAA"></el-option>
+            </el-select>
+          </el-form-item>
           <el-form-item label="活动名称" prop="activityid">
-            <el-select v-model="form.activityid" placeholder="请选择活动名称" style="width: 200px;" @change="changeActivity">
+            <span v-if="form.activityid == '样品'">{{ this.form.activityname}}</span>
+            <el-select v-else v-model="form.activityid" placeholder="请选择活动名称" style="width: 200px;" @change="changeActivity">
               <el-option v-for="Activity in activityNameList" :key="Activity.id" :label="Activity.fname" :value="Activity.id"></el-option>
             </el-select>
           </el-form-item>
@@ -235,6 +248,7 @@ export default {
       workIdGDPerson: null,
       form: {
         fnumber: 1,
+        orderNum: '',
         activityid: '',
         activityname: '',
         fnote: ''
@@ -242,6 +256,9 @@ export default {
       rules: {
         fnumber: [
           { required: true, message: '请输入数量', trigger: 'change' }
+        ],
+        orderNum: [
+          { required: true, message: '请输入订单号', trigger: 'change' }
         ],
         activityid: [
           { required: true, message: '请选择活动名称', trigger: 'change' }
@@ -467,6 +484,15 @@ export default {
     changeActivity (id) {
       this.form.activityname = this.activityNameList.filter(this.checkActivityId)[0].fname
     },
+    changeOrdernum (ordernum) {
+      if (ordernum === '样品订单AAA') {
+        this.form.activityname = '样品'
+        this.form.activityid = '样品'
+      } else {
+        this.form.activityname = ''
+        this.form.activityid = ''
+      }
+    },
     checkActivityId (Activity) {
       return Activity.id === this.form.activityid
     },
@@ -615,9 +641,11 @@ export default {
     },
     sureSubmit () {
       let Data = {
+        kdepartment: this.userInfo.kdepartment,
         jlruserno: this.userInfo.userno,
         gongxu: this.userInfo.gongxu,
         fbiller: this.userInfo.fname,
+        fbillno: this.form.orderNum,
         activityid: this.form.activityid,
         activityname: this.form.activityname,
         fnote: this.form.fnote,

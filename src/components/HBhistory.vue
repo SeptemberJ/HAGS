@@ -1375,13 +1375,13 @@ export default {
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          this.delGDPerson(row.id)
+          this.delGDPerson(row.id, row.starttime)
         }).catch(() => {
         })
       }
     },
-    delGDPerson (Id) {
-      this.Http.get('delhbry', {workid: this.workIdGDPerson, userno: Id}
+    delGDPerson (Id, starttime) {
+      this.Http.get('delhbry', {workid: this.workIdGDPerson, userno: Id, starttime: starttime}
       ).then(res => {
         switch (res.data.code) {
           case '1':
@@ -1437,16 +1437,35 @@ export default {
     changePersonGD (val) {
       // 校验重复
       this.curPersonId = val
-      if (this.personListGD.filter(this.checkId).length >= 1) {
-        this.$message({
-          message: '该操作员已存在!',
-          type: 'error'
+      let repeatPList = this.personListGD.filter(this.checkId)
+      let canAdd = true
+      if (repeatPList.length > 0) {
+        repeatPList.map((item, idx) => {
+          if (item.endtime === '' || item.starttime === '') {
+            canAdd = false
+          }
+          if (idx === repeatPList.length - 1) {
+            if (!canAdd) {
+              this.$message({
+                message: '该操作员还不能新增!',
+                type: 'error'
+              })
+              this.addGDPerson.id = ''
+              this.addGDPerson.fname = ''
+              this.addGDPerson.userno = ''
+              this.curPersonId = ''
+              this.addGDPerson.options = this.selectChoosePeopleList
+            } else {
+              this.addGDPerson.options = this.selectChoosePeopleList
+              this.selectChoosePeopleList.map(item => {
+                if (item.id === val) {
+                  this.addGDPerson.fname = item.fname
+                  this.addGDPerson.userno = item.id // item.userno
+                }
+              })
+            }
+          }
         })
-        this.addGDPerson.id = ''
-        this.addGDPerson.fname = ''
-        this.addGDPerson.userno = ''
-        this.curPersonId = ''
-        this.addGDPerson.options = this.selectChoosePeopleList
       } else {
         this.addGDPerson.options = this.selectChoosePeopleList
         this.selectChoosePeopleList.map(item => {

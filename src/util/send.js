@@ -2,9 +2,8 @@ import axios from 'axios'
 import { Message } from 'element-ui'
 import utils from './utils.js'
 import store from '../vuex/store'
-let wsdlurl = 'http://111.231.134.126:8082/Service1.asmx'
-// let wsdlurl = 'http://ep23767307.qicp.vip:24997/Service1.asmx'
-// let wsdlurl = 'http://10.0.0.13:31379/Service1.asmx'
+// let wsdlurl = 'http://111.231.134.126:8082/Service1.asmx'
+let wsdlurl = 'http://ep23767307.qicp.vip:24997/Service1.asmx'
 
 const CancelToken = axios.CancelToken
 const source = CancelToken.source()

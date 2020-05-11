@@ -24,7 +24,7 @@
             <!-- <el-button size="small" type="info" @click="showHBHistoryDay">当日汇报记录</el-button>
             <el-button size="small" type="info" @click="showHBHistory">汇报记录</el-button>
             <el-button size="small" type="info" @click="showHBList">汇报列表</el-button> -->
-            <el-button size="small" type="info" @click="showActivity">活动列表</el-button>
+            <el-button v-if="curModuleInfo.department != '外协'" size="small" type="info" @click="showActivity">活动列表</el-button>
             <el-button size="small" type="info" v-if="curModuleInfo.department != '外协'" @click="showHBHistoryDay">当日汇报记录</el-button>
             <el-button size="small" type="info" v-if="curModuleInfo.department != '外协'" @click="showHBHistory">汇报记录</el-button>
             <el-button size="small" type="info" v-if="curModuleInfo.department != '外协'" @click="showHBList">汇报列表</el-button>
@@ -532,7 +532,7 @@
       </div>
     </el-dialog>
     <!-- 活动列表 -->
-    <el-dialog class="el-dialog__body_NoPadding" title="活动列表" :visible.sync="dialogActivityListVisible" :close-on-click-modal="false" width="90%">
+    <el-dialog class="el-dialog__body_NoPadding" title="活动列表1" :visible.sync="dialogActivityListVisible" :close-on-click-modal="false" width="90%">
       <Activity ref="hdChild"></Activity>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogActivityListVisible = false">关 闭</el-button>
@@ -1547,13 +1547,13 @@ export default {
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          this.delGDPerson(row.id)
+          this.delGDPerson(row.id, row.starttime)
         }).catch(() => {
         })
       }
     },
-    delGDPerson (Id) {
-      this.Http.get('delhbry', {workid: this.workIdGDPerson, userno: Id}
+    delGDPerson (Id, starttime) {
+      this.Http.get('delhbry', {workid: this.workIdGDPerson, userno: Id, starttime: starttime}
       ).then(res => {
         switch (res.data.code) {
           case '1':
@@ -1609,16 +1609,35 @@ export default {
     changePersonGD (val) {
       // 校验重复
       this.curPersonId = val
-      if (this.personListGD.filter(this.checkId).length >= 1) {
-        this.$message({
-          message: '该操作员已存在!',
-          type: 'error'
+      let repeatPList = this.personListGD.filter(this.checkId)
+      let canAdd = true
+      if (repeatPList.length > 0) {
+        repeatPList.map((item, idx) => {
+          if (item.endtime === '' || item.starttime === '') {
+            canAdd = false
+          }
+          if (idx === repeatPList.length - 1) {
+            if (!canAdd) {
+              this.$message({
+                message: '该操作员还不能新增!',
+                type: 'error'
+              })
+              this.addGDPerson.id = ''
+              this.addGDPerson.fname = ''
+              this.addGDPerson.userno = ''
+              this.curPersonId = ''
+              this.addGDPerson.options = this.selectChoosePeopleList
+            } else {
+              this.addGDPerson.options = this.selectChoosePeopleList
+              this.selectChoosePeopleList.map(item => {
+                if (item.id === val) {
+                  this.addGDPerson.fname = item.fname
+                  this.addGDPerson.userno = item.id // item.userno
+                }
+              })
+            }
+          }
         })
-        this.addGDPerson.id = ''
-        this.addGDPerson.fname = ''
-        this.addGDPerson.userno = ''
-        this.curPersonId = ''
-        this.addGDPerson.options = this.selectChoosePeopleList
       } else {
         this.addGDPerson.options = this.selectChoosePeopleList
         this.selectChoosePeopleList.map(item => {
@@ -1677,7 +1696,7 @@ export default {
         return false
       }
       this.btLoading = true
-      this.Http.post('addry?workid=' + this.workIdGDPerson + '&userno=' + this.addGDPerson.id + '&fname=' + this.addGDPerson.fname
+      this.Http.post('addry?workid=' + this.workIdGDPerson + '&userno=' + this.addGDPerson.id + '&fname=' + this.addGDPerson.fname + '&kdepartment=' + this.userInfo.kdepartment
       ).then(res => {
         switch (res.data.code) {
           case 1:
@@ -1798,6 +1817,7 @@ export default {
         gongxu: this.userInfo.gongxu,
         fbiller: this.userInfo.fname,
         department: this.curModuleInfo.departid,
+        kdepartment: this.userInfo.kdepartment,
         jlruserno: this.userInfo.userno,
         peoplelist: this.personList.map(item => {
           item.userno = item.id
@@ -1857,6 +1877,7 @@ export default {
         gongxu: this.userInfo.gongxu,
         fbiller: this.userInfo.fname,
         department: this.curModuleInfo.departid,
+        kdepartment: this.userInfo.kdepartment,
         jlruserno: this.userInfo.userno,
         peoplelist: this.personList.map(item => {
           item.userno = item.id

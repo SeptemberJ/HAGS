@@ -110,6 +110,12 @@
       </el-table-column>
       <el-table-column
         fixed
+        prop="gx"
+        label="开机工序"
+        min-width="120">
+      </el-table-column>
+      <el-table-column
+        fixed
         prop="fbillno"
         label="订单号"
         width="110">
@@ -306,6 +312,12 @@
         prop="dynumber"
         label="打印次数"
         min-width="100">
+      </el-table-column>
+      <el-table-column
+        fixed
+        prop="gx"
+        label="开机工序"
+        min-width="120">
       </el-table-column>
       <el-table-column
         fixed
