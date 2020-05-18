@@ -15,7 +15,7 @@
           style="width: 100%">
           <el-table-column
             type="selection"
-            width="40">
+            width="50">
           </el-table-column>
           <el-table-column
             type="index"
@@ -121,6 +121,13 @@
             </template>
           </el-table-column>
         </el-table>
+        <el-pagination v-if="addTableOrder.length > 0" style="margin: 10px 0;"
+          @current-change="handleCurrentChange_list"
+          :current-page.sync="curPage_list"
+          :page-size="pageSize_list"
+          layout="total, prev, pager, next, jumper"
+          :total="sum_list">
+        </el-pagination>
       </el-col>
       <el-col :span="24" class="MarginT_20">
         <!-- <el-button size="small" type="danger" :loading="btLoading" :disabled="status == '投放'" @click="showGX">勾选项</el-button> -->
@@ -277,6 +284,9 @@ export default {
       FSourceClosed: 0, // 申请单投放（0未投放，1已投放）
       filterOrderNo: '',
       orderList: [],
+      curPage_list: 1,
+      pageSize_list: 50,
+      sum_list: 0,
       curPage: 1,
       pageSize: 5,
       sum: 0,
@@ -488,6 +498,9 @@ export default {
           })
         })
       }
+    },
+    handleCurrentChange_list () {
+      this.getDetail()
     },
     operate (type) {
       this.loadingBg = true
@@ -791,7 +804,8 @@ export default {
       tmpData += '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"> '
       tmpData += '<soap:Body> '
       tmpData += '<JA_LIST xmlns="http://tempuri.org/">'
-      tmpData += "<FSQL><![CDATA[select * from Z_MRPDetail where finterid='" + this.orderMRPId + "']]></FSQL>"
+      tmpData += "<FSQL><![CDATA[exec [Z_MRPDetail_Page] '" + this.orderMRPId + "'," + Number((this.curPage_list - 1) * this.pageSize_list + 1) + ',' + this.curPage_list * this.pageSize_list + ']]></FSQL>'
+      // tmpData += "<FSQL><![CDATA[select * from Z_MRPDetail where finterid='" + this.orderMRPId + "']]></FSQL>"
       tmpData += '</JA_LIST>'
       tmpData += '</soap:Body>'
       tmpData += '</soap:Envelope>'
@@ -815,6 +829,7 @@ export default {
           this.FSourceClosed = Info[0]['FSourceClosed']
           this.FICMOClosed = Info[0]['FICMOClosed']
           this.curReportId = Info[0].FInterID
+          this.sum_list = Info[0].fcount
           this.selectedAllList = Info.map((item, idx) => {
             item.idx = idx
             item['单据编号'] = item['订单单号']
